@@ -1,0 +1,2 @@
+INDEX VERSION 1.126+/home/david/Dropbox/projects/ER/speech/viterbi/codes/.metadata/.plugins/org.eclipse.jdt.core
+3928404073.index
