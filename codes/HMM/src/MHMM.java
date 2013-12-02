@@ -25,7 +25,7 @@ public class MHMM
     static final String HIT = "hit";
     static final String CAT = "cat";
     
-    static final int port = 9990;
+    static final int port = 9999;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
@@ -88,12 +88,12 @@ public class MHMM
 		confusion_probability.put(HIT, c2);
 		confusion_probability.put(CAT, c3);*/
 
-        
+        /*
         Hashtable<String, Hashtable<String, Float>> confusion_probability =
-        		confustionGen(actualVocabularySet, vocabularySet);
+        		confustionGen(actualVocabularySet, vocabularySet);*/
         
         
-/*        ArrayList<String> strArr = new ArrayList<String>(); 
+        ArrayList<String> strArr = new ArrayList<String>(); 
         
 		DatagramSocket serverSocket = new DatagramSocket(port);
         System.out.println("In the UDPserver");
@@ -105,9 +105,9 @@ public class MHMM
 	    	DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 	    	serverSocket.receive(receivePacket);
 	        //String revStr = new String(receivePacket.getData());
-	    	
+	    	/*
 	    	 * Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
-	    	 
+	    	 */
 	    	String revStr = new String(receiveData, 0, receivePacket.getLength());
 	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
 	        //System.out.println("revStr.length(): " + revStr.length());
@@ -134,15 +134,15 @@ public class MHMM
 	                confusion_probability);
 	        
         }
-        serverSocket.close();*/
+        serverSocket.close();
 	        
-        
+        /*
         forward_viterbi(actualVocabularySet,
         		vocabularySet, states,
                 start_probability,
                 transition_probability,
                 emission_probability,
-                confusion_probability);
+                confusion_probability);*/
         }
  
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
@@ -256,11 +256,13 @@ public class MHMM
             	words[x] = X[x][path[x]]; 
             }
 
+            System.out.println("\n*************************************\n");           
             for (int x = 0; x < obs_num+1; x++)
             {
             	System.out.println("state: " + path[x] + 
             			", with the word: " + words[x]);
             }
+            System.out.println("\n*************************************\n");
         }
         
         public static Hashtable<String, Hashtable<String, Float>> 
