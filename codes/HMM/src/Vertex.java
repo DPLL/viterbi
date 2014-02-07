@@ -9,23 +9,23 @@ import java.util.Arrays;
 
 public class Vertex {
 	int vertexID;
+	// wordNum is the number of words for each node
 	int wordNum;
 	String[] wordList;
 	
-
-	
-	public Vertex (int id, int numberOfWords, String[] listOfWords) 
+	public Vertex(int id, int numberOfWords, String[] listOfWords) 
 	{
 		vertexID = id;
 		wordNum = numberOfWords;
+		/*
 		if (numberOfWords != listOfWords.length) {
 			System.out.println("Number of words does not match!!!");
 			System.exit(-1);
-		}
+		}*/
 		wordList = listOfWords;
 	}
 	
-	public Vertex (int id) 
+	public Vertex(int id) 
 	{
 		this(id, 0, null);
 	}
