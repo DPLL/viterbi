@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.jgrapht.VertexFactory;
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.generate.RandomGraphGenerator;
 import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
@@ -21,6 +22,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 public class GraphGenerator {
 	
 	static WeightedGraph<Vertex, DefaultWeightedEdge> randomGraph;
+	VertexFactory<Vertex> vFactory;
 	
 	// number of vertex
 	static int numVertex = 15;
@@ -55,7 +57,7 @@ public class GraphGenerator {
     			new RandomGraphGenerator<Vertex, DefaultWeightedEdge>(numVertex, numEdge);
 
         // Create the VertexFactory so the generator can create vertices
-        VertexFactory<Vertex> vFactory = new ClassBasedVertexFactory<Vertex>(Vertex.class);
+        vFactory = new ClassBasedVertexFactory<Vertex>(Vertex.class);
 
         // Use the randomGraphGenerator object to make randomGraph a random graph with [numVertex] number of vertices
         randomGenerator.generateGraph(randomGraph, vFactory, null);
@@ -106,9 +108,59 @@ public class GraphGenerator {
 		*/
 	}
 	
+	
+	 /*
+     * Find the diameter of the graph, and thus find a proper source and destination pair
+     */
 	public void findDiameter()
 	{
+
+		// see whether the graph is ready 
+		if (randomGraph == null || vFactory == null) {
+			System.out.println("The graph is not ready!");
+			System.exit(-1);
+		}
 		
+		Vertex startVertex = new Vertex();
+        Vertex endVertex = new Vertex();
+        ///The diameter of the graph
+        double diameter;
+    
+        //System.out.println("Number of vertex is: "+ randomGraph.vertexSet().size());    
+        FloydWarshallShortestPaths<Vertex, DefaultWeightedEdge> shortestPaths = new FloydWarshallShortestPaths<Vertex, DefaultWeightedEdge>(randomGraph);
+        diameter = shortestPaths.getDiameter();
+        System.out.println("diameter of the graph is: "+ diameter);
+        
+        // Find the source and the destination node
+        Iterator<Vertex> nodeIterator1 = randomGraph.vertexSet().iterator();
+        double maxShortestPath = 0;
+        //int find = 0;
+        int nodeCntr = 0;
+        while (nodeIterator1.hasNext()) {
+        	Vertex vet1 = nodeIterator1.next();
+        	//System.out.println("vet1 is: " + vet1);
+        	Iterator<Vertex> nodeIterator2 = randomGraph.vertexSet().iterator();
+            while (nodeIterator2.hasNext()) {
+            	Vertex vet2 = nodeIterator2.next();
+            	//System.out.println("vet2 is " + vet2);
+            	if (vet2.vertexID != vet1.vertexID) {
+            		nodeCntr++;
+	            	double shortestPathDis = shortestPaths.shortestDistance(vet1, vet2);
+	            	//System.out.println("The current shortestPathDis is: " + shortestPathDis);
+	            	//if (shortestPathDis > maxShortestPath && shortestPathDis < numVertex*costBound) {//This is only valid when the link cost is not 1
+            		if (shortestPathDis > maxShortestPath && shortestPathDis < numVertex*1) {
+	            		startVertex = vet1;
+	            		endVertex = vet2;
+	            		maxShortestPath = shortestPathDis;
+	            	}
+            	}
+            }
+        } 
+
+        System.out.println("It has traversed " +  nodeCntr + " edges");
+        System.out.println("startVertex is: "+ startVertex.toString() + "!!!");
+        System.out.println("endVertex is: "+ endVertex.toString() + "!!!");
+        System.out.println("The current maxShorestPath is: " + maxShortestPath);
 	}
 	
     public static boolean replaceVertexID(Vertex oldVertex, Integer id, int startIndex, String[] wordPool)
@@ -190,5 +242,6 @@ public class GraphGenerator {
 		
 		GraphGenerator test = new GraphGenerator();
 		test.GraphGen(0.5, 5, 5);
+		test.findDiameter();
 	}
 }
