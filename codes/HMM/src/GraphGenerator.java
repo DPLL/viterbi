@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 
 public class GraphGenerator {
@@ -79,7 +81,8 @@ public class GraphGenerator {
         for (String str : wordList)
         	System.out.println(str);*/
         
-        // generate a random starting point
+        // generate a random starting point, this random start point is between
+        // 0 and (list.size() - 1).
         int startPoint = (int)(Math.random() * list.size());
         System.out.println("startPoint is " + startPoint);
         
@@ -90,7 +93,21 @@ public class GraphGenerator {
             replaceVertexID(ver, counter++, startPoint, wordList);
         }
         
+        // Output all the vertexes and the edges
+        /*
         System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
+        Iterator<Vertex> iter2 = new DepthFirstIterator<Vertex, DefaultWeightedEdge>(randomGraph);
+        Vertex ver2;
+        while (iter2.hasNext()) {
+        	ver2 = iter2.next();
+            System.out.println("Vertex " + ver2.toString() + " is connected to: "
+                    + randomGraph.edgesOf(ver2).toString());
+        }
+		*/
+	}
+	
+	public void findDiameter()
+	{
 		
 	}
 	
