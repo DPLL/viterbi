@@ -39,7 +39,7 @@ public class GraphGenerator {
 	{
 	}
 	
-	public void GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
+	public WeightedGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
 		wordPerNode = wordNumPerNode;
@@ -48,10 +48,15 @@ public class GraphGenerator {
 		numEdge = (int) (density * numVertex * (numVertex-1));
 		System.out.println("numEdge is: " + numEdge);
 		
+		/*
         // Create the default directed weighted graph object; it is null at this point
 		// A default directed graph is a non-simple directed graph in which multiple edges between any two vertices are not permitted, but loops are. 
-    	randomGraph = new DefaultDirectedWeightedGraph<Vertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+    	randomGraph = new DefaultDirectedWeightedGraph<Vertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);*/
 
+        // Create the simple directed weighted graph object; it is null at this point
+		// A simple directed graph is a non-simple directed graph in which neither multiple edges between any two vertices nor loops are permitted. 
+    	randomGraph = new SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+    	
         // Create the randomGraphGenerator object
     	RandomGraphGenerator<Vertex, DefaultWeightedEdge> randomGenerator = 
     			new RandomGraphGenerator<Vertex, DefaultWeightedEdge>(numVertex, numEdge);
@@ -95,6 +100,7 @@ public class GraphGenerator {
             replaceVertexID(ver, counter++, startPoint, wordList);
         }
         
+        return randomGraph;
         // Output all the vertexes and the edges
         /*
         System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
@@ -161,6 +167,16 @@ public class GraphGenerator {
         System.out.println("startVertex is: "+ startVertex.toString() + "!!!");
         System.out.println("endVertex is: "+ endVertex.toString() + "!!!");
         System.out.println("The current maxShorestPath is: " + maxShortestPath);
+        /*
+        Set<DefaultWeightedEdge> edges = new HashSet<DefaultWeightedEdge>();
+        edges.addAll(randomGraph.edgeSet());
+        for (DefaultWeightedEdge edge : edges) {
+            //Traverse all the edges in the edgeSet
+        	System.out.println("source of the edge is: "+ randomGraph.getEdgeSource(edge));
+        	System.out.println("target of the edge is: "+ randomGraph.getEdgeTarget(edge));
+        	System.out.println("the weight of the edge is: "+ randomGraph.getEdgeWeight(edge));
+        }
+        */
 	}
 	
     public static boolean replaceVertexID(Vertex oldVertex, Integer id, int startIndex, String[] wordPool)
@@ -239,9 +255,12 @@ public class GraphGenerator {
 		numEdge = (int) (density * numVertex * (numVertex-1));
 			
 		*/
-		
+		WeightedGraph<Vertex, DefaultWeightedEdge> graph;
 		GraphGenerator test = new GraphGenerator();
-		test.GraphGen(0.5, 5, 5);
+		graph = test.GraphGen(0.5, 5, 5);
 		test.findDiameter();
+		System.out.println(graph.toString());
+		System.out.println(graph.edgeSet().size());
+
 	}
 }
