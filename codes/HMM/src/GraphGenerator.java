@@ -21,7 +21,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 
 public class GraphGenerator {
 	
-	static WeightedGraph<Vertex, DefaultWeightedEdge> randomGraph;
+	static SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> randomGraph;
 	VertexFactory<Vertex> vFactory;
 	
 	// number of vertex
@@ -35,11 +35,12 @@ public class GraphGenerator {
 	// length of word
 	static int wordLength;
 	// TODO what if OOP style coding? set it as constructor?
-	private GraphGenerator() 
+	
+	GraphGenerator() 
 	{
 	}
 	
-	public WeightedGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
+	public SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
 		wordPerNode = wordNumPerNode;
@@ -67,10 +68,7 @@ public class GraphGenerator {
         // Use the randomGraphGenerator object to make randomGraph a random graph with [numVertex] number of vertices
         randomGenerator.generateGraph(randomGraph, vFactory, null);
         
-        // Now, replace all the vertices with sequential numbers so we can ID them ,in the same time, we assign wordList to the nodes.
-        Set<Vertex> vertices1 = new HashSet<Vertex>();
-        vertices1.addAll(randomGraph.vertexSet());
-        
+        // Now, replace all the vertices with sequential numbers so we can ID them ,in the same time, we assign wordList to the nodes.     
         // Firstly, we read from the corresponding file to fetch the random words.
         String path = "/home/david/Dropbox/projects/ER/speech/viterbi/" + wordPerNode + ".txt";
         //System.out.println(path);
@@ -81,20 +79,21 @@ public class GraphGenerator {
         	list.add(s.next());
         }
         s.close();
-        System.out.println(list);
+        //System.out.println(list);
         String[] wordList = new String[list.size()];
         wordList = list.toArray(wordList);
         /*
         for (String str : wordList)
         	System.out.println(str);*/
         
-        // generate a random starting point, this random start point is between
-        // 0 and (list.size() - 1).
+        // TODO change this to permutation of the string array.
+        // generate a random starting point, this random start point is between 0 and (list.size() - 1).
         int startPoint = (int)(Math.random() * list.size());
         System.out.println("startPoint is " + startPoint);
         
         // update the information for each node in the graph by IDing and assigning words to them.
-        
+        Set<Vertex> vertices1 = new HashSet<Vertex>();
+        vertices1.addAll(randomGraph.vertexSet());
         Integer counter = 0;
         for (Vertex ver : vertices1) {
             replaceVertexID(ver, counter++, startPoint, wordList);
@@ -196,7 +195,7 @@ public class GraphGenerator {
         	int index = (startIndex+id*wordPerNode + i)%wordPool.length;
         	words[i] = wordPool[index];
         }
-        System.out.println(Arrays.toString(words));
+        //System.out.println(Arrays.toString(words));
         
     	newVertex = new Vertex(id, wordPerNode, words);
         
@@ -259,8 +258,8 @@ public class GraphGenerator {
 		GraphGenerator test = new GraphGenerator();
 		graph = test.GraphGen(0.5, 5, 5);
 		test.findDiameter();
-		System.out.println(graph.toString());
-		System.out.println(graph.edgeSet().size());
+		//System.out.println(graph.toString());
+		//System.out.println(graph.edgeSet().size());
 
 	}
 }
