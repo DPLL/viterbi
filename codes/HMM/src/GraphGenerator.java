@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
 import org.jgrapht.VertexFactory;
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.generate.RandomGraphGenerator;
 import org.jgrapht.graph.ClassBasedVertexFactory;
@@ -25,7 +27,7 @@ public class GraphGenerator {
 	VertexFactory<Vertex> vFactory;
 	
 	// number of vertex
-	static int numVertex = 15;
+	static int numVertex = 5;
 	// number of edges
 	static int numEdge;
 	// density of the DAG
@@ -34,6 +36,10 @@ public class GraphGenerator {
 	static int wordPerNode;
 	// length of word
 	static int wordLength;
+	// ground truth of states
+	ArrayList<String> trueStates;
+	// ground truth of words
+	ArrayList<String> trueWords;
 	// TODO what if OOP style coding? set it as constructor?
 	
 	GraphGenerator() 
@@ -70,7 +76,7 @@ public class GraphGenerator {
         
         // Now, replace all the vertices with sequential numbers so we can ID them ,in the same time, we assign wordList to the nodes.     
         // Firstly, we read from the corresponding file to fetch the random words.
-        String path = "/home/david/Dropbox/projects/ER/speech/viterbi/" + wordPerNode + ".txt";
+        String path = "/home/david/Dropbox/projects/ER/speech/viterbi/" + wordLength + ".txt";
         //System.out.println(path);
         
         Scanner s = new Scanner(new File(path));
@@ -117,9 +123,11 @@ public class GraphGenerator {
 	 /*
      * Find the diameter of the graph, and thus find a proper source and destination pair
      */
-	public void findDiameter()
+	public ArrayList<DefaultWeightedEdge> findDiameter()
 	{
-
+		// return the ArrayList of the diameter
+		ArrayList<DefaultWeightedEdge> diameterPath;
+		
 		// see whether the graph is ready 
 		if (randomGraph == null || vFactory == null) {
 			System.out.println("The graph is not ready!");
@@ -166,7 +174,25 @@ public class GraphGenerator {
         System.out.println("startVertex is: "+ startVertex.toString() + "!!!");
         System.out.println("endVertex is: "+ endVertex.toString() + "!!!");
         System.out.println("The current maxShorestPath is: " + maxShortestPath);
+        // Sanity Check 1: see whether the diameter I got is the same with diameter = shortestPaths.getDiameter();
+        if(diameter != maxShortestPath) {
+        	System.out.println("diameter does not match!!!");
+        	System.exit(-1);
+        }
+        // Sanity Check 2: see whether the startVertex and endVertex meet the requirement of diameter
+        DijkstraShortestPath<Vertex, DefaultWeightedEdge> dijkstraPath = 
+        		new DijkstraShortestPath<Vertex, DefaultWeightedEdge>(randomGraph, startVertex, endVertex);
+        if(dijkstraPath.getPathLength() != maxShortestPath) {
+        	System.out.println("startVertex and EndVertex cannot meet the requirement of diameter!!!");
+        	System.exit(-1);
+        }        
+        
+        System.out.println(dijkstraPath.getPathEdgeList());
+        diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
+        return diameterPath;
+        
         /*
+        // Traverse all the edges to see connection relationship.
         Set<DefaultWeightedEdge> edges = new HashSet<DefaultWeightedEdge>();
         edges.addAll(randomGraph.edgeSet());
         for (DefaultWeightedEdge edge : edges) {
@@ -176,6 +202,29 @@ public class GraphGenerator {
         	System.out.println("the weight of the edge is: "+ randomGraph.getEdgeWeight(edge));
         }
         */
+	}
+	
+	// TODO
+	public void setGourdTruth(List<DefaultWeightedEdge> pathEdgeList)
+	{
+		trueStates = new ArrayList<String>();
+		trueWords = new ArrayList<String>();
+		
+		// specify the states that have been gone through
+		// Version one: select the first word from the wordlist
+		int count = 0;
+		for (DefaultWeightedEdge e : pathEdgeList) {
+			if (count++ == 0) { // this means it is the first state
+				trueStates.add(Integer.toString(randomGraph.getEdgeSource(e).vertexID));
+				trueWords.add(randomGraph.getEdgeSource(e).wordList[0]);
+			} 
+			trueStates.add(Integer.toString(randomGraph.getEdgeTarget(e).vertexID));
+			trueWords.add(randomGraph.getEdgeTarget(e).wordList[0]);
+		}
+		System.out.println("The trueStates is: " + trueStates);
+		System.out.println("The tureWords is: " + trueWords);
+		
+		return;
 	}
 	
     public static boolean replaceVertexID(Vertex oldVertex, Integer id, int startIndex, String[] wordPool)
@@ -195,7 +244,7 @@ public class GraphGenerator {
         	int index = (startIndex+id*wordPerNode + i)%wordPool.length;
         	words[i] = wordPool[index];
         }
-        //System.out.println(Arrays.toString(words));
+        System.out.println(Arrays.toString(words));
         
     	newVertex = new Vertex(id, wordPerNode, words);
         
@@ -255,11 +304,13 @@ public class GraphGenerator {
 			
 		*/
 		WeightedGraph<Vertex, DefaultWeightedEdge> graph;
+		ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		GraphGenerator test = new GraphGenerator();
-		graph = test.GraphGen(0.5, 5, 5);
-		test.findDiameter();
+		graph = test.GraphGen(0.2, 5, 5);
 		//System.out.println(graph.toString());
 		//System.out.println(graph.edgeSet().size());
+		diameterPath = test.findDiameter();
+		test.setGourdTruth(diameterPath);
 
 	}
 }

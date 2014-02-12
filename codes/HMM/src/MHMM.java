@@ -13,7 +13,7 @@ import java.util.Hashtable;
  
 public class MHMM
 {
-	static final String HEALTHY = "Healthy";
+/*	static final String HEALTHY = "Healthy";
 	static final String FEVER = "Fever";
  
     static final String CUT = "cut";
@@ -23,25 +23,68 @@ public class MHMM
 	//added actual observatinons of vocabularySet
     static final String MAC = "mac";
     static final String HIT = "hit";
-    static final String CAT = "cat";
+    static final String CAT = "cat";*/
+	
+	static final String ZERO  = "0";
+	static final String ONE   = "1";
+	static final String TWO   = "2";
+	static final String THREE = "3";
+	static final String FOUR  = "4";
+	
+    static final String OXYG = "oxygen";
+    static final String DEFI = "defibrillator";
+    static final String FLAT = "flat";
+    static final String ASYS = "asystole";
+    static final String SHOC = "shock";
+    static final String ELEC = "electric";
+    static final String PUSH = "push";
+    static final String INTR = "intravenous";
+    static final String EPI  = "epinephrine";
+    static final String AMIO = "amiodarone";
     
-    static final int port = 9999;
+	//added actual observatinons of vocabularySet
+    static final String oxyg = "oxygen";
+    static final String asys = "assistant";
+    static final String elec = "trick";
+    static final String epi = "epinephrine";
+    static final String darrell = "still";
+    //static final String darrell = "zen zen zen zen zen zen zen zen zen zen";
+    static final String later = "maybe later";
+/*    static final String oxyg = "oxygen";
+    static final String asys = "asystole";
+    static final String elec = "electric";
+    static final String epi = "epinephrine";*/
+
+	
+    
+    static final int port = 9998;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
-    	String[] states = new String[] {HEALTHY, FEVER};
+    	//String[] states = new String[] {HEALTHY, FEVER};
+    	String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR};
  
-                //String[] accurate vocabularySet 
-        String[] vocabularySet = new String[] {MAD, HAT, CUT};
+        //String[] accurate vocabularySet 
+    	//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+        String[] vocabularySet = new String[] {OXYG, DEFI, FLAT, ASYS, SHOC, ELEC, PUSH, INTR, EPI, AMIO};
 
 		//String[] inaccurate vocabularySet 
-		String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+		//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+        //String[] actualVocabularySet = new String[] {oxyg, asys, elec, epi};
+        String[] actualVocabularySet = new String[] {darrell, later};
  
         Hashtable<String, Float> start_probability = new Hashtable<String, Float>();
+        /*
         start_probability.put(HEALTHY, 0.6f);
-        start_probability.put(FEVER, 0.4f);
+        start_probability.put(FEVER, 0.4f);*/
+        
+        start_probability.put(ZERO, 0.2f);
+        start_probability.put(ONE, 0.2f);
+        start_probability.put(TWO, 0.2f);
+        start_probability.put(THREE, 0.2f);
+        start_probability.put(FOUR, 0.2f);
  
-        // transition_probability
+/*        // transition_probability
         Hashtable<String, Hashtable<String, Float>> transition_probability = 
         		new Hashtable<String, Hashtable<String, Float>>();
         Hashtable<String, Float> t1 = new Hashtable<String, Float>();
@@ -65,8 +108,57 @@ public class MHMM
         e2.put(HAT, 0.3f); 
         e2.put(MAD, 0.1f);
         emission_probability.put(HEALTHY, e1);
-        emission_probability.put(FEVER, e2);
+        emission_probability.put(FEVER, e2);*/
 
+        // transition_probability
+        Hashtable<String, Hashtable<String, Float>> transition_probability = 
+        		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> t0 = new Hashtable<String, Float>();
+        t0.put(ZERO, (1.0f/3.0f));
+        t0.put(ONE, (1.0f/3.0f));
+        t0.put(TWO, (1.0f/3.0f));
+        Hashtable<String, Float> t1 = new Hashtable<String, Float>();
+        t1.put(ONE, 0.5f);
+        t1.put(TWO, 0.5f);
+        Hashtable<String, Float> t2 = new Hashtable<String, Float>();
+        t2.put(TWO, (1.0f/3.0f));
+        t2.put(THREE, (1.0f/3.0f));
+        t2.put(FOUR, (1.0f/3.0f));
+        transition_probability.put(ZERO, t0);
+        transition_probability.put(ONE, t1);
+        transition_probability.put(TWO, t2);
+ 
+        // emission_probability
+        Hashtable<String, Hashtable<String, Float>> emission_probability = 
+        		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> e0 = new Hashtable<String, Float>();
+        e0.put(OXYG, 0.5f);            
+        e0.put(DEFI, 0.5f);
+        Hashtable<String, Float> e1 = new Hashtable<String, Float>();
+        e1.put(FLAT, 0.5f);            
+        e1.put(ASYS, 0.5f); 
+        Hashtable<String, Float> e2 = new Hashtable<String, Float>();
+        e2.put(SHOC, (1.0f/3.0f));            
+        e2.put(ELEC, (1.0f/3.0f)); 
+        e2.put(OXYG, (1.0f/3.0f));
+        Hashtable<String, Float> e3 = new Hashtable<String, Float>();
+        e3.put(INTR, (1.0f/3.0f));            
+        e3.put(PUSH, (1.0f/3.0f)); 
+        e3.put(DEFI, (1.0f/3.0f));
+        Hashtable<String, Float> e4 = new Hashtable<String, Float>();
+        e4.put(EPI, 0.5f);            
+        e4.put(AMIO, 0.5f); 
+        emission_probability.put(ZERO, e0);
+        emission_probability.put(ONE, e1);
+        emission_probability.put(TWO, e2);
+        emission_probability.put(THREE, e3);
+        emission_probability.put(FOUR, e4);
+        
+        // print the emission_probability
+        System.out.println(emission_probability);
+        // print the transition_probability
+        System.out.println(transition_probability);
+        
 		//confusion_probability
         /*
         // Hardcode confusion_probability
@@ -88,9 +180,11 @@ public class MHMM
 		confusion_probability.put(HIT, c2);
 		confusion_probability.put(CAT, c3);*/
 
-        /*
-        Hashtable<String, Hashtable<String, Float>> confusion_probability =
+        
+/*        Hashtable<String, Hashtable<String, Float>> confusion_probability =
         		confustionGen(actualVocabularySet, vocabularySet);*/
+/*
+        System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
         
         
         ArrayList<String> strArr = new ArrayList<String>(); 
@@ -105,9 +199,8 @@ public class MHMM
 	    	DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 	    	serverSocket.receive(receivePacket);
 	        //String revStr = new String(receivePacket.getData());
-	    	/*
-	    	 * Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
-	    	 */
+	    	
+	    	//Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
 	    	String revStr = new String(receiveData, 0, receivePacket.getLength());
 	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
 	        //System.out.println("revStr.length(): " + revStr.length());
@@ -136,7 +229,7 @@ public class MHMM
         }
         serverSocket.close();
 	        
-        /*
+/*        
         forward_viterbi(actualVocabularySet,
         		vocabularySet, states,
                 start_probability,
@@ -198,12 +291,16 @@ public class MHMM
                     	for (String source_state : states)
                     	{
                     		j++;
-                    		float p = emit_p.get(next_state).get(word) * 
-                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(word);
-
+                    		float p;
+                    		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
+                    				emit_p.get(next_state).get(word) == null || trans_p.get(source_state).get(next_state) == null)
+                    			p = 0;
+                    		else
+	                    		p = emit_p.get(next_state).get(word) * 
+	                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(word);
                     		v_prob = V[t-1][j] * p;
 						
-                    		if (v_prob > Pmax)
+                    		if (v_prob >= Pmax)
                     		{
                     			Pmax = v_prob;
                     			Smax = j;
@@ -225,7 +322,7 @@ public class MHMM
             String v_path;
             float v_prob;
 	
-			
+            /*
             for (int n = 0; n < obs_num+1; n++)
             	for (int z = 0; z < state_num; z++)
             		System.out.println(V[n][z]);
@@ -235,19 +332,23 @@ public class MHMM
             for (int n = 0; n < obs_num+1; n++) 
             	for (int z = 0; z < state_num; z++)
             		System.out.println(X[n][z]);
+			*/
 		
             int Smax = -1;
-            float max = 0;
+            float pMax = 0;
             for (int n = 0; n < state_num; n++ ) 
             {
-            	if (V[obs_num][n] > max) {
-            		max = V[obs_num][n];
+            	if (V[obs_num][n] >= pMax) {
+            		pMax = V[obs_num][n];
             		Smax = n;
             	}
             }
 
+            // If at the current stage, the output of ASR is too far-away from the vocabulary set,
+            // it needs special handling.
             int path[] = new int[obs_num + 1];
             String words[] = new String[obs_num + 1];
+            
             path[obs_num]  = Smax;
             words[obs_num] = X[obs_num][Smax];
             for (int x = obs_num-1; x >= 0; x--)
@@ -256,7 +357,10 @@ public class MHMM
             	words[x] = X[x][path[x]]; 
             }
 
-            System.out.println("\n*************************************\n");           
+            	
+            System.out.println("\n*************************************\n");         
+            System.out.println(Arrays.toString(actualObs));
+            
             for (int x = 0; x < obs_num+1; x++)
             {
             	System.out.println("state: " + path[x] + 
@@ -274,13 +378,14 @@ public class MHMM
         	//.out.println(Arrays.toString(obs));
         	//System.out.println(Arrays.toString(vocalbularySet));
         	String[] obsPhonemes;
+        	//String[] obsPhonemes = {"anju:@L d'arEl", "m'eIbi: l'eIt3"};
         	String[] vocalPhonemes;
         	
         	obsPhonemes = phonemeConversion(obs);
-        	vocalPhonemes = phonemeConversion(vocalbularySet);
         	
-        	/*
-        	for (String temp : obsPhonemes)
+        	vocalPhonemes = phonemeConversion(vocalbularySet);        	
+        	
+/*        	for (String temp : obsPhonemes)
         		System.out.println(temp);
         	
         	for (String temp : vocalPhonemes)
@@ -305,12 +410,19 @@ public class MHMM
     				new Hashtable<String, Hashtable<String, Float>>();
         	for (String obsWord : obs) {
         		Hashtable<String, Float> c = new Hashtable<String, Float>();
+        		// get rid of the utility 'phonemes'
+    			String obsPhoneme = obsPhonemes[i].replaceAll("[',%=_:|]", "");
         		j = 0;
         		for (String volWord : vocalbularySet) {
         			float similarityIndex;
-        			int LDistance = computeLevenshteinDistance(obsPhonemes[i], vocalPhonemes[j]);
-        			int wordLength = obsWord.length();
-        			//System.out.println("LDistance " + LDistance + " wordLength " + wordLength);
+        			// get rid of the utility 'phonemes'
+        			String vocalPhoneme = vocalPhonemes[j].replaceAll("[',%=_:|]", "");
+        			int LDistance = computeLevenshteinDistance(obsPhoneme, vocalPhoneme);
+        			//int wordLength = obsWord.length();
+        			//int wordLength = obsPhonemes[i].length();
+        			int wordLength = obsPhoneme.length();
+        			//System.out.println("vocal " + vocalPhonemes[j] + 
+        			//		" LDistance " + LDistance + " wordLength " + wordLength);
         			similarityIndex = ( LDistance <= wordLength ? (1 - ((float)LDistance/wordLength)) : 0);
         			c.put(volWord, similarityIndex);
         			j++;
@@ -340,22 +452,48 @@ public class MHMM
         	int i = 0;
         	
         	String[] phenemeArr = new String[str.length];
+        	String command;
     		
         	for (String word : str)
         	{
-        		p = Runtime.getRuntime().exec(speakCall + word);
-            	p.waitFor();
-            	
-            	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            	
-            	// return the subString(1) because of the fact that espeak adds a space at the beginning
-            	line = reader.readLine().substring(1);
-            	if (line != null)
-            	{
-            		//System.out.println(line);
-                	phenemeArr[i] = line;
-            	}
-            	
+        		// Probably because of the bug in speak package, it cannot return desired results.
+        		String[] subWords = word.split(" ");
+        		StringBuilder out = new StringBuilder();
+        		int j = 0;
+        		for (String subWord : subWords)
+        		{
+        			j++;
+	        		command = speakCall + subWord;
+	        		p = Runtime.getRuntime().exec(command);
+	            	p.waitFor();
+	            	
+	            	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	            	
+	            	// return the subString(1) because of the fact that espeak adds a space at the beginning
+	            	//line = reader.readLine().substring(1);
+	            	
+	            	if ((line = reader.readLine()) != null)
+	            	{
+	            		//System.out.println(line);
+	            		if (j == 1)
+	            			out.append(line.substring(1));
+	            		else
+	            			out.append(" ").append(line.substring(1));
+	            	}
+	            	phenemeArr[i] = out.toString();
+        		}
+            	/*
+            	StringBuilder out = new StringBuilder();
+                String curr = null, previous = null;
+                while ((curr = reader.readLine()) != null)
+                {
+                    if (!curr.equals(previous)) {
+                        previous = curr;
+                        out.append(curr).append('\n');
+                        //System.out.println(curr);
+                        phenemeArr[i] = out;
+                    }
+                }*/           	
             	i++;
         	}
         	
@@ -385,8 +523,5 @@ public class MHMM
 
             return distance[str1.length()][str2.length()];    
         }
-        
-
-
 }
 

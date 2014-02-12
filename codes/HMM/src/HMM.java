@@ -11,7 +11,7 @@ public class HMM
  
         public static void main(String[] args) 
         {
-                String[] states = new String[] {HEALTHY, FEVER};
+        		String[] states = new String[] {HEALTHY, FEVER};
  
                 //String[] observations = new String[] {DIZZY, COLD, NORMAL};
                 String[] observations = new String[] {NORMAL, COLD, DIZZY};

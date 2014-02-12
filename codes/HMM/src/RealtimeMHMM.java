@@ -1,6 +1,5 @@
 import java.awt.List;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -10,133 +9,155 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
-
-import org.jgrapht.WeightedGraph;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
  
-public class Transcriber
+public class RealtimeMHMM
 {
-    // UDP port number
-    static final int port = 9999;
+/*	static final String HEALTHY = "Healthy";
+	static final String FEVER = "Fever";
+ 
+    static final String CUT = "cut";
+    static final String HAT = "hat";
+    static final String MAD = "mad";
+
+	//added actual observatinons of vocabularySet
+    static final String MAC = "mac";
+    static final String HIT = "hit";
+    static final String CAT = "cat";*/
+	
+	static final String ZERO  = "0";
+	static final String ONE   = "1";
+	static final String TWO   = "2";
+	static final String THREE = "3";
+	static final String FOUR  = "4";
+	
+    static final String OXYG = "oxygen";
+    static final String DEFI = "defibrillator";
+    static final String FLAT = "flat";
+    static final String ASYS = "asystole";
+    static final String SHOC = "shock";
+    static final String ELEC = "electric";
+    static final String PUSH = "push";
+    static final String INTR = "intravenous";
+    static final String EPI  = "epinephrine";
+    static final String AMIO = "amiodarone";
+    
+	//added actual observatinons of vocabularySet
+    static final String oxyg = "oxygen";
+    static final String asys = "assistant";
+    static final String elec = "trick";
+    static final String epi = "epinephrine";
+    static final String darrell = "still";
+    //static final String darrell = "zen zen zen zen zen zen zen zen zen zen";
+    static final String later = "maybe later";
+/*    static final String oxyg = "oxygen";
+    static final String asys = "asystole";
+    static final String elec = "electric";
+    static final String epi = "epinephrine";*/
+
+	
+    
+    static final int port = 9998;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
-    	// Generate a random graph
-    	SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
-    	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-		GraphGenerator graphGen = new GraphGenerator();
-		graph = graphGen.GraphGen(0.5, 2, 5);
-		System.out.println(graph.toString());
-		
-		diameterPath =graphGen.findDiameter();
-		graphGen.setGourdTruth(diameterPath);
-		
-		//System.out.println(graph.edgeSet().size());
+    	//String[] states = new String[] {HEALTHY, FEVER};
+    	String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR};
+ 
+        //String[] accurate vocabularySet 
+    	//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+        String[] vocabularySet = new String[] {OXYG, DEFI, FLAT, ASYS, SHOC, ELEC, PUSH, INTR, EPI, AMIO};
 
-		// Graph Interface
-		// verSet contains all the vertexes of the graph
-        Set<Vertex> verSet = new HashSet<Vertex>();
-        verSet.addAll(graph.vertexSet());
-        
-        // for states
-        ArrayList<String> stateList = new ArrayList<String>();
-        // for start_probability
+		//String[] inaccurate vocabularySet 
+		//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+        //String[] actualVocabularySet = new String[] {oxyg, asys, elec, epi};
+        String[] actualVocabularySet = new String[] {darrell, later};
+ 
         Hashtable<String, Float> start_probability = new Hashtable<String, Float>();
-        float start_prob = (float)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
-        // for vocabularySet
-        ArrayList<String> vocabularySetList = new ArrayList<String>();
-        // for emission_probability
-        Hashtable<String, Hashtable<String, Float>> emission_probability = 
-        		new Hashtable<String, Hashtable<String, Float>>();
-        float emission_prob = (float)1/(graphGen.wordPerNode);// emission_prob is evenly distributed among all the words for a node.
-        System.out.println("emission_prob: " + emission_prob + " graphGen.wordPerNode: " + graphGen.wordPerNode);
-        // for transition_probability
+        /*
+        start_probability.put(HEALTHY, 0.6f);
+        start_probability.put(FEVER, 0.4f);*/
+        
+        start_probability.put(ZERO, 0.2f);
+        start_probability.put(ONE, 0.2f);
+        start_probability.put(TWO, 0.2f);
+        start_probability.put(THREE, 0.2f);
+        start_probability.put(FOUR, 0.2f);
+ 
+/*        // transition_probability
         Hashtable<String, Hashtable<String, Float>> transition_probability = 
         		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> t1 = new Hashtable<String, Float>();
+        t1.put(HEALTHY, 0.7f);
+        t1.put(FEVER, 0.3f);
+        Hashtable<String, Float> t2 = new Hashtable<String, Float>();
+        t2.put(HEALTHY, 0.4f);
+        t2.put(FEVER, 0.6f);
+        transition_probability.put(HEALTHY, t1);
+        transition_probability.put(FEVER, t2);
+ 
+        // emission_probability
+        Hashtable<String, Hashtable<String, Float>> emission_probability = 
+        		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> e1 = new Hashtable<String, Float>();
+        e1.put(CUT, 0.1f);            
+        e1.put(HAT, 0.4f); 
+        e1.put(MAD, 0.5f);
+        Hashtable<String, Float> e2 = new Hashtable<String, Float>();
+        e2.put(CUT, 0.6f);            
+        e2.put(HAT, 0.3f); 
+        e2.put(MAD, 0.1f);
+        emission_probability.put(HEALTHY, e1);
+        emission_probability.put(FEVER, e2);*/
+
+        // transition_probability
+        Hashtable<String, Hashtable<String, Float>> transition_probability = 
+        		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> t0 = new Hashtable<String, Float>();
+        t0.put(ZERO, (1.0f/3.0f));
+        t0.put(ONE, (1.0f/3.0f));
+        t0.put(TWO, (1.0f/3.0f));
+        Hashtable<String, Float> t1 = new Hashtable<String, Float>();
+        t1.put(ONE, 0.5f);
+        t1.put(TWO, 0.5f);
+        Hashtable<String, Float> t2 = new Hashtable<String, Float>();
+        t2.put(TWO, (1.0f/3.0f));
+        t2.put(THREE, (1.0f/3.0f));
+        t2.put(FOUR, (1.0f/3.0f));
+        transition_probability.put(ZERO, t0);
+        transition_probability.put(ONE, t1);
+        transition_probability.put(TWO, t2);
+ 
+        // emission_probability
+        Hashtable<String, Hashtable<String, Float>> emission_probability = 
+        		new Hashtable<String, Hashtable<String, Float>>();
+        Hashtable<String, Float> e0 = new Hashtable<String, Float>();
+        e0.put(OXYG, 0.5f);            
+        e0.put(DEFI, 0.5f);
+        Hashtable<String, Float> e1 = new Hashtable<String, Float>();
+        e1.put(FLAT, 0.5f);            
+        e1.put(ASYS, 0.5f); 
+        Hashtable<String, Float> e2 = new Hashtable<String, Float>();
+        e2.put(SHOC, (1.0f/3.0f));            
+        e2.put(ELEC, (1.0f/3.0f)); 
+        e2.put(OXYG, (1.0f/3.0f));
+        Hashtable<String, Float> e3 = new Hashtable<String, Float>();
+        e3.put(INTR, (1.0f/3.0f));            
+        e3.put(PUSH, (1.0f/3.0f)); 
+        e3.put(DEFI, (1.0f/3.0f));
+        Hashtable<String, Float> e4 = new Hashtable<String, Float>();
+        e4.put(EPI, 0.5f);            
+        e4.put(AMIO, 0.5f); 
+        emission_probability.put(ZERO, e0);
+        emission_probability.put(ONE, e1);
+        emission_probability.put(TWO, e2);
+        emission_probability.put(THREE, e3);
+        emission_probability.put(FOUR, e4);
         
-        for (Vertex ver : verSet) {
-        	// print the current vertex
-        	//System.out.println("The current vertex is: " + ver);
-        	// words is the ArrayList form of wordList of this particular vertex. 
-        	ArrayList<String> words = new ArrayList<String>(Arrays.asList(ver.wordList));
-        	//System.out.println(words);
-        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
-        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
-        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
-        	//System.out.println(outgoingEdges);
-        	
-        	// array of states
-        	stateList.add(Integer.toString(ver.vertexID));
-        	// start_probability
-        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
-        	// vocabularySet and emission_probability
-        	Hashtable<String, Float> e = new Hashtable<String, Float>();
-        	for (String word : words) {
-            	// vocabularySet
-        		vocabularySetList.add(word);
-        		// emission_probability
-        		e.put(word, emission_prob);
-        	}
-        	// emission_probability
-        	emission_probability.put(Integer.toString(ver.vertexID), e);
-        	// transition_probability
-        	float transition_prob = (float)1/(graph.outDegreeOf(ver));
-        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
-            Hashtable<String, Float> t = new Hashtable<String, Float>();
-            for(DefaultWeightedEdge edge : outgoingEdges) {
-            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
-            }
-            transition_probability.put(Integer.toString(ver.vertexID), t);     
-        }
-        
-        // print the states
-        //System.out.println(stateList);
-        String[] states = new String[stateList.size()];
-        states = stateList.toArray(states);
-        //System.out.println(Arrays.toString(states));
-        // print the start_probability
-        //System.out.println(start_probability);
-        // print the vocabularySet
-        //System.out.println(vocabularySetList);
-        String[] vocabularySet = new String[vocabularySetList.size()];
-        vocabularySet = vocabularySetList.toArray(vocabularySet);
-        //System.out.println(Arrays.toString(vocabularySet));
-        //System.out.println(vocabularySetList.size());
         // print the emission_probability
-        //System.out.println(emission_probability);
+        System.out.println(emission_probability);
         // print the transition_probability
-        //System.out.println(transition_probability);
-        
-        // Based on the ground truth about the workflow, select corresponding audio file 
-        System.out.println(graphGen.trueStates);
-        System.out.println(graphGen.trueWords);
-        
-        for (String name: graphGen.trueWords) {
-            String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
-            System.out.println(path);
-            File f = new File(path);
-            if (!f.exists()) {
-            	System.out.println("File not found!");
-            	System.exit(-1);
-            }
-            
-            // call shell command to run Sphinx
-            /*
-            String cmd = "java -jar /home/david/Downloads/sphinx4-1.0beta6/bin/LatticeDemo.jar " + path;
-            System.out.println(cmd);
-            Process p;
-            try {
-            	p = Runtime.getRuntime().exec(cmd);
-            } catch (Exception e) {
-            	e.printStackTrace();
-            }*/
-        }
-        
+        System.out.println(transition_probability);
         
 		//confusion_probability
         /*
@@ -165,7 +186,7 @@ public class Transcriber
 /*
         System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
         
-        /*
+        
         ArrayList<String> strArr = new ArrayList<String>(); 
         
 		DatagramSocket serverSocket = new DatagramSocket(port);
@@ -207,7 +228,7 @@ public class Transcriber
 	        
         }
         serverSocket.close();
-	        */
+	        
 /*        
         forward_viterbi(actualVocabularySet,
         		vocabularySet, states,
