@@ -13,6 +13,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -116,105 +118,72 @@ public class Transcriber
         System.out.println(graphGen.trueStates);
         System.out.println(graphGen.trueWords);
         
+        ArrayList<String> asrResults = new ArrayList<String>();
+        
         for (String name: graphGen.trueWords) {
             String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
-            System.out.println(path);
+            //System.out.println(path);
             File f = new File(path);
             if (!f.exists()) {
             	System.out.println("File not found!");
             	System.exit(-1);
             }
-            
-            // call shell command to run Sphinx
-            /*
+            // call shell command to run Sphinx           
             String cmd = "java -jar /home/david/Downloads/sphinx4-1.0beta6/bin/LatticeDemo.jar " + path;
             System.out.println(cmd);
             Process p;
+            StringBuffer output = new StringBuffer();
+            
             try {
             	p = Runtime.getRuntime().exec(cmd);
+            	p.waitFor();
+ 
+		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));	        
+		        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		        // read the output from the command
+	            System.out.println("Here is the standard output of the command:\n");
+	            String s = null;
+	            while ((s = stdInput.readLine()) != null) {
+	            	//System.out.println(s);
+	            	output.append(s + "\n");
+	            }
+	            // read any errors from the attempted command
+	            //System.out.println("Here is the standard error of the command (if any):\n");
+	            //while ((s = stdError.readLine()) != null) {
+	            //    System.out.println(s);
+	            //}
             } catch (Exception e) {
             	e.printStackTrace();
-            }*/
+            }            
+            System.out.println(output.toString());
+            // Manipulate the output and get the contents after 'I heard: '
+            String pattern = "(I heard: )([\\w ']+)";
+            Pattern r = Pattern.compile(pattern);
+            Matcher m = r.matcher(output);
+            if(m.find()) {
+            	System.out.println("The matching is: " + m.group(2));
+            	asrResults.add(m.group(2));
+            } else {
+            	System.out.println("ASR does not output anything!");
+            }
         }
         
-        
-		//confusion_probability
-        /*
-        // Hardcode confusion_probability
-		Hashtable<String, Hashtable<String, Float>> confusion_probability = 
-			new Hashtable<String, Hashtable<String, Float>>();
-		Hashtable<String, Float> c1 = new Hashtable<String, Float>();
-		c1.put(CUT, 0.0f);
-		c1.put(HAT, (1.0f/3.0f));
-		c1.put(MAD, (2.0f/3.0f));
-		Hashtable<String, Float> c2 = new Hashtable<String, Float>();
-		c2.put(CUT, (1.0f/3.0f));
-		c2.put(HAT, (2.0f/3.0f));
-		c2.put(MAD, 0.0f);
-		Hashtable<String, Float> c3 = new Hashtable<String, Float>();
-		c3.put(CUT, (2.0f/3.0f));
-		c3.put(HAT, (2.0f/3.0f));
-		c3.put(MAD, (1.0f/3.0f));
-		confusion_probability.put(MAC, c1);
-		confusion_probability.put(HIT, c2);
-		confusion_probability.put(CAT, c3);*/
+        System.out.println(asrResults);
 
+        // convert arrayList to array
+        String[] wordSeq = new String[asrResults.size()];
+        wordSeq = asrResults.toArray(wordSeq);
+        System.out.println(Arrays.toString(wordSeq));
         
-/*        Hashtable<String, Hashtable<String, Float>> confusion_probability =
-        		confustionGen(actualVocabularySet, vocabularySet);*/
-/*
-        System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
+        Hashtable<String, Hashtable<String, Float>> confusion_probability =
+        		confustionGen(wordSeq, vocabularySet);
         
-        /*
-        ArrayList<String> strArr = new ArrayList<String>(); 
-        
-		DatagramSocket serverSocket = new DatagramSocket(port);
-        System.out.println("In the UDPserver");
-        
-        while(true)
-        {
-	        byte[] receiveData = new byte[256];
-	        //byte[] sendData = new byte[256];
-	    	DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-	    	serverSocket.receive(receivePacket);
-	        //String revStr = new String(receivePacket.getData());
-	    	
-	    	//Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
-	    	String revStr = new String(receiveData, 0, receivePacket.getLength());
-	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
-	        //System.out.println("revStr.length(): " + revStr.length());
-	        System.out.println("RECEIVED: " + revStr);
-	        
-	        if(revStr.equals("over"))
-	        		break;
-	
-	        strArr.add(revStr);
-	        
-        	//System.out.println("strArr.size() is " + strArr.size());
-	        String[] actualVocSet = strArr.toArray(new String[strArr.size()]);
-	        //System.out.println(Arrays.toString(actualVocSet));
-	        
-	        
-	        Hashtable<String, Hashtable<String, Float>> confusion_probability =
-	        		confustionGen(actualVocSet, vocabularySet);
-	        
-	        forward_viterbi(actualVocSet,
-	        		vocabularySet, states,
-	                start_probability,
-	                transition_probability,
-	                emission_probability,
-	                confusion_probability);
-	        
-        }
-        serverSocket.close();
-	        */
-/*        
-        forward_viterbi(actualVocabularySet,
+        forward_viterbi(wordSeq,
         		vocabularySet, states,
                 start_probability,
                 transition_probability,
                 emission_probability,
-                confusion_probability);*/
+                confusion_probability);
         }
  
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
@@ -348,6 +317,37 @@ public class Transcriber
             System.out.println("\n*************************************\n");
         }
         
+		// convolution_index calculates the overlapping similarity of two strings
+		// Notice that p_src is the string in the vocabulariy set, and p_dest is the
+		// the actual string that is heard.
+		public static float convolution_index(String p_src, String p_dest)
+    	{
+		    int len_src = p_src.length();
+		    int len_dest = p_dest.length();
+		    int steps = 2*len_src + len_dest;
+		    int i,c;
+		    float retval = 0;
+	   
+		    for(i=0; i<steps; ++i) {
+		        int cur_conv_index = 0;
+		        int start_s = Math.max(0, (len_src - 1 - i));
+		        int start_d = Math.max(0, i - len_src + 1);
+		        while(start_s < len_src && start_d < len_dest) {
+		            //System.out.println(p_src.substring(start_s,start_s+1) + " == " + p_dest.substring(start_d,start_d+1));
+		            if(p_src.substring(start_s,start_s+1).equals(p_dest.substring(start_d,start_d+1))) {
+		                ++cur_conv_index;
+		            }
+		            ++start_s;
+		            ++start_d;
+		        }
+		        if(cur_conv_index > retval)
+		            retval = cur_conv_index;
+		    }
+			System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
+		    return retval/len_dest;       
+		}
+        
+        
         public static Hashtable<String, Hashtable<String, Float>> 
         	confustionGen(String[] obs, String[] vocalbularySet) throws IOException, InterruptedException
         {
@@ -403,6 +403,11 @@ public class Transcriber
         			//System.out.println("vocal " + vocalPhonemes[j] + 
         			//		" LDistance " + LDistance + " wordLength " + wordLength);
         			similarityIndex = ( LDistance <= wordLength ? (1 - ((float)LDistance/wordLength)) : 0);
+					// --------------------------------------------------------
+					// Modified for adding convolution index
+					float conv = convolution_index(vocalPhoneme, obsPhoneme);
+					similarityIndex *= conv;
+					// --------------------------------------------------------
         			c.put(volWord, similarityIndex);
         			j++;
         		}
