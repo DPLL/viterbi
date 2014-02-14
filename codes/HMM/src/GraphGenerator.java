@@ -27,7 +27,7 @@ public class GraphGenerator {
 	VertexFactory<Vertex> vFactory;
 	
 	// number of vertex
-	static int numVertex = 5;
+	static int numVertex = 3;
 	// number of edges
 	static int numEdge;
 	// density of the DAG
@@ -105,9 +105,7 @@ public class GraphGenerator {
             replaceVertexID(ver, counter++, startPoint, wordList);
         }
         
-        return randomGraph;
         // Output all the vertexes and the edges
-        /*
         System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
         Iterator<Vertex> iter2 = new DepthFirstIterator<Vertex, DefaultWeightedEdge>(randomGraph);
         Vertex ver2;
@@ -116,7 +114,8 @@ public class GraphGenerator {
             System.out.println("Vertex " + ver2.toString() + " is connected to: "
                     + randomGraph.edgesOf(ver2).toString());
         }
-		*/
+        
+        return randomGraph;
 	}
 	
 	

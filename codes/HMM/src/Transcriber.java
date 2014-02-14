@@ -110,14 +110,19 @@ public class Transcriber
         //System.out.println(Arrays.toString(vocabularySet));
         //System.out.println(vocabularySetList.size());
         // print the emission_probability
-        //System.out.println(emission_probability);
+        System.out.println(emission_probability);
         // print the transition_probability
-        //System.out.println(transition_probability);
+        System.out.println(transition_probability);
         
         // Based on the ground truth about the workflow, select corresponding audio file 
-        System.out.println(graphGen.trueStates);
-        System.out.println(graphGen.trueWords);
+        //System.out.println(graphGen.trueStates);
+        //System.out.println(graphGen.trueWords);
         
+        /*
+         * ASR part -- calling Sphinx
+         */
+        
+        /*
         ArrayList<String> asrResults = new ArrayList<String>();
         
         for (String name: graphGen.trueWords) {
@@ -141,7 +146,7 @@ public class Transcriber
 		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));	        
 		        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 		        // read the output from the command
-	            System.out.println("Here is the standard output of the command:\n");
+	            //System.out.println("Here is the standard output of the command:\n");
 	            String s = null;
 	            while ((s = stdInput.readLine()) != null) {
 	            	//System.out.println(s);
@@ -155,7 +160,7 @@ public class Transcriber
             } catch (Exception e) {
             	e.printStackTrace();
             }            
-            System.out.println(output.toString());
+            //System.out.println(output.toString());
             // Manipulate the output and get the contents after 'I heard: '
             String pattern = "(I heard: )([\\w ']+)";
             Pattern r = Pattern.compile(pattern);
@@ -174,7 +179,9 @@ public class Transcriber
         String[] wordSeq = new String[asrResults.size()];
         wordSeq = asrResults.toArray(wordSeq);
         System.out.println(Arrays.toString(wordSeq));
+        */
         
+        /*
         Hashtable<String, Hashtable<String, Float>> confusion_probability =
         		confustionGen(wordSeq, vocabularySet);
         
@@ -184,16 +191,34 @@ public class Transcriber
                 transition_probability,
                 emission_probability,
                 confusion_probability);
+        */
+        // Testing by feeding in the right words directly without going through ASR
+        String[] trueWordSeq = new String[graphGen.trueWords.size()];
+        trueWordSeq = graphGen.trueWords.toArray(trueWordSeq);
+        Hashtable<String, Hashtable<String, Float>> confusion_probability =
+        		confustionGen(trueWordSeq, vocabularySet);
+        
+        forward_viterbi(trueWordSeq,
+        		vocabularySet, states,
+                start_probability,
+                transition_probability,
+                emission_probability,
+                confusion_probability);
+        
+		System.out.println("The trueStates is: " + graphGen.trueStates);
+		System.out.println("The tureWords is: " + graphGen.trueWords);
         }
  
+    
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
                         Hashtable<String, Float> start_p,
                         Hashtable<String, Hashtable<String, Float>> trans_p,
                         Hashtable<String, Hashtable<String, Float>> emit_p,
 			Hashtable<String, Hashtable<String, Float>> conf_p)
         {
-
+        	// state_num is the number of different states
         	int state_num = states.length;
+        	// obs_num is the number of words from ASR
         	//int obs_num = obs.length;
         	int obs_num = actualObs.length;
         	//V[t][i] stores the overall largest probability ending at the state of i at time t
@@ -204,6 +229,8 @@ public class Transcriber
         	String X[][] = new String[obs_num+1][state_num];
 		
         	int m = 0;
+        	Arrays.sort(states);
+        	System.out.println("sorted states[] is: " + Arrays.toString(states));
         	for (String state : states)
         	{
         		V[0][m] = start_p.get(state);
@@ -218,11 +245,8 @@ public class Transcriber
             {
             	// input is the current actual observation
             	t++;
-            	// i is the current state
-            	int i = -1;
                 for (String next_state : states)
                 {
-                	i++;
                     int Smax = -1;
                     float Pmax = 0;
                     String v_word = "";	
@@ -230,10 +254,8 @@ public class Transcriber
                     float v_prob = 1;       
 			
                     // x is the current accurate observation (word)	
-                    int x = -1;
                     for (String word : obs)		
                     {
-                    	x++;
                     	// j is the previous state
                     	int j = -1; 
                     	for (String source_state : states)
@@ -246,19 +268,19 @@ public class Transcriber
                     		else
 	                    		p = emit_p.get(next_state).get(word) * 
 	                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(word);
-                    		v_prob = V[t-1][j] * p;
+                    		v_prob = V[t-1][Integer.parseInt(source_state)] * p;
 						
                     		if (v_prob >= Pmax)
                     		{
                     			Pmax = v_prob;
-                    			Smax = j;
+                    			Smax = Integer.parseInt(source_state);
                     			v_word = word;
                     		}
                     	}
                     }
-                    V[t][i] = Pmax;
-                    B[t][i] = Smax;
-                    X[t][i] = v_word;
+                    V[t][Integer.parseInt(next_state)] = Pmax;
+                    B[t][Integer.parseInt(next_state)] = Smax;
+                    X[t][Integer.parseInt(next_state)] = v_word;
                 }
             }
  
@@ -343,7 +365,7 @@ public class Transcriber
 		        if(cur_conv_index > retval)
 		            retval = cur_conv_index;
 		    }
-			System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
+			//System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
 		    return retval/len_dest;       
 		}
         

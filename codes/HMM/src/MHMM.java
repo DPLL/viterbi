@@ -186,7 +186,11 @@ public class MHMM
 /*
         System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
         
+        /*
+         * Running as a UDP server and wait for initial from ASR. 
+         */
         
+        /*
         ArrayList<String> strArr = new ArrayList<String>(); 
         
 		DatagramSocket serverSocket = new DatagramSocket(port);
@@ -228,6 +232,18 @@ public class MHMM
 	        
         }
         serverSocket.close();
+        */
+        
+        // Test by just feeding in the right word sequence into MHMM.
+        Hashtable<String, Hashtable<String, Float>> confusion_probability =
+        		confustionGen(new String[]{"flat", "asystole", "electric", "intravenous"}, vocabularySet);
+        
+        forward_viterbi(new String[]{"flat", "asystole", "electric", "intravenous"},
+        		vocabularySet, states,
+                start_probability,
+                transition_probability,
+                emission_probability,
+                confusion_probability);
 	        
 /*        
         forward_viterbi(actualVocabularySet,

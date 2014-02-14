@@ -34,19 +34,19 @@ public class Vertex {
 	{
 		this(0);
 	}
-	
+	/*
 	public String toString() 
 	{
 		return "vertexID("+ vertexID + ")"; 
-	}
-	/*
+	}*/
+	
 	public String toString() 
 	{
 		return "vertexID("+ vertexID + ");  "
 				+ "wordNum(" + wordNum + ");  " + "wordList(" 
 				+ Arrays.toString(wordList) +")"; 
 	}
-	*/
+	
 	public static void main(String args[]) 
 	{
 		Vertex v = new Vertex(1, 2, new String[]{"hi", "hello"});
