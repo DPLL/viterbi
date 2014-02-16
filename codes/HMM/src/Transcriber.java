@@ -206,6 +206,7 @@ public class Transcriber
                 confusion_probability);
         
 		System.out.println("The trueStates is: " + graphGen.trueStates);
+		
 		System.out.println("The tureWords is: " + graphGen.trueWords);
         }
  
@@ -247,10 +248,14 @@ public class Transcriber
             	t++;
                 for (String next_state : states)
                 {
+                	// Smax is the previous state that corresponds to the current 
+                	// max probability
                     int Smax = -1;
+                    // Pmax is the max probability that reaching the current state
                     float Pmax = 0;
+                    // v_word the word from the vocabulary set who corresponds to Pmax.
                     String v_word = "";	
-
+                    // intermediate variable for calculating Pmax 
                     float v_prob = 1;       
 			
                     // x is the current accurate observation (word)	
@@ -278,19 +283,12 @@ public class Transcriber
                     		}
                     	}
                     }
+                    // Update the corresponding arrays.
                     V[t][Integer.parseInt(next_state)] = Pmax;
                     B[t][Integer.parseInt(next_state)] = Smax;
                     X[t][Integer.parseInt(next_state)] = v_word;
                 }
             }
- 
-            float total = 0;
-            String argmax = "";
-            float valmax = 0;
- 
-            float prob;
-            String v_path;
-            float v_prob;
 	
             /*
             for (int n = 0; n < obs_num+1; n++)
@@ -303,7 +301,7 @@ public class Transcriber
             	for (int z = 0; z < state_num; z++)
             		System.out.println(X[n][z]);
 			*/
-		
+            // find the current max probability and its corresponding state.
             int Smax = -1;
             float pMax = 0;
             for (int n = 0; n < state_num; n++ ) 
@@ -326,8 +324,7 @@ public class Transcriber
             	path[x] = B[x+1][path[x+1]];
             	words[x] = X[x][path[x]]; 
             }
-
-            	
+           	
             System.out.println("\n*************************************\n");         
             System.out.println(Arrays.toString(actualObs));
             
