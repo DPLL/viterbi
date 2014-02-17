@@ -33,12 +33,16 @@ public class Transcriber
     	AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		GraphGenerator graphGen = new GraphGenerator();
-		graph = graphGen.GraphGen(0.5, 2, 5);
-		System.out.println(graph.toString());
-		
-		diameterPath =graphGen.findDiameter();
-		graphGen.setGourdTruth(diameterPath);
-		
+		while(true) {
+			graph = graphGen.GraphGen(0.5, 2, 5);
+			System.out.println(graph.toString());
+			
+			diameterPath =graphGen.findDiameter();
+			if (graphGen.setGourdTruth(diameterPath))
+				break;
+			else 
+				System.out.println("\n@@@@@@@@@@@\nGraph is not ready, regenerating!!!\n@@@@@@@@@@@\n");
+		}
 		//System.out.println(graph.edgeSet().size());
 
 		// Graph Interface

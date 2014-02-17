@@ -205,16 +205,22 @@ public class GraphGenerator {
 	}
 	
 	// TODO
-	public void setGourdTruth(List<DefaultWeightedEdge> pathEdgeList)
+	// setGroundTruth will return true if it sets the states where the start vertex has incoming edges
+	public boolean setGourdTruth(List<DefaultWeightedEdge> pathEdgeList)
 	{
 		trueStates = new ArrayList<String>();
 		trueWords = new ArrayList<String>();
 		
+		Vertex startVer;
 		// specify the states that have been gone through
 		// Version one: select the first word from the wordlist
 		int count = 0;
 		for (DefaultWeightedEdge e : pathEdgeList) {
 			if (count++ == 0) { // this means it is the first state
+				// check whether the source has incoming edges
+				if (!hasIncomingEdge(randomGraph.getEdgeSource(e))) { // if it does not have incoming edges
+					return false;
+				}
 				trueStates.add(Integer.toString(randomGraph.getEdgeSource(e).vertexID));
 				trueWords.add(randomGraph.getEdgeSource(e).wordList[0]);
 			} 
@@ -224,7 +230,7 @@ public class GraphGenerator {
 		System.out.println("The trueStates is: " + trueStates);
 		System.out.println("The tureWords is: " + trueWords);
 		
-		return;
+		return true;
 	}
 	
     public static boolean replaceVertexID(Vertex oldVertex, Integer id, int startIndex, String[] wordPool)
@@ -279,7 +285,7 @@ public class GraphGenerator {
      * uniformGen generates a random double number randomly distributed
      * in the range: 1...upperBound+1.
      */
-    public static double uniformGen (double upperBound) {
+    public static double uniformGen(double upperBound) {
     	Random randomGen = new Random();
     	double uniRandomInt = randomGen.nextDouble()*upperBound + 1;
     	//System.out.println("uniRandomInt is: " + uniRandomInt);
@@ -287,7 +293,7 @@ public class GraphGenerator {
     	return uniRandomInt;
     }
     
-    public boolean hasIncomingEdge (Vertex ver) {
+    public boolean hasIncomingEdge(Vertex ver) {
     	if (randomGraph.incomingEdgesOf(ver).isEmpty()) {
     		System.out.println("The start vertex has no incoming edges!");
     		return false;
