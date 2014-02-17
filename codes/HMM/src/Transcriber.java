@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
  
@@ -28,7 +29,8 @@ public class Transcriber
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	// Generate a random graph
-    	SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
+    	//SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
+    	AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		GraphGenerator graphGen = new GraphGenerator();
 		graph = graphGen.GraphGen(0.5, 2, 5);

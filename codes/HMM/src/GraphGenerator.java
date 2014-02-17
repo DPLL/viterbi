@@ -14,6 +14,7 @@ import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.FloydWarshallShortestPaths;
 import org.jgrapht.generate.RandomGraphGenerator;
+import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -23,7 +24,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 
 public class GraphGenerator {
 	
-	static SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> randomGraph;
+	static AbstractBaseGraph<Vertex, DefaultWeightedEdge> randomGraph;
 	VertexFactory<Vertex> vFactory;
 	
 	// number of vertex
@@ -46,7 +47,7 @@ public class GraphGenerator {
 	{
 	}
 	
-	public SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
+	public AbstractBaseGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
 		wordPerNode = wordNumPerNode;
@@ -286,6 +287,14 @@ public class GraphGenerator {
     	return uniRandomInt;
     }
     
+    public boolean hasIncomingEdge (Vertex ver) {
+    	if (randomGraph.incomingEdgesOf(ver).isEmpty()) {
+    		System.out.println("The start vertex has no incoming edges!");
+    		return false;
+    	}
+    	return true;
+    }
+    
 	public static void main(String [] args) throws FileNotFoundException 
 	{
 
@@ -302,7 +311,7 @@ public class GraphGenerator {
 		numEdge = (int) (density * numVertex * (numVertex-1));
 			
 		*/
-		WeightedGraph<Vertex, DefaultWeightedEdge> graph;
+		AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
 		ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		GraphGenerator test = new GraphGenerator();
 		graph = test.GraphGen(0.2, 5, 5);
