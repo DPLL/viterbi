@@ -48,64 +48,14 @@ public class Transcriber
         /*
          * ASR part -- calling Sphinx
          */
-        ArrayList<String> asrResults = new ArrayList<String>();
-        
-        for (String name: graphGen.trueWords) {
-            String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
-            //System.out.println(path);
-            File f = new File(path);
-            if (!f.exists()) {
-            	System.out.println("File not found!");
-            	System.exit(-1);
-            }
-            // call shell command to run Sphinx           
-            String cmd = "java -jar /home/david/Downloads/sphinx4-1.0beta6/bin/LatticeDemo.jar " + path;
-            System.out.println(cmd);
-            Process p;
-            StringBuffer output = new StringBuffer();
-            
-            try {
-            	p = Runtime.getRuntime().exec(cmd);
-            	p.waitFor();
- 
-		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));	        
-		        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-		        // read the output from the command
-	            //System.out.println("Here is the standard output of the command:\n");
-	            String s = null;
-	            while ((s = stdInput.readLine()) != null) {
-	            	//System.out.println(s);
-	            	output.append(s + "\n");
-	            }
-	            // read any errors from the attempted command
-	            //System.out.println("Here is the standard error of the command (if any):\n");
-	            //while ((s = stdError.readLine()) != null) {
-	            //    System.out.println(s);
-	            //}
-            } catch (Exception e) {
-            	e.printStackTrace();
-            }            
-            //System.out.println(output.toString());
-            // Manipulate the output and get the contents after 'I heard: '
-            String pattern = "(I heard: )([\\w ']+)";
-            Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(output);
-            if(m.find()) {
-            	System.out.println("The matching is: " + m.group(2));
-            	asrResults.add(m.group(2));
-            } else {
-            	System.out.println("ASR does not output anything!");
-            }
-        }
-        
-        System.out.println(asrResults);
 
+		ArrayList<String> sphinxResult = new ArrayList<String>();
+		sphinxResult = callSphinx(graphGen);
         // convert arrayList to array
-        String[] wordSeq = new String[asrResults.size()];
-        wordSeq = asrResults.toArray(wordSeq);
+        String[] wordSeq = new String[sphinxResult.size()];
+        wordSeq = sphinxResult.toArray(wordSeq);
         System.out.println(Arrays.toString(wordSeq));
         
-
 		/*
 		 *  Graph Interface
 		 */
@@ -218,7 +168,67 @@ public class Transcriber
 		System.out.println("The tureWords is: " + graphGen.trueWords);
 		System.out.println("The trueStates is: " + graphGen.trueStates);	
         }
+    
+    	/*
+    	 * call sphinx to get initial recognition results and return as a string ArrayList.
+    	 */
+    	public static ArrayList<String> callSphinx(GraphGenerator graphGen) 
+    	{
+            ArrayList<String> asrResults = new ArrayList<String>();
+            
+            for (String name: graphGen.trueWords) {
+                String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
+                //System.out.println(path);
+                File f = new File(path);
+                if (!f.exists()) {
+                	System.out.println("File not found!");
+                	System.exit(-1);
+                }
+                // call shell command to run Sphinx           
+                String cmd = "java -jar /home/david/Downloads/sphinx4-1.0beta6/bin/LatticeDemo.jar " + path;
+                System.out.println(cmd);
+                Process p;
+                StringBuffer output = new StringBuffer();
+                
+                try {
+                	p = Runtime.getRuntime().exec(cmd);
+                	p.waitFor();
+     
+    		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));	        
+    		        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+    		        // read the output from the command
+    	            //System.out.println("Here is the standard output of the command:\n");
+    	            String s = null;
+    	            while ((s = stdInput.readLine()) != null) {
+    	            	//System.out.println(s);
+    	            	output.append(s + "\n");
+    	            }
+    	            // read any errors from the attempted command
+    	            //System.out.println("Here is the standard error of the command (if any):\n");
+    	            //while ((s = stdError.readLine()) != null) {
+    	            //    System.out.println(s);
+    	            //}
+                } catch (Exception e) {
+                	e.printStackTrace();
+                }            
+                //System.out.println(output.toString());
+                // Manipulate the output and get the contents after 'I heard: '
+                String pattern = "(I heard: )([\\w ']+)";
+                Pattern r = Pattern.compile(pattern);
+                Matcher m = r.matcher(output);
+                if(m.find()) {
+                	System.out.println("The matching is: " + m.group(2));
+                	asrResults.add(m.group(2));
+                } else {
+                	System.out.println("ASR does not output anything!");
+                }
+            }
+            
+            System.out.println(asrResults);
+    		return asrResults;
+    	}
  
+    	
     	// actualObs is the initial result form ASR, i.e., Y; obs is the ground true vocalbulary, i.e., X.
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
                         Hashtable<String, Float> start_p,
@@ -349,7 +359,10 @@ public class Transcriber
             reportFidelity(actualObs, path, words, trueWords, trueStates);
         }
         
-
+        /*
+         * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
+         * ground truth words and the actual observations have the same length, i.e., Sphinx does not miss any word.
+         */
         public static void reportFidelity(String[] actualObs, int[] path, String[] words, ArrayList<String> trueWords, ArrayList<String> trueStates) 
         {
         	// gourndStateScore is the score of ground truth state
@@ -360,7 +373,7 @@ public class Transcriber
         		System.out.println("Error!!!");
         	}
         	if(groundWordScore != (words.length-1) || actualObs.length != groundWordScore) {
-        		System.out.println("The ground truth and the speech recognition results do not match");
+        		System.out.println("The ground truth and the speech recognition results do not match!!!");
         	}
         	// myStateScore is the score of state of my algo.
         	int myStateScore = 0;
