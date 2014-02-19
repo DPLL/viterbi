@@ -127,8 +127,6 @@ public class Transcriber
         /*
          * ASR part -- calling Sphinx
          */
-        
-        /*
         ArrayList<String> asrResults = new ArrayList<String>();
         
         for (String name: graphGen.trueWords) {
@@ -185,9 +183,9 @@ public class Transcriber
         String[] wordSeq = new String[asrResults.size()];
         wordSeq = asrResults.toArray(wordSeq);
         System.out.println(Arrays.toString(wordSeq));
-        */
         
-        /*
+        
+        
         Hashtable<String, Hashtable<String, Float>> confusion_probability =
         		confustionGen(wordSeq, vocabularySet);
         
@@ -196,8 +194,12 @@ public class Transcriber
                 start_probability,
                 transition_probability,
                 emission_probability,
-                confusion_probability);
-        */
+                confusion_probability,
+                graphGen.trueWords, 
+                graphGen.trueStates
+                );
+        
+        /*
         // Testing by feeding in the right words directly without going through ASR
         String[] trueWordSeq = new String[graphGen.trueWords.size()];
         trueWordSeq = graphGen.trueWords.toArray(trueWordSeq);
@@ -209,19 +211,19 @@ public class Transcriber
                 start_probability,
                 transition_probability,
                 emission_probability,
-                confusion_probability);
-        
-		System.out.println("The trueStates is: " + graphGen.trueStates);
-		
+                confusion_probability);*/
+
 		System.out.println("The tureWords is: " + graphGen.trueWords);
+		System.out.println("The trueStates is: " + graphGen.trueStates);	
         }
  
-    
+    	// actualObs is the initial result form ASR, i.e., Y; obs is the ground true vocalbulary, i.e., X.
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
                         Hashtable<String, Float> start_p,
                         Hashtable<String, Hashtable<String, Float>> trans_p,
                         Hashtable<String, Hashtable<String, Float>> emit_p,
-			Hashtable<String, Hashtable<String, Float>> conf_p)
+			Hashtable<String, Hashtable<String, Float>> conf_p,
+			ArrayList<String> trueWords, ArrayList<String> trueStates)
         {
         	// state_num is the number of different states
         	int state_num = states.length;
@@ -340,6 +342,54 @@ public class Transcriber
             			", with the word: " + words[x]);
             }
             System.out.println("\n*************************************\n");
+            
+            // report the results of fidelity
+            reportFidelity(actualObs, path, words, trueWords, trueStates);
+        }
+        
+
+        public static void reportFidelity(String[] actualObs, int[] path, String[] words, ArrayList<String> trueWords, ArrayList<String> trueStates) 
+        {
+        	// gourndStateScore is the score of ground truth state
+        	int groundStateScore = trueStates.size();
+        	// groundWordScore is the score of ground truth words
+        	int groundWordScore = trueWords.size();
+        	if (groundWordScore != groundStateScore || words.length != path.length) {
+        		System.out.println("Error!!!");
+        	}
+        	// myStateScore is the score of state of my algo.
+        	int myStateScore = 0;
+        	// myWordScore is the score of words of my algo.
+        	int myWordScore = 0;
+        	// asrWordScore is the score of wordsof my ASR.
+        	int asrWordScore = 0;
+        	// for the word recovery
+        	for (int i = 0; i < groundWordScore; i++) {
+        		for (int j = 1; j < words.length; j++ ) {
+        			if (words[j] == trueWords.get(i)) {
+        				myWordScore++;
+        			}
+        			if (actualObs[j-1] == trueWords.get(i)) {
+        				asrWordScore++;
+        			}
+        			if (path[j] == Integer.parseInt(trueStates.get(i))) {
+        				myStateScore++;
+        			}
+        		}
+        	}
+        	
+        	/*
+        	for (int i = 0; i < groundStateScore; i++) {
+        		for (int j = 1; j < path.length; j++) {
+        			if (path[j] == Integer.parseInt(trueStates.get(i))) {
+        				myStateScore++;
+        			}
+        		}
+        	}*/
+        	
+        	System.out.println("myWordScore: " + (float)((float)myWordScore/groundWordScore));
+        	System.out.println("myStateScore: " + (float)((float)myStateScore/groundStateScore));
+        	System.out.println("asrWordScore: " + (float)((float)asrWordScore/groundWordScore));
         }
         
 		// convolution_index calculates the overlapping similarity of two strings
