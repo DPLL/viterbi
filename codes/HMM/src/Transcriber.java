@@ -43,6 +43,7 @@ public class Transcriber
     // confusion_probability stores the confusion probability matrix
     static Hashtable<String, Hashtable<String, Float>> confusion_probability;
     
+    
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	// Generate a random graph
