@@ -25,18 +25,34 @@ public class Transcriber
 {
     // UDP port number
     static final int port = 9999;
- 
+    
+    // graphGen is the randomGraph generator that generates a weigthed random graph
+    static GraphGenerator graphGen;
+	// wordSeq is the initial recognition results from Sphinx as a String array
+    static String[] wordSeq;
+    // states store the all the different states the workflow has
+    static String[] states;
+    // vocabularySet stores all the vocabulary the workflow has
+    static String[] vocabularySet;
+    // emission_probability stores the emission probability matrix
+    static Hashtable<String, Hashtable<String, Float>> emission_probability;
+    // transition_probability stores the transition probability matrix
+    static Hashtable<String, Hashtable<String, Float>> transition_probability;
+    // transition_probability stores the start probability matrix
+    static Hashtable<String, Float> start_probability;
+    // confusion_probability stores the confusion probability matrix
+    static Hashtable<String, Hashtable<String, Float>> confusion_probability;
+    
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	// Generate a random graph
     	//SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
     	AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-		GraphGenerator graphGen = new GraphGenerator();
+		graphGen = new GraphGenerator();
 		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList
 		ArrayList<String> sphinxResult = new ArrayList<String>();
-		// wordSeq is the initial recognition results from Sphinx as a String array
-        String[] wordSeq;
+
         
 		while(true) {
 			while(true) {
@@ -69,87 +85,12 @@ public class Transcriber
 		/*
 		 *  Graph Interface
 		 */
-		// verSet contains all the vertexes of the graph
-        Set<Vertex> verSet = new HashSet<Vertex>();
-        verSet.addAll(graph.vertexSet());
+		graphParse(graph);
         
-        // for states
-        ArrayList<String> stateList = new ArrayList<String>();
-        // for start_probability
-        Hashtable<String, Float> start_probability = new Hashtable<String, Float>();
-        float start_prob = (float)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
-        // for vocabularySet
-        ArrayList<String> vocabularySetList = new ArrayList<String>();
-        // for emission_probability
-        Hashtable<String, Hashtable<String, Float>> emission_probability = 
-        		new Hashtable<String, Hashtable<String, Float>>();
-        float emission_prob = (float)1/(graphGen.wordPerNode);// emission_prob is evenly distributed among all the words for a node.
-        System.out.println("emission_prob: " + emission_prob + " graphGen.wordPerNode: " + graphGen.wordPerNode);
-        // for transition_probability
-        Hashtable<String, Hashtable<String, Float>> transition_probability = 
-        		new Hashtable<String, Hashtable<String, Float>>();
-        
-        for (Vertex ver : verSet) {
-        	// print the current vertex
-        	//System.out.println("The current vertex is: " + ver);
-        	// words is the ArrayList form of wordList of this particular vertex. 
-        	ArrayList<String> words = new ArrayList<String>(Arrays.asList(ver.wordList));
-        	//System.out.println(words);
-        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
-        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
-        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
-        	//System.out.println(outgoingEdges);
-        	
-        	// array of states
-        	stateList.add(Integer.toString(ver.vertexID));
-        	// start_probability
-        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
-        	// vocabularySet and emission_probability
-        	Hashtable<String, Float> e = new Hashtable<String, Float>();
-        	for (String word : words) {
-            	// vocabularySet
-        		vocabularySetList.add(word);
-        		// emission_probability
-        		e.put(word, emission_prob);
-        	}
-        	// emission_probability
-        	emission_probability.put(Integer.toString(ver.vertexID), e);
-        	// transition_probability
-        	float transition_prob = (float)1/(graph.outDegreeOf(ver));
-        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
-            Hashtable<String, Float> t = new Hashtable<String, Float>();
-            for(DefaultWeightedEdge edge : outgoingEdges) {
-            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
-            }
-            transition_probability.put(Integer.toString(ver.vertexID), t);     
-        }
-        
-        // print the states
-        //System.out.println(stateList);
-        String[] states = new String[stateList.size()];
-        states = stateList.toArray(states);
-        //System.out.println(Arrays.toString(states));
-        // print the start_probability
-        //System.out.println(start_probability);
-        // print the vocabularySet
-        //System.out.println(vocabularySetList);
-        String[] vocabularySet = new String[vocabularySetList.size()];
-        vocabularySet = vocabularySetList.toArray(vocabularySet);
-        //System.out.println(Arrays.toString(vocabularySet));
-        //System.out.println(vocabularySetList.size());
-        // print the emission_probability
-        System.out.println(emission_probability);
-        // print the transition_probability
-        System.out.println(transition_probability);
-        
-        // Based on the ground truth about the workflow, select corresponding audio file 
-        //System.out.println(graphGen.trueStates);
-        //System.out.println(graphGen.trueWords);        
-        
-        
-        Hashtable<String, Hashtable<String, Float>> confusion_probability =
-        		confustionGen(wordSeq, vocabularySet);
+		/*
+		 * generate the confusion probability matrix
+		 */
+        confusion_probability =	confustionGen(wordSeq, vocabularySet);
         
         forward_viterbi(wordSeq,
         		vocabularySet, states,
@@ -179,6 +120,86 @@ public class Transcriber
 		System.out.println("The trueStates is: " + graphGen.trueStates);	
         }
     
+	    /*
+	     * read the graph and create interface for it. 
+	     */
+	    public static void graphParse(AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph)
+	    {
+			// verSet contains all the vertexes of the graph
+	        Set<Vertex> verSet = new HashSet<Vertex>();
+	        verSet.addAll(graph.vertexSet());
+	        
+	        // for states
+	        ArrayList<String> stateList = new ArrayList<String>();
+	        // for start_probability
+	        start_probability = new Hashtable<String, Float>();
+	        float start_prob = (float)1/(verSet.size()); // start_prob is evenly distributed among all the states
+	        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
+	        // for vocabularySet
+	        ArrayList<String> vocabularySetList = new ArrayList<String>();
+	        // for emission_probability
+	        emission_probability = 
+	        		new Hashtable<String, Hashtable<String, Float>>();
+	        float emission_prob = (float)1/(graphGen.wordPerNode);// emission_prob is evenly distributed among all the words for a node.
+	        System.out.println("emission_prob: " + emission_prob + " graphGen.wordPerNode: " + graphGen.wordPerNode);
+	        // for transition_probability
+	        transition_probability = 
+	        		new Hashtable<String, Hashtable<String, Float>>();
+	        
+	        for (Vertex ver : verSet) {
+	        	// print the current vertex
+	        	//System.out.println("The current vertex is: " + ver);
+	        	// words is the ArrayList form of wordList of this particular vertex. 
+	        	ArrayList<String> words = new ArrayList<String>(Arrays.asList(ver.wordList));
+	        	//System.out.println(words);
+	        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
+	        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
+	        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
+	        	//System.out.println(outgoingEdges);
+	        	
+	        	// array of states
+	        	stateList.add(Integer.toString(ver.vertexID));
+	        	// start_probability
+	        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
+	        	// vocabularySet and emission_probability
+	        	Hashtable<String, Float> e = new Hashtable<String, Float>();
+	        	for (String word : words) {
+	            	// vocabularySet
+	        		vocabularySetList.add(word);
+	        		// emission_probability
+	        		e.put(word, emission_prob);
+	        	}
+	        	// emission_probability
+	        	emission_probability.put(Integer.toString(ver.vertexID), e);
+	        	// transition_probability
+	        	float transition_prob = (float)1/(graph.outDegreeOf(ver));
+	        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
+	            Hashtable<String, Float> t = new Hashtable<String, Float>();
+	            for(DefaultWeightedEdge edge : outgoingEdges) {
+	            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
+	            }
+	            transition_probability.put(Integer.toString(ver.vertexID), t);     
+	        }
+	        
+	        // print the states
+	        //System.out.println(stateList);
+	        states = new String[stateList.size()];
+	        states = stateList.toArray(states);
+	        //System.out.println(Arrays.toString(states));
+	        // print the start_probability
+	        //System.out.println(start_probability);
+	        // print the vocabularySet
+	        //System.out.println(vocabularySetList);
+	        vocabularySet = new String[vocabularySetList.size()];
+	        vocabularySet = vocabularySetList.toArray(vocabularySet);
+	        //System.out.println(Arrays.toString(vocabularySet));
+	        //System.out.println(vocabularySetList.size());
+	        // print the emission_probability
+	        System.out.println(emission_probability);
+	        // print the transition_probability
+	        System.out.println(transition_probability);
+	    	return;
+	    }
     	/*
     	 * call sphinx to get initial recognition results and return as a string ArrayList.
     	 */
@@ -214,10 +235,10 @@ public class Transcriber
     	            	output.append(s + "\n");
     	            }
     	            // read any errors from the attempted command
-    	            System.out.println("Here is the standard error of the command (if any):\n");
-    	            while ((s = stdError.readLine()) != null) {
-    	                System.out.println(s);
-    	            }
+    	            //System.out.println("Here is the standard error of the command (if any):\n");
+    	            //while ((s = stdError.readLine()) != null) {
+    	            //    System.out.println(s);
+    	            //}
                 } catch (Exception e) {
                 	e.printStackTrace();
                 }            
@@ -473,18 +494,6 @@ public class Transcriber
         	for (String temp : vocalPhonemes)
         		System.out.println(temp);
         	*/
-        	  
-        	/*
-        	 * calculate the Levenshtein distance and generate the corresponding confusion matrix.
-        	 */
-        	//System.out.println("computeLevenshteinDistance mac and mad "  + computeLevenshteinDistance(obsPhonemes[0], vocalPhonemes[0]));
-        	
-        	/*
-    		Hashtable<String, Float> c3 = new Hashtable<String, Float>();
-    		c3.put(CUT, (2.0f/3.0f));
-    		c3.put(HAT, (2.0f/3.0f));
-    		c3.put(MAD, (1.0f/3.0f));
-    		confusion_probability.put(MAC, c1);*/
         	
         	int i = 0;
         	int j;
