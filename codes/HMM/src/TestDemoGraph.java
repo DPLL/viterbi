@@ -16,12 +16,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jgraph.graph.DefaultEdge;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
  
-public class Transcriber
+public class TestDemoGraph
 {
     // UDP port number
     static final int port = 9999;
@@ -31,41 +33,26 @@ public class Transcriber
     	// Generate a random graph
     	//SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
     	AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
+    	DemoGraph graphGen;
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-		GraphGenerator graphGen = new GraphGenerator();
+		graphGen = new DemoGraph();
+		graph = DemoGraph.createDirectedfGraph();
 		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList
 		ArrayList<String> sphinxResult = new ArrayList<String>();
 		// wordSeq is the initial recognition results from Sphinx as a String array
-        String[] wordSeq;
+        String[] wordSeq = new String[]{"occidental", "assist are a", "atlantic", "enter being us"};
         
-		while(true) {
-			while(true) {
-				graph = graphGen.GraphGen(0.5, 2, 5);
-				System.out.println(graph.toString());				
-				diameterPath =graphGen.findDiameter();
-				if (graphGen.setGourdTruth(diameterPath))
-					break;
-				else 
-					System.out.println("\n@@@@@@@@@@@\nGraph is not ready, regenerating!!!\n@@@@@@@@@@@\n");
-			}
-			//System.out.println(graph.edgeSet().size());
-			
-	        /*
-	         * ASR part -- calling Sphinx
-	         */
-			sphinxResult = callSphinx(graphGen);
-			if (sphinxResult != null) {
-		        // convert arrayList to array
-				wordSeq = new String[sphinxResult.size()];
-		        wordSeq = sphinxResult.toArray(wordSeq);
-		        System.out.println(Arrays.toString(wordSeq));
-		        break;
-			}
-			else {
-				System.out.println("\n@@@@@@@@@@@\nSphinx is not working properly, " +
-						"regenerating!!!\n@@@@@@@@@@@\n");
-			}
-		}
+        graphGen.trueStates = new ArrayList<String>();
+        graphGen.trueWords = new ArrayList<String>();
+        graphGen.trueStates.add("0");
+        graphGen.trueStates.add("1");
+        graphGen.trueStates.add("2");
+        graphGen.trueStates.add("3");
+        graphGen.trueWords.add("oxygen");
+        graphGen.trueWords.add("asystole");
+        graphGen.trueWords.add("electric");
+        graphGen.trueWords.add("intravenous");
+        
 		/*
 		 *  Graph Interface
 		 */

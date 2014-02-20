@@ -34,6 +34,7 @@ public class GraphGenerator {
 	// density of the DAG
 	static double density;
 	// number of words per node
+	// It is assumed that the wordPerNode is the same across different nodes.
 	static int wordPerNode;
 	// length of word
 	static int wordLength;
