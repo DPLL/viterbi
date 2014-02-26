@@ -21,81 +21,86 @@ import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
  
-public class Transcriber
+public class TranscriberSimulation
 {
-    // UDP port number
-    static final int port = 9999;
     
     // graphGen is the randomGraph generator that generates a weigthed random graph
-    static GraphGenerator graphGen;
-	// wordSeq is the initial recognition results from Sphinx as a String array
-    static String[] wordSeq;
+    static GraphGenSimulation graphGen;
+	// objectSeq is the initial recognition results from Sphinx as a String array
+    static double[][] objectSeq;
     // states store the all the different states the workflow has
     static String[] states;
-    // vocabularySet stores all the vocabulary the workflow has
-    static String[] vocabularySet;
+    // trueObjectSet stores all the trueObject the workflow has
+    static double[][] trueObjectSet;
     // emission_probability stores the emission probability matrix
-    static Hashtable<String, Hashtable<String, Float>> emission_probability;
+    static Hashtable<String, Hashtable<double[], Double>> emission_probability;
     // transition_probability stores the transition probability matrix
-    static Hashtable<String, Hashtable<String, Float>> transition_probability;
+    static Hashtable<String, Hashtable<String, Double>> transition_probability;
     // transition_probability stores the start probability matrix
-    static Hashtable<String, Float> start_probability;
+    static Hashtable<String, Double> start_probability;
     // confusion_probability stores the confusion probability matrix
-    static Hashtable<String, Hashtable<String, Float>> confusion_probability;
-    // myWordPercentage is the percentage of word that my correction algo. is right
-    static float myWordPercentage;
+    static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;
+    // myWordPercentage is the percentage of object that my correction algo. is right
+    static double myWordPercentage;
     // myStatePercentage is the percentage of state that my correction algo. is right
-    static float myStatePercentage;
-    // asrWordPercentage is the percentage of word that ASR is right
-    static float asrWordPercentage;
+    static double myStatePercentage;
+    // asrWordPercentage is the percentage of object that ASR is right
+    static double asrWordPercentage;
+    /*
+     * stat for noise adding
+     */
+    // mean is the average of sensor error
+    static double mean = 0;
+    // stdDev is the standard deviation of sensor error
+    static double stdDev = 1;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 3;
-    	float totalMyWordPercentage = (float) 0.0;
-    	float totalASRWordPercentage = (float) 0.0;
-    	float totalMyStatePercentage = (float) 0.0;
+    	int runTime = 1;
+    	double totalMyWordPercentage = (double) 0.0;
+    	double totalASRWordPercentage = (double) 0.0;
+    	double totalMyStatePercentage = (double) 0.0;
 
     	
-    	for (int i = 0; i < runTime; i++) {
+    	for(int i = 0; i < runTime; i++) {
     	 	// Generate a random graph
-        	//SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge> graph;
-        	AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
+        	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
+        	AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph;
         	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-    		graphGen = new GraphGenerator();
+    		graphGen = new GraphGenSimulation();
     		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList
     		ArrayList<String> sphinxResult = new ArrayList<String>();
-
             
-    		while(true) {
-    			while(true) {
-    				graph = graphGen.GraphGen(0.8, 3, 6);
-    				System.out.println(graph.toString());				
-    				diameterPath =graphGen.findDiameter();
-    				if (graphGen.setGourdTruth(diameterPath))
-    					break;
-    				else 
-    					System.out.println("\n@@@@@@@@@@@\nGraph is not ready, regenerating!!!\n@@@@@@@@@@@\n");
-    			}
-    			//System.out.println(graph.edgeSet().size());
-    			
-    	        /*
-    	         * ASR part -- calling Sphinx
-    	         */
-    			sphinxResult = callSphinx(graphGen);
-    			if (sphinxResult != null) {
-    		        // convert arrayList to array
-    				wordSeq = new String[sphinxResult.size()];
-    		        wordSeq = sphinxResult.toArray(wordSeq);
-    		        System.out.println(Arrays.toString(wordSeq));
-    		        break;
-    			}
-    			else {
-    				System.out.println("\n@@@@@@@@@@@\nSphinx is not working properly, " +
-    						"regenerating!!!\n@@@@@@@@@@@\n");
-    			}
-    		}
+    		
+			while(true){
+				graph = graphGen.GraphGen(0.5, 2, 5);
+				System.out.println(graph.toString());				
+				diameterPath =graphGen.findDiameter();
+				if (graphGen.setGourdTruth(diameterPath))
+					break;
+				else 
+					System.out.println("\n@@@@@@@@@@@\nGraph is not ready, regenerating!!!\n@@@@@@@@@@@\n");
+			}
+			//System.out.println(graph.edgeSet().size());
+			
+	        /*
+	         * ASR part -- calling Sphinx
+	         */
+			/*
+			sphinxResult = callSphinx(graphGen);
+			if (sphinxResult != null) {
+		        // convert arrayList to array
+				objectSeq = new String[sphinxResult.size()];
+		        objectSeq = sphinxResult.toArray(objectSeq);
+		        System.out.println(Arrays.toString(objectSeq));
+		        break;
+			}
+			else {
+				System.out.println("\n@@@@@@@@@@@\nSphinx is not working properly, " +
+						"regenerating!!!\n@@@@@@@@@@@\n");
+			}*/
+    		
     		/*
     		 *  Graph Interface
     		 */
@@ -104,33 +109,33 @@ public class Transcriber
     		/*
     		 * generate the confusion probability matrix
     		 */
-            confusion_probability =	confustionGen(wordSeq, vocabularySet);
-            
-            correct(wordSeq,
-            		vocabularySet, states,
+            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+            /*
+            correct(objectSeq,
+            		trueObjectSet, states,
                     start_probability,
                     transition_probability,
                     emission_probability,
                     confusion_probability,
-                    graphGen.trueWords, 
+                    graphGen.trueObjects, 
                     graphGen.trueStates
-                    );
+                    );*/
             
             /*
-            // Testing by feeding in the right words directly without going through ASR
+            // Testing by feeding in the right objects directly without going through ASR
             String[] trueWordSeq = new String[graphGen.trueWords.size()];
             trueWordSeq = graphGen.trueWords.toArray(trueWordSeq);
-            Hashtable<String, Hashtable<String, Float>> confusion_probability =
-            		confustionGen(trueWordSeq, vocabularySet);
+            Hashtable<String, Hashtable<String, Double>> confusion_probability =
+            		confustionGen(trueWordSeq, trueObjectSet);
             
             forward_viterbi(trueWordSeq,
-            		vocabularySet, states,
+            		trueObjectSet, states,
                     start_probability,
                     transition_probability,
                     emission_probability,
                     confusion_probability);*/
 
-    		System.out.println("The tureWords is: " + graphGen.trueWords);
+    		System.out.println("The tureWords is: " + graphGen.trueObjects);
     		System.out.println("The trueStates is: " + graphGen.trueStates);	
     		
     		totalMyWordPercentage += myWordPercentage;
@@ -142,44 +147,44 @@ public class Transcriber
     	}
     	
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("myWordScore: " + (float)totalMyWordPercentage/runTime);
-    	System.out.println("asrWordScore: " + (float)totalASRWordPercentage/runTime);
-    	System.out.println("myStateScore: " + (float)totalMyStatePercentage/runTime);      	
+    	System.out.println("myWordScore: " + (double)totalMyWordPercentage/runTime);
+    	System.out.println("asrWordScore: " + (double)totalASRWordPercentage/runTime);
+    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
 		
     }
     
 	    /*
 	     * read the graph and create interface for it. 
 	     */
-	    public static void graphParse(AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph)
+	    public static void graphParse(AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph)
 	    {
 			// verSet contains all the vertexes of the graph
-	        Set<Vertex> verSet = new HashSet<Vertex>();
+	        Set<VertexSimulation> verSet = new HashSet<VertexSimulation>();
 	        verSet.addAll(graph.vertexSet());
 	        
 	        // for states
 	        ArrayList<String> stateList = new ArrayList<String>();
 	        // for start_probability
-	        start_probability = new Hashtable<String, Float>();
-	        float start_prob = (float)1/(verSet.size()); // start_prob is evenly distributed among all the states
+	        start_probability = new Hashtable<String, Double>();
+	        double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
 	        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
-	        // for vocabularySet
-	        ArrayList<String> vocabularySetList = new ArrayList<String>();
+	        // for trueObjectSet
+	        ArrayList<double[]> trueObjectSetList = new ArrayList<double[]>();
 	        // for emission_probability
 	        emission_probability = 
-	        		new Hashtable<String, Hashtable<String, Float>>();
-	        float emission_prob = (float)1/(graphGen.wordPerNode);// emission_prob is evenly distributed among all the words for a node.
-	        System.out.println("emission_prob: " + emission_prob + " graphGen.wordPerNode: " + graphGen.wordPerNode);
+	        		new Hashtable<String, Hashtable<double[], Double>>();
+	        double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
+	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
 	        // for transition_probability
 	        transition_probability = 
-	        		new Hashtable<String, Hashtable<String, Float>>();
+	        		new Hashtable<String, Hashtable<String, Double>>();
 	        
-	        for (Vertex ver : verSet) {
+	        for (VertexSimulation ver : verSet) {
 	        	// print the current vertex
 	        	//System.out.println("The current vertex is: " + ver);
-	        	// words is the ArrayList form of wordList of this particular vertex. 
-	        	ArrayList<String> words = new ArrayList<String>(Arrays.asList(ver.wordList));
-	        	//System.out.println(words);
+	        	// objects is the ArrayList form of objectList of this particular vertex. 
+	        	ArrayList<double[]> objects = new ArrayList<double[]>(Arrays.asList(ver.objectMatrix));
+	        	//System.out.println(objects);
 	        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
 	        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
 	        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
@@ -189,20 +194,20 @@ public class Transcriber
 	        	stateList.add(Integer.toString(ver.vertexID));
 	        	// start_probability
 	        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
-	        	// vocabularySet and emission_probability
-	        	Hashtable<String, Float> e = new Hashtable<String, Float>();
-	        	for (String word : words) {
-	            	// vocabularySet
-	        		vocabularySetList.add(word);
+	        	// trueObjectSet and emission_probability
+	        	Hashtable<double[], Double> e = new Hashtable<double[], Double>();
+	        	for (double[] object : objects) {
+	            	// trueObjectSet
+	        		trueObjectSetList.add(object);
 	        		// emission_probability
-	        		e.put(word, emission_prob);
+	        		e.put(object, emission_prob);
 	        	}
 	        	// emission_probability
 	        	emission_probability.put(Integer.toString(ver.vertexID), e);
 	        	// transition_probability
-	        	float transition_prob = (float)1/(graph.outDegreeOf(ver));
+	        	double transition_prob = (double)1/(graph.outDegreeOf(ver));
 	        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
-	            Hashtable<String, Float> t = new Hashtable<String, Float>();
+	            Hashtable<String, Double> t = new Hashtable<String, Double>();
 	            for(DefaultWeightedEdge edge : outgoingEdges) {
 	            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
 	            }
@@ -216,12 +221,14 @@ public class Transcriber
 	        //System.out.println(Arrays.toString(states));
 	        // print the start_probability
 	        //System.out.println(start_probability);
-	        // print the vocabularySet
-	        //System.out.println(vocabularySetList);
-	        vocabularySet = new String[vocabularySetList.size()];
-	        vocabularySet = vocabularySetList.toArray(vocabularySet);
-	        //System.out.println(Arrays.toString(vocabularySet));
-	        //System.out.println(vocabularySetList.size());
+	        // print the trueObjectSet
+	        System.out.println(trueObjectSetList);
+	        trueObjectSet = new double[trueObjectSetList.size()][];
+	        trueObjectSet = trueObjectSetList.toArray(trueObjectSet);
+	        System.out.println("print out the trueObejctSet as follows:");
+	        for(double[] object : trueObjectSet)
+	        	System.out.println(Arrays.toString(object));
+	        //System.out.println(trueObjectSetList.size());
 	        // print the emission_probability
 	        System.out.println(emission_probability);
 	        // print the transition_probability
@@ -231,11 +238,12 @@ public class Transcriber
     	/*
     	 * call sphinx to get initial recognition results and return as a string ArrayList.
     	 */
-    	public static ArrayList<String> callSphinx(GraphGenerator graphGen) 
+	    /*
+    	public static ArrayList<String> callSphinx(GraphGenSimulation graphGen) 
     	{
             ArrayList<String> asrResults = new ArrayList<String>();
             
-            for (String name: graphGen.trueWords) {
+            for (String name: graphGen.trueObjects) {
                 String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
                 //System.out.println(path);
                 File f = new File(path);
@@ -286,27 +294,27 @@ public class Transcriber
             
             System.out.println(asrResults);
     		return asrResults;
-    	}
+    	}*/
  
     	
     	// actualObs is the initial result form ASR, i.e., Y; obs is the ground true vocalbulary, i.e., X.
         public static void correct(String[] actualObs, String[] obs, String[] states,
-                        Hashtable<String, Float> start_p,
-                        Hashtable<String, Hashtable<String, Float>> trans_p,
-                        Hashtable<String, Hashtable<String, Float>> emit_p,
-			Hashtable<String, Hashtable<String, Float>> conf_p,
+                        Hashtable<String, Double> start_p,
+                        Hashtable<String, Hashtable<String, Double>> trans_p,
+                        Hashtable<String, Hashtable<String, Double>> emit_p,
+			Hashtable<String, Hashtable<String, Double>> conf_p,
 			ArrayList<String> trueWords, ArrayList<String> trueStates)
         {
         	// state_num is the number of different states
         	int state_num = states.length;
-        	// obs_num is the number of words from ASR
+        	// obs_num is the number of objects from ASR
         	//int obs_num = obs.length;
         	int obs_num = actualObs.length;
         	//V[t][i] stores the overall largest probability ending at the state of i at time t
-        	float V[][] = new float[obs_num+1][state_num];
+        	double V[][] = new double[obs_num+1][state_num];
         	//B[t][i]  stores the last source state corresponding to the V[t][i]
         	int B[][] = new int[obs_num+1][state_num];
-        	//X[t][i] stores the word that has been chosen corresponding to the V[t][i]
+        	//X[t][i] stores the object that has been chosen corresponding to the V[t][i]
         	String X[][] = new String[obs_num+1][state_num];
 		
         	int m = 0;
@@ -332,41 +340,41 @@ public class Transcriber
                 	// max probability
                     int Smax = -1;
                     // Pmax is the max probability that reaching the current state
-                    float Pmax = 0;
-                    // v_word the word from the vocabulary set who corresponds to Pmax.
-                    String v_word = "";	
+                    double Pmax = 0;
+                    // v_object the object from the trueObject set who corresponds to Pmax.
+                    String v_object = "";	
                     // intermediate variable for calculating Pmax 
-                    float v_prob = 1;       
+                    double v_prob = 1;       
 			
-                    // x is the current accurate observation (word)	
-                    for (String word : obs)		
+                    // x is the current accurate observation (object)	
+                    for (String object : obs)		
                     {
                     	// j is the previous state
                     	int j = -1; 
                     	for (String source_state : states)
                     	{
                     		j++;
-                    		float p;
+                    		double p;
                     		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
-                    				emit_p.get(next_state).get(word) == null || trans_p.get(source_state).get(next_state) == null)
+                    				emit_p.get(next_state).get(object) == null || trans_p.get(source_state).get(next_state) == null)
                     			p = 0;
                     		else
-	                    		p = emit_p.get(next_state).get(word) * 
-	                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(word);
+	                    		p = emit_p.get(next_state).get(object) * 
+	                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(object);
                     		v_prob = V[t-1][Integer.parseInt(source_state)] * p;
 						
                     		if (v_prob >= Pmax)
                     		{
                     			Pmax = v_prob;
                     			Smax = Integer.parseInt(source_state);
-                    			v_word = word;
+                    			v_object = object;
                     		}
                     	}
                     }
                     // Update the corresponding arrays.
                     V[t][Integer.parseInt(next_state)] = Pmax;
                     B[t][Integer.parseInt(next_state)] = Smax;
-                    X[t][Integer.parseInt(next_state)] = v_word;
+                    X[t][Integer.parseInt(next_state)] = v_object;
                 }
             }
 	
@@ -383,7 +391,7 @@ public class Transcriber
 			*/
             // find the current max probability and its corresponding state.
             int Smax = -1;
-            float pMax = 0;
+            double pMax = 0;
             for (int n = 0; n < state_num; n++ ) 
             {
             	if (V[obs_num][n] >= pMax) {
@@ -392,17 +400,17 @@ public class Transcriber
             	}
             }
 
-            // If at the current stage, the output of ASR is too far-away from the vocabulary set,
+            // If at the current stage, the output of ASR is too far-away from the trueObject set,
             // it needs special handling.
             int path[] = new int[obs_num + 1];
-            String words[] = new String[obs_num + 1];
+            String objects[] = new String[obs_num + 1];
             
             path[obs_num]  = Smax;
-            words[obs_num] = X[obs_num][Smax];
+            objects[obs_num] = X[obs_num][Smax];
             for (int x = obs_num-1; x >= 0; x--)
             {
             	path[x] = B[x+1][path[x+1]];
-            	words[x] = X[x][path[x]]; 
+            	objects[x] = X[x][path[x]]; 
             }
            	
             System.out.println("\n*************************************\n");         
@@ -411,46 +419,46 @@ public class Transcriber
             for (int x = 0; x < obs_num+1; x++)
             {
             	System.out.println("state: " + path[x] + 
-            			", with the word: " + words[x]);
+            			", with the object: " + objects[x]);
             }
             System.out.println("\n*************************************\n");
             
             // report the results of fidelity
-            reportFidelity(actualObs, path, words, trueWords, trueStates);
+            reportFidelity(actualObs, path, objects, trueWords, trueStates);
         }
         
         /*
          * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
-         * ground truth words and the actual observations have the same length, i.e., Sphinx does not miss any word.
+         * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
          */
-        public static void reportFidelity(String[] actualObs, int[] path, String[] words, ArrayList<String> trueWords, ArrayList<String> trueStates) 
+        public static void reportFidelity(String[] actualObs, int[] path, String[] objects, ArrayList<String> trueWords, ArrayList<String> trueStates) 
         {
         	// gourndStateScore is the score of ground truth state
         	int groundStateScore = trueStates.size();
-        	// groundWordScore is the score of ground truth words
+        	// groundWordScore is the score of ground truth objects
         	int groundWordScore = trueWords.size();
-        	if (groundWordScore != groundStateScore || words.length != path.length) {
+        	if (groundWordScore != groundStateScore || objects.length != path.length) {
         		System.out.println("Error!!!");
         	}
-        	if(groundWordScore != (words.length-1) || actualObs.length != groundWordScore) {
+        	if(groundWordScore != (objects.length-1) || actualObs.length != groundWordScore) {
         		System.out.println("The ground truth and the speech recognition results do not match!!!");
         	}
         	// myStateScore is the score of state of my algo.
         	int myStateScore = 0;
-        	// myWordScore is the score of words of my algo.
+        	// myWordScore is the score of objects of my algo.
         	int myWordScore = 0;
-        	// asrWordScore is the score of wordsof my ASR.
+        	// asrWordScore is the score of objectsof my ASR.
         	int asrWordScore = 0;
-        	// for the word recovery
+        	// for the object recovery
         	for (int i = groundWordScore-1; i >= 0; i--) {
-        		//System.out.println("words[i+1]: " + words[i+1]);
-        		//System.out.println("truewords.get(i): " + trueWords.get(i));
-    			//if (words[i+1] == trueWords.get(i)) {
-        		if (words[i+1].equals(trueWords.get(i))) {
+        		//System.out.println("objects[i+1]: " + objects[i+1]);
+        		//System.out.println("trueobjects.get(i): " + trueWords.get(i));
+    			//if (objects[i+1] == trueWords.get(i)) {
+        		if (objects[i+1].equals(trueWords.get(i))) {
     				myWordScore++;
     			}
     			//System.out.println("actualObs[i]: " + actualObs[i]);
-    			//System.out.println("truewords.get(i): " + trueWords.get(i));
+    			//System.out.println("trueobjects.get(i): " + trueWords.get(i));
     			//if (actualObs[i] == trueWords.get(i)) {
     			if (actualObs[i].equals(trueWords.get(i))) {
     				asrWordScore++;
@@ -463,9 +471,9 @@ public class Transcriber
         	}
         	
         	// 
-            myWordPercentage =  ((float)myWordScore/groundWordScore);
-            asrWordPercentage = ((float)asrWordScore/groundWordScore);
-            myStatePercentage = ((float)myStateScore/groundStateScore);
+            myWordPercentage =  ((double)myWordScore/groundWordScore);
+            asrWordPercentage = ((double)asrWordScore/groundWordScore);
+            myStatePercentage = ((double)myStateScore/groundStateScore);
         	
             
         	System.out.println("myWordScore: " + myWordPercentage);
@@ -477,13 +485,13 @@ public class Transcriber
 		// convolution_index calculates the overlapping similarity of two strings
 		// Notice that p_src is the string in the vocabulariy set, and p_dest is the
 		// the actual string that is heard.
-		public static float convolution_index(String p_src, String p_dest)
+		public static double convolution_index(String p_src, String p_dest)
     	{
 		    int len_src = p_src.length();
 		    int len_dest = p_dest.length();
 		    int steps = 2*len_src + len_dest;
 		    int i,c;
-		    float retval = 0;
+		    double retval = 0;
 	   
 		    for(i=0; i<steps; ++i) {
 		        int cur_conv_index = 0;
@@ -505,21 +513,18 @@ public class Transcriber
 		}
         
         
-        public static Hashtable<String, Hashtable<String, Float>> 
-        	confustionGen(String[] obs, String[] vocalbularySet) throws IOException, InterruptedException
+        public static Hashtable<double[], Hashtable<double[], Double>> 
+        	confustionGen(double[][] obs, double[][] trueObjectSet) throws IOException, InterruptedException
         {
         	/*
-        	 * convert the word sequence into phonetic sequence by calling eSpeak.
+        	 * convert the object sequence into phonetic sequence by calling eSpeak.
         	 */        	
-        	//.out.println(Arrays.toString(obs));
-        	//System.out.println(Arrays.toString(vocalbularySet));
-        	String[] obsPhonemes;
-        	//String[] obsPhonemes = {"anju:@L d'arEl", "m'eIbi: l'eIt3"};
-        	String[] vocalPhonemes;
+        	//String[] obsPhonemes;
+        	//String[] vocalPhonemes;
         	
-        	obsPhonemes = phonemeConversion(obs);
+        	//obsPhonemes = phonemeConversion(obs);
         	
-        	vocalPhonemes = phonemeConversion(vocalbularySet);        	
+        	//vocalPhonemes = phonemeConversion(trueObjectSet);        	
         	
 /*        	for (String temp : obsPhonemes)
         		System.out.println(temp);
@@ -528,106 +533,38 @@ public class Transcriber
         		System.out.println(temp);
         	*/
         	
-        	int i = 0;
-        	int j;
-    		Hashtable<String, Hashtable<String, Float>> confusion_probability = 
-    				new Hashtable<String, Hashtable<String, Float>>();
-        	for (String obsWord : obs) {
-        		Hashtable<String, Float> c = new Hashtable<String, Float>();
-        		// get rid of the utility 'phonemes'
-    			String obsPhoneme = obsPhonemes[i].replaceAll("[',%=_:|]", "");
-        		j = 0;
-        		for (String volWord : vocalbularySet) {
-        			float similarityIndex;
-        			// get rid of the utility 'phonemes'
-        			String vocalPhoneme = vocalPhonemes[j].replaceAll("[',%=_:|]", "");
-        			int LDistance = computeLevenshteinDistance(obsPhoneme, vocalPhoneme);
-        			//int wordLength = obsWord.length();
-        			//int wordLength = obsPhonemes[i].length();
-        			int wordLength = obsPhoneme.length();
-        			//System.out.println("vocal " + vocalPhonemes[j] + 
-        			//		" LDistance " + LDistance + " wordLength " + wordLength);
-        			similarityIndex = ( LDistance <= wordLength ? (1 - ((float)LDistance/wordLength)) : 0);
-					// --------------------------------------------------------
-					// Modified for adding convolution index
-					float conv = convolution_index(vocalPhoneme, obsPhoneme);
-					similarityIndex *= conv;
-					// --------------------------------------------------------
-        			c.put(volWord, similarityIndex);
-        			j++;
+    		Hashtable<double[], Hashtable<double[], Double>> confusion_probability = 
+    				new Hashtable<double[], Hashtable<double[], Double>>();
+        	for (double[] obsObject : obs) {
+        		Hashtable<double[], Double> c = new Hashtable<double[], Double>();
+        		for (double[] trueObject : trueObjectSet) {
+        			double similarityIndex;
+        			double EDistance = computeEuclideanDistance(obsObject, trueObject);
+        			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range+mean+stdDev));
+        			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+        			c.put(trueObject, similarityIndex);
         		}
-        		confusion_probability.put(obsWord, c);
-        		i++;
+        		confusion_probability.put(obsObject, c);
         	}
         	
         	//System.out.println("Hi, I am here");
         	
-        	Enumeration<String> names;	
-            names = confusion_probability.keys();
-            while(names.hasMoreElements()) {
-               String str = (String) names.nextElement();
-               System.out.println(str + ": " +
-            		   confusion_probability.get(str));
+        	Enumeration<double[]> obsObejct;	
+        	obsObejct = confusion_probability.keys();
+            while(obsObejct.hasMoreElements()) {
+               double[] key = (double[]) obsObejct.nextElement();
+               System.out.println(key + ": " +
+            		   confusion_probability.get(key));
             }
         	
 			return confusion_probability;
         }
         
-    	public static String[] phonemeConversion(String[] str) throws IOException, InterruptedException
-    	{
-        	Process p;
-        	String speakCall = "speak -x ";
-        	String line;
-        	int i = 0;
-        	
-        	String[] phenemeArr = new String[str.length];
-        	String command;
-    		
-        	for (String word : str)
-        	{
-        		// Probably because of the bug in speak package, it cannot return desired results.
-        		String[] subWords = word.split(" ");
-        		StringBuilder out = new StringBuilder();
-        		int j = 0;
-        		for (String subWord : subWords)
-        		{
-        			j++;
-	        		command = speakCall + subWord;
-	        		p = Runtime.getRuntime().exec(command);
-	            	p.waitFor();
-	            	
-	            	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	            	
-	            	// return the subString(1) because of the fact that espeak adds a space at the beginning
-	            	//line = reader.readLine().substring(1);
-	            	
-	            	if ((line = reader.readLine()) != null)
-	            	{
-	            		//System.out.println(line);
-	            		if (j == 1)
-	            			out.append(line.substring(1));
-	            		else
-	            			out.append(" ").append(line.substring(1));
-	            	}
-	            	phenemeArr[i] = out.toString();
-        		}
-            	/*
-            	StringBuilder out = new StringBuilder();
-                String curr = null, previous = null;
-                while ((curr = reader.readLine()) != null)
-                {
-                    if (!curr.equals(previous)) {
-                        previous = curr;
-                        out.append(curr).append('\n');
-                        //System.out.println(curr);
-                        phenemeArr[i] = out;
-                    }
-                }*/           	
-            	i++;
-        	}
-        	
-			return phenemeArr;	
-    	}
+        // Calcalate 
+        public static double computeEuclideanDistance(double[]obsObject, double[]trueObject)
+        {
+			return 0;
+        }
     	
         private static int minimum(int a, int b, int c) {
             return Math.min(Math.min(a, b), c);
@@ -646,7 +583,7 @@ public class Transcriber
                     distance[i][j] = minimum(
                     		distance[i - 1][j] + 1,
                             distance[i][j - 1] + 1,
-                            // TODO change the weight of substuting one character of the word to 2
+                            // TODO change the weight of substuting one character of the object to 2
                             // distance[i - 1][j - 1]+ ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 2));
                             distance[i - 1][j - 1]+ ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1));
 

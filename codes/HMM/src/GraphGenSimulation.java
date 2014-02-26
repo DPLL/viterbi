@@ -22,102 +22,73 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 
-public class GraphGenerator {
+public class GraphGenSimulation {
 	
-	static AbstractBaseGraph<Vertex, DefaultWeightedEdge> randomGraph;
-	VertexFactory<Vertex> vFactory;
+	static AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> randomGraph;
+	VertexFactory<VertexSimulation> vFactory;
 	
 	// number of vertex
-	static int numVertex = 10;
+	static int numVertex = 3;
 	// number of edges
 	static int numEdge;
 	// density of the DAG
 	static double density;
-	// number of words per node
-	// It is assumed that the wordPerNode is the same across different nodes.
-	static int wordPerNode;
-	// length of word
-	static int wordLength;
+	// number of objects per node
+	// It is assumed that the objectPerNode is the same across different nodes.
+	static int objectPerNode;
+	// the number of dimension of objects
+	static int dimension;
 	// ground truth of states
 	ArrayList<String> trueStates;
-	// ground truth of words
-	ArrayList<String> trueWords;
-	// TODO what if OOP style coding? set it as constructor?
+	// ground truth of objects
+	ArrayList<double[]> trueObjects;
 	
-	GraphGenerator() 
+	// the value of the coordinates can vary within [0, range)
+	static double range = 100; 
+
+	
+	
+	GraphGenSimulation() 
 	{
 	}
 	
-	public AbstractBaseGraph<Vertex, DefaultWeightedEdge> GraphGen(double densityOfGraph, int wordNumPerNode, int lengthOfWord) throws FileNotFoundException 
+	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, int n) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
-		wordPerNode = wordNumPerNode;
-		wordLength = lengthOfWord;
+		objectPerNode = objectNumPerNode;
 		// cast numEdge to integer
 		numEdge = (int) (density * numVertex * (numVertex-1));
 		System.out.println("numEdge is: " + numEdge);
+		dimension = n;
 		
-		/*
-        // Create the default directed weighted graph object; it is null at this point
-		// A default directed graph is a non-simple directed graph in which multiple edges between any two vertices are not permitted, but loops are. 
-    	randomGraph = new DefaultDirectedWeightedGraph<Vertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);*/
-
         // Create the simple directed weighted graph object; it is null at this point
 		// A simple directed graph is a non-simple directed graph in which neither multiple edges between any two vertices nor loops are permitted. 
-    	randomGraph = new SimpleDirectedWeightedGraph<Vertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-    	
+    	randomGraph = new SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge>(DefaultWeightedEdge.class);   	
         // Create the randomGraphGenerator object
-    	RandomGraphGenerator<Vertex, DefaultWeightedEdge> randomGenerator = 
-    			new RandomGraphGenerator<Vertex, DefaultWeightedEdge>(numVertex, numEdge);
-
+    	RandomGraphGenerator<VertexSimulation, DefaultWeightedEdge> randomGenerator = 
+    			new RandomGraphGenerator<VertexSimulation, DefaultWeightedEdge>(numVertex, numEdge);
         // Create the VertexFactory so the generator can create vertices
-        vFactory = new ClassBasedVertexFactory<Vertex>(Vertex.class);
-
+        vFactory = new ClassBasedVertexFactory<VertexSimulation>(VertexSimulation.class);
         // Use the randomGraphGenerator object to make randomGraph a random graph with [numVertex] number of vertices
         randomGenerator.generateGraph(randomGraph, vFactory, null);
         
-        // Now, replace all the vertices with sequential numbers so we can ID them ,in the same time, we assign wordList to the nodes.     
-        // Firstly, we read from the corresponding file to fetch the random words.
-        String path = "/home/david/Dropbox/projects/ER/speech/viterbi/" + wordLength + ".txt";
-        //System.out.println(path);
-        
-        Scanner s = new Scanner(new File(path));
-        ArrayList<String> list = new ArrayList<String>();
-        while (s.hasNext()) {
-        	list.add(s.next());
-        }
-        s.close();
-        //System.out.println(list);
-        String[] wordList = new String[list.size()];
-        wordList = list.toArray(wordList);
-        /*
-        for (String str : wordList)
-        	System.out.println(str);*/
-        
-        // TODO change this to permutation of the string array.
-        // generate a random starting point, this random start point is between 0 and (list.size() - 1).
-        int startPoint = (int)(Math.random() * list.size());
-        //System.out.println("startPoint is " + startPoint);
-        
-        // update the information for each node in the graph by IDing and assigning words to them.
-        Set<Vertex> vertices1 = new HashSet<Vertex>();
+        // update the information for each node in the graph by IDing and assigning objects to them.
+        Set<VertexSimulation> vertices1 = new HashSet<VertexSimulation>();
         vertices1.addAll(randomGraph.vertexSet());
         Integer counter = 0;
-        for (Vertex ver : vertices1) {
-            replaceVertexID(ver, counter++, startPoint, wordList);
-        }
-        
+        for (VertexSimulation ver : vertices1) {
+            replaceVertexID(ver, counter++);
+        }       
         
         // Output all the vertexes and the edges
         System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
-        Iterator<Vertex> iter2 = new DepthFirstIterator<Vertex, DefaultWeightedEdge>(randomGraph);
-        Vertex ver2;
+        Iterator<VertexSimulation> iter2 = new DepthFirstIterator<VertexSimulation, DefaultWeightedEdge>(randomGraph);
+        VertexSimulation ver2;
         while (iter2.hasNext()) {
         	ver2 = iter2.next();
-            System.out.println("Vertex " + ver2.toString() + " is connected to: "
+            System.out.println("VertexSimulation " + ver2.toString() + " is connected to: "
                     + randomGraph.edgesOf(ver2).toString());
         }
-        
         return randomGraph;
 	}
 	
@@ -136,27 +107,27 @@ public class GraphGenerator {
 			System.exit(-1);
 		}
 		
-		Vertex startVertex = new Vertex();
-        Vertex endVertex = new Vertex();
+		VertexSimulation startVertex = new VertexSimulation();
+        VertexSimulation endVertex = new VertexSimulation();
         ///The diameter of the graph
         double diameter;
     
         //System.out.println("Number of vertex is: "+ randomGraph.vertexSet().size());    
-        FloydWarshallShortestPaths<Vertex, DefaultWeightedEdge> shortestPaths = new FloydWarshallShortestPaths<Vertex, DefaultWeightedEdge>(randomGraph);
+        FloydWarshallShortestPaths<VertexSimulation, DefaultWeightedEdge> shortestPaths = new FloydWarshallShortestPaths<VertexSimulation, DefaultWeightedEdge>(randomGraph);
         diameter = shortestPaths.getDiameter();
         //System.out.println("diameter of the graph is: "+ diameter);
         
         // Find the source and the destination node
-        Iterator<Vertex> nodeIterator1 = randomGraph.vertexSet().iterator();
+        Iterator<VertexSimulation> nodeIterator1 = randomGraph.vertexSet().iterator();
         double maxShortestPath = 0;
         //int find = 0;
         int nodeCntr = 0;
         while (nodeIterator1.hasNext()) {
-        	Vertex vet1 = nodeIterator1.next();
+        	VertexSimulation vet1 = nodeIterator1.next();
         	//System.out.println("vet1 is: " + vet1);
-        	Iterator<Vertex> nodeIterator2 = randomGraph.vertexSet().iterator();
+        	Iterator<VertexSimulation> nodeIterator2 = randomGraph.vertexSet().iterator();
             while (nodeIterator2.hasNext()) {
-            	Vertex vet2 = nodeIterator2.next();
+            	VertexSimulation vet2 = nodeIterator2.next();
             	//System.out.println("vet2 is " + vet2);
             	if (vet2.vertexID != vet1.vertexID) {
             		nodeCntr++;
@@ -182,8 +153,8 @@ public class GraphGenerator {
         	System.exit(-1);
         }
         // Sanity Check 2: see whether the startVertex and endVertex meet the requirement of diameter
-        DijkstraShortestPath<Vertex, DefaultWeightedEdge> dijkstraPath = 
-        		new DijkstraShortestPath<Vertex, DefaultWeightedEdge>(randomGraph, startVertex, endVertex);
+        DijkstraShortestPath<VertexSimulation, DefaultWeightedEdge> dijkstraPath = 
+        		new DijkstraShortestPath<VertexSimulation, DefaultWeightedEdge>(randomGraph, startVertex, endVertex);
         if(dijkstraPath.getPathLength() != maxShortestPath) {
         	System.out.println("startVertex and EndVertex cannot meet the requirement of diameter!!!");
         	System.exit(-1);
@@ -206,16 +177,17 @@ public class GraphGenerator {
         */
 	}
 	
+	
 	// TODO
 	// setGroundTruth will return true if it sets the states where the start vertex has incoming edges
 	public boolean setGourdTruth(List<DefaultWeightedEdge> pathEdgeList)
 	{
 		trueStates = new ArrayList<String>();
-		trueWords = new ArrayList<String>();
+		trueObjects = new ArrayList<double[]>();
 		
-		Vertex startVer;
+		VertexSimulation startVer;
 		// specify the states that have been gone through
-		// Version one: select the first word from the wordlist
+		// Version one: select the first object from the objectlist
 		int count = 0;
 		for (DefaultWeightedEdge e : pathEdgeList) {
 			if (count++ == 0) { // this means it is the first state
@@ -224,42 +196,46 @@ public class GraphGenerator {
 					return false;
 				}
 				trueStates.add(Integer.toString(randomGraph.getEdgeSource(e).vertexID));
-				trueWords.add(randomGraph.getEdgeSource(e).wordList[0]);
+				trueObjects.add(randomGraph.getEdgeSource(e).objectMatrix[0]);
 			} 
 			trueStates.add(Integer.toString(randomGraph.getEdgeTarget(e).vertexID));
-			trueWords.add(randomGraph.getEdgeTarget(e).wordList[0]);
+			trueObjects.add(randomGraph.getEdgeTarget(e).objectMatrix[0]);
 		}
 		System.out.println("The trueStates is: " + trueStates);
-		System.out.println("The tureWords is: " + trueWords);
-		
+		System.out.println("The trueObjects is as the following:");
+		for(double[] arr : trueObjects)
+			System.out.println(Arrays.toString(arr));
+
 		return true;
 	}
 	
-    public static boolean replaceVertexID(Vertex oldVertex, Integer id, int startIndex, String[] wordPool)
+    public static boolean replaceVertexID(VertexSimulation oldVertex, Integer id)
     {
-    	Vertex newVertex;
+    	VertexSimulation newVertex;
     	
-        if ((oldVertex == null) || (id == null)) {
+        if((oldVertex == null) || (id == null)) {
         	System.out.println("Error in replacement of nodes");
             return false;
         }
         Set<DefaultWeightedEdge> relatedEdges = randomGraph.edgesOf(oldVertex);
         
-        // words is the wordList for this particular node
-        String[] words = new String[wordPerNode];
+        // objects is the objectList for this particular node
+        double[][] objects = new double[objectPerNode][dimension];
         
-        for (int i = 0; i < wordPerNode; i++) {
-        	int index = (startIndex+id*wordPerNode + i)%wordPool.length;
-        	words[i] = wordPool[index];
+        for(int i = 0; i < objectPerNode; i++) {
+        	for(int j = 0; j < dimension; j++) {
+        		objects[i][j] = Math.random() * range;
+        	}
         }
-        System.out.println(Arrays.toString(words));
+        for (double[] row : objects)
+        	System.out.println(Arrays.toString(row));
         
-    	newVertex = new Vertex(id, wordPerNode, words);
+    	newVertex = new VertexSimulation(id, objectPerNode, dimension, objects);
         
         randomGraph.addVertex(newVertex);
 
-        Vertex sourceVertex;
-        Vertex targetVertex;
+        VertexSimulation sourceVertex;
+        VertexSimulation targetVertex;
         DefaultWeightedEdge addedEdge;
         for (DefaultWeightedEdge e : relatedEdges) {
             sourceVertex = randomGraph.getEdgeSource(e);
@@ -295,7 +271,7 @@ public class GraphGenerator {
     	return uniRandomInt;
     }
     
-    public boolean hasIncomingEdge(Vertex ver) {
+    public boolean hasIncomingEdge(VertexSimulation ver) {
     	if (randomGraph.incomingEdgesOf(ver).isEmpty()) {
     		System.out.println("The start vertex has no incoming edges!");
     		return false;
@@ -308,23 +284,23 @@ public class GraphGenerator {
 
 		/*
 		if (args.length != 3) {
-			System.out.println("Correct Usage: ./GraphGenerator [density] [wordPerNode] [wordLength]");
+			System.out.println("Correct Usage: ./GraphGenerator [density] [objectPerNode] [objectLength]");
 			System.exit(-1);
 		}
 		
 		density = Double.parseDouble(args[0]);
-		wordPerNode = Integer.parseInt(args[1]);
-		wordLength = Integer.parseInt(args[2]);
+		objectPerNode = Integer.parseInt(args[1]);
+		objectLength = Integer.parseInt(args[2]);
 		// cast numEdge to integer
 		numEdge = (int) (density * numVertex * (numVertex-1));
 			
 		*/
-		AbstractBaseGraph<Vertex, DefaultWeightedEdge> graph;
+		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph;
 		ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-		GraphGenerator test = new GraphGenerator();
-		graph = test.GraphGen(0.2, 5, 5);
-		//System.out.println(graph.toString());
-		//System.out.println(graph.edgeSet().size());
+		GraphGenSimulation test = new GraphGenSimulation();
+		graph = test.GraphGen(0.5, 2, 5);
+		System.out.println(graph.toString());
+		System.out.println(graph.edgeSet().size());
 		diameterPath = test.findDiameter();
 		test.setGourdTruth(diameterPath);
 
