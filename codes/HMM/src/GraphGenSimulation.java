@@ -27,8 +27,6 @@ public class GraphGenSimulation {
 	static AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> randomGraph;
 	VertexFactory<VertexSimulation> vFactory;
 	
-	// number of vertex
-	static int numVertex = 3;
 	// number of edges
 	static int numEdge;
 	// density of the DAG
@@ -42,9 +40,10 @@ public class GraphGenSimulation {
 	ArrayList<String> trueStates;
 	// ground truth of objects
 	ArrayList<double[]> trueObjects;
-	
+	// number of vertex
+	static int numVertex = 10;
 	// the value of the coordinates can vary within [0, range)
-	static int range = 10; 
+	static int range = 100; 
 
 	
 	

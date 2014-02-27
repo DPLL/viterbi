@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.AbstractBaseGraph;
@@ -52,12 +54,12 @@ public class TranscriberSimulation
     // mean is the average of sensor error
     static double mean = 0;
     // stdDev is the standard deviation of sensor error
-    static double stdDev = 0;
+    static double stdDev = 10;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 1;
+    	int runTime = 10;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -74,7 +76,8 @@ public class TranscriberSimulation
             
     		
 			while(true){
-				graph = graphGen.GraphGen(0.5, 2, 1);
+				// graphGen(double densityOfGraph, int objectNumPerNode, int n)
+				graph = graphGen.GraphGen(0.19, 3, 3);
 				System.out.println(graph.toString());				
 				diameterPath =graphGen.findDiameter();
 				if (graphGen.setGourdTruth(diameterPath))
@@ -88,22 +91,9 @@ public class TranscriberSimulation
 			 * Sensor simulator -- add noise to the trueObjects 
 			 */
 			noiseAddedResult= addNoise(graphGen);
-	        /*
-	         * ASR part -- calling Sphinx
-	         */
-			/*
-			sphinxResult = callSphinx(graphGen);
-			if (sphinxResult != null) {
-		        // convert arrayList to array
-				objectSeq = new String[sphinxResult.size()];
-		        objectSeq = sphinxResult.toArray(objectSeq);
-		        System.out.println(Arrays.toString(objectSeq));
-		        break;
-			}
-			else {
-				System.out.println("\n@@@@@@@@@@@\nSphinx is not working properly, " +
-						"regenerating!!!\n@@@@@@@@@@@\n");
-			}*/
+			objectSeq = new double[noiseAddedResult.size()][];
+	        objectSeq = noiseAddedResult.toArray(objectSeq);
+	        System.out.println(Arrays.deepToString(objectSeq));
     		
     		/*
     		 *  Graph Interface
@@ -113,8 +103,8 @@ public class TranscriberSimulation
     		/*
     		 * generate the confusion probability matrix
     		 */
-            //confusion_probability =	confustionGen(objectSeq, trueObjectSet);
-            /*
+            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+            
             correct(objectSeq,
             		trueObjectSet, states,
                     start_probability,
@@ -123,10 +113,11 @@ public class TranscriberSimulation
                     confusion_probability,
                     graphGen.trueObjects, 
                     graphGen.trueStates
-                    );*/
+                    );
             
             
             // Testing by feeding in the right objects directly without going through ASR
+            /*
             double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
             trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
             System.out.println("The trueObjectSeq is as follows:");
@@ -143,7 +134,7 @@ public class TranscriberSimulation
                     emission_probability,
                     confusion_probability,
                     graphGen.trueObjects, 
-                    graphGen.trueStates);
+                    graphGen.trueStates);*/
 
             StringBuilder str = new StringBuilder();
             for(int m = 0; m < graphGen.trueObjects.size(); m++) {
@@ -169,7 +160,7 @@ public class TranscriberSimulation
     	
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
-    	System.out.println("asrObjectScore: " + (double)totalASRWordPercentage/runTime);
+    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
     	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
 		
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -266,67 +257,28 @@ public class TranscriberSimulation
 	        System.out.println(transition_probability);
 	    	return;
 	    }
-    	/*
-    	 * call sphinx to get initial recognition results and return as a string ArrayList.
-    	 */
-	    /*
-    	public static ArrayList<String> callSphinx(GraphGenSimulation graphGen) 
-    	{
-            ArrayList<String> asrResults = new ArrayList<String>();
-            
-            for (String name: graphGen.trueObjects) {
-                String path = "/home/david/Dropbox/DCOSS14/wavs/" + name + ".wav";
-                //System.out.println(path);
-                File f = new File(path);
-                if (!f.exists()) {
-                	System.out.println("File not found!");
-                	System.exit(-1);
-                }
-                // call shell command to run Sphinx           
-                String cmd = "java -jar /home/david/Downloads/sphinx4-1.0beta6/bin/LatticeDemo.jar " + path;
-                System.out.println(cmd);
-                Process p;
-                StringBuffer output = new StringBuffer();
-                
-                try {
-                	p = Runtime.getRuntime().exec(cmd);
-                	p.waitFor();
-     
-    		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));	        
-    		        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-    		        // read the output from the command
-    	            //System.out.println("Here is the standard output of the command:\n");
-    	            String s = null;
-    	            while ((s = stdInput.readLine()) != null) {
-    	            	//System.out.println(s);
-    	            	output.append(s + "\n");
-    	            }
-    	            // read any errors from the attempted command
-    	            //System.out.println("Here is the standard error of the command (if any):\n");
-    	            //while ((s = stdError.readLine()) != null) {
-    	            //    System.out.println(s);
-    	            //}
-                } catch (Exception e) {
-                	e.printStackTrace();
-                }            
-                //System.out.println(output.toString());
-                // Manipulate the output and get the contents after 'I heard: '
-                String pattern = "(I heard: )([\\w ']+)";
-                Pattern r = Pattern.compile(pattern);
-                Matcher m = r.matcher(output);
-                if(m.find()) {
-                	System.out.println("The matching is: " + m.group(2));
-                	asrResults.add(m.group(2));
-                } else {
-                	System.out.println("ASR does not output anything!");
-                	return null;
-                }
+	    
+	    public static ArrayList<double[]> addNoise(GraphGenSimulation graphGen)
+	    {
+	    	ArrayList<double[]> noiseAddedResults = new ArrayList<double[]>();
+	    	Random fRandom = new Random();
+            for(double[] obj: graphGen.trueObjects) {
+            	// assume that each dimension of the object is subject to error that is i.i.d.
+            	double[] objNoiseAdded = new double[obj.length];
+            	for(int i = 0; i < obj.length; i++) {
+            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+            		double error = fRandom.nextGaussian()*stdDev + mean;
+            		System.out.println("error is: " + error);
+            		objNoiseAdded[i] = obj[i] + error;            		
+            	}
+            	noiseAddedResults.add(objNoiseAdded);
             }
             
-            System.out.println(asrResults);
-    		return asrResults;
-    	}*/
- 
+            System.out.println("noiseAddedResults is as follows");
+            for(double[] arr : noiseAddedResults)
+            	System.out.println(Arrays.toString(arr));
+    		return noiseAddedResults;
+	    }
     	
     	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
         public static void correct(double[][] actualObs, double[][] obs, String[] states,
@@ -475,8 +427,8 @@ public class TranscriberSimulation
         	double myStateScore = 0;
         	// myObjectScore is the score of objects of my algo.
         	double myObjectScore = 0;
-        	// asrObjectScore is the score of objects of my ASR.
-        	double asrObjectScore = 0;
+        	// sensorObjectScore is the score of objects of my ASR.
+        	double sensorObjectScore = 0;
         	// for the object recovery
         	for (int i = groundObjectScore-1; i >= 0; i--) {
         		//System.out.println("objects[i+1]: " + objects[i+1]);
@@ -488,7 +440,7 @@ public class TranscriberSimulation
         		mySimilarity = computeSimilarity(objects[i+1], trueObjects.get(i));
         		asrSimilarity = computeSimilarity(actualObs[i], trueObjects.get(i));
         		myObjectScore += mySimilarity;
-        		asrObjectScore += asrSimilarity;
+        		sensorObjectScore += asrSimilarity;
         		// Only if the states matches, will myStateScore be increased
     			if (path[i+1] == Integer.parseInt(trueStates.get(i))) {
     				myStateScore++;
@@ -497,12 +449,12 @@ public class TranscriberSimulation
         	
         	// 
             myWordPercentage =  ((double)myObjectScore/groundObjectScore);
-            asrWordPercentage = ((double)asrObjectScore/groundObjectScore);
+            asrWordPercentage = ((double)sensorObjectScore/groundObjectScore);
             myStatePercentage = ((double)myStateScore/groundStateScore);
         	
             
         	System.out.println("myObjectScore: " + myWordPercentage);
-        	System.out.println("asrObjectScore: " + asrWordPercentage);
+        	System.out.println("sensorObjectScore: " + asrWordPercentage);
         	System.out.println("myStateScore: " + myStatePercentage);      	
         	
         }
