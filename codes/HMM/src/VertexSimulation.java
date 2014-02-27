@@ -51,7 +51,7 @@ public class VertexSimulation {
 		for (double[] arr : objectMatrix) {
 			str.append(Arrays.toString(arr));
 		}*/
-		System.out.println(Arrays.deepToString(objectMatrix));
+		//System.out.println(Arrays.deepToString(objectMatrix));
 		return str.toString(); 
 	}
 	

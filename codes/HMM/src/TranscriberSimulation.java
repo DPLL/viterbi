@@ -52,7 +52,7 @@ public class TranscriberSimulation
     // mean is the average of sensor error
     static double mean = 0;
     // stdDev is the standard deviation of sensor error
-    static double stdDev = 1;
+    static double stdDev = 0;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
@@ -70,11 +70,11 @@ public class TranscriberSimulation
         	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
     		graphGen = new GraphGenSimulation();
     		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList
-    		ArrayList<String> sphinxResult = new ArrayList<String>();
+    		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();
             
     		
 			while(true){
-				graph = graphGen.GraphGen(0.5, 2, 5);
+				graph = graphGen.GraphGen(0.5, 2, 1);
 				System.out.println(graph.toString());				
 				diameterPath =graphGen.findDiameter();
 				if (graphGen.setGourdTruth(diameterPath))
@@ -84,6 +84,10 @@ public class TranscriberSimulation
 			}
 			//System.out.println(graph.edgeSet().size());
 			
+			/*
+			 * Sensor simulator -- add noise to the trueObjects 
+			 */
+			noiseAddedResult= addNoise(graphGen);
 	        /*
 	         * ASR part -- calling Sphinx
 	         */
@@ -141,7 +145,18 @@ public class TranscriberSimulation
                     graphGen.trueObjects, 
                     graphGen.trueStates);
 
-    		System.out.println("The trueObjects is: " + graphGen.trueObjects);
+            StringBuilder str = new StringBuilder();
+            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+            	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
+            }
+            //System.out.println(str);
+    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+            
+    		System.out.println("The trueObjects is as follows:" + str);
+    		/*
+    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+    		}*/
     		System.out.println("The trueStates is: " + graphGen.trueStates);	
     		
     		totalMyWordPercentage += myWordPercentage;
@@ -157,6 +172,9 @@ public class TranscriberSimulation
     	System.out.println("asrObjectScore: " + (double)totalASRWordPercentage/runTime);
     	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
 		
+    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    	System.out.println("");
+    	
     }
     
 	    /*
@@ -179,8 +197,8 @@ public class TranscriberSimulation
 	        // for emission_probability
 	        emission_probability = 
 	        		new Hashtable<String, Hashtable<double[], Double>>();
-	        double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
-	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
+	        double emission_prob = (double)1/(GraphGenSimulation.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
+	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + GraphGenSimulation.objectPerNode);
 	        // for transition_probability
 	        transition_probability = 
 	        		new Hashtable<String, Hashtable<String, Double>>();
@@ -228,16 +246,22 @@ public class TranscriberSimulation
 	        // print the start_probability
 	        //System.out.println(start_probability);
 	        // print the trueObjectSet
-	        System.out.println(trueObjectSetList);
+	        //System.out.println(trueObjectSetList);
 	        trueObjectSet = new double[trueObjectSetList.size()][];
 	        trueObjectSet = trueObjectSetList.toArray(trueObjectSet);
-	        System.out.println("print out the trueObejctSet as follows:");
-	        for(double[] object : trueObjectSet)
-	        	System.out.println(Arrays.toString(object));
-	        System.out.println(Arrays.deepToString(trueObjectSet));
+	        //System.out.println("print out the trueObejctSet as follows:");
+	        //for(double[] object : trueObjectSet)
+	        //	System.out.println(Arrays.toString(object));
+	        //System.out.println(Arrays.deepToString(trueObjectSet));
 	        //System.out.println(trueObjectSetList.size());
 	        // print the emission_probability
-	        System.out.println(emission_probability);
+	        //System.out.println("emission_probability: " + emission_probability);
+	        System.out.println("emission_probability: "); 
+            for(String state: emission_probability.keySet()) {
+            	System.out.println("State " + state + ":");
+            	for(double[] object : emission_probability.get(state).keySet())
+            		System.out.println(Arrays.toString(object) + ":" + emission_probability.get(state).get(object));
+            }
 	        // print the transition_probability
 	        System.out.println(transition_probability);
 	    	return;
@@ -324,13 +348,15 @@ public class TranscriberSimulation
         	double X[][][] = new double[obs_num+1][state_num][];
 		
         	int m = 0;
+        	// PAY ATTENTION! We have to sort the states first so that int value of states will be 
+        	// acting as index in the later steps.
         	Arrays.sort(states);
         	System.out.println("sorted states[] is: " + Arrays.toString(states));
         	for (String state : states)
         	{
         		V[0][m] = start_p.get(state);
         		B[0][m] = m;
-        		X[0][m] = new double[graphGen.dimension];
+        		X[0][m] = new double[GraphGenSimulation.dimension];
         		m++;
         	}
 
@@ -348,17 +374,14 @@ public class TranscriberSimulation
                     // Pmax is the max probability that reaching the current state
                     double Pmax = 0;
                     // v_object the object from the trueObject set who corresponds to Pmax.
-                    double[] v_object = new double[graphGen.dimension];	
+                    double[] v_object = new double[GraphGenSimulation.dimension];	
                     // intermediate variable for calculating Pmax 
                     double v_prob = 1;       			
                     // x is the current accurate observation (object)	
                     for (double[] object : obs)		
                     {
-                    	// j is the previous state
-                    	int j = -1; 
                     	for (String source_state : states)
                     	{
-                    		j++;
                     		double p;
                     		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
                     				emit_p.get(next_state).get(object) == null || trans_p.get(source_state).get(next_state) == null)
@@ -506,14 +529,20 @@ public class TranscriberSimulation
         	}
         	
         	//System.out.println("Hi, I am here");
-        	
+        	/*
         	Enumeration<double[]> obsObejct;	
         	obsObejct = confusion_probability.keys();
             while(obsObejct.hasMoreElements()) {
                double[] key = (double[]) obsObejct.nextElement();
                System.out.println(key + ": " +
             		   confusion_probability.get(key));
-            }       	
+            }*/
+            
+            for(double[] obsObject: confusion_probability.keySet()) {
+            	System.out.println("obsObject " + Arrays.toString(obsObject) + ":");
+            	for(double[] trueObject : confusion_probability.get(obsObject).keySet())
+            		System.out.println(Arrays.toString(trueObject) + ":" + confusion_probability.get(obsObject).get(trueObject));
+            }
 			return confusion_probability;
         }
         
