@@ -109,7 +109,7 @@ public class TranscriberSimulation
     		/*
     		 * generate the confusion probability matrix
     		 */
-            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+            //confusion_probability =	confustionGen(objectSeq, trueObjectSet);
             /*
             correct(objectSeq,
             		trueObjectSet, states,
@@ -121,21 +121,23 @@ public class TranscriberSimulation
                     graphGen.trueStates
                     );*/
             
-            /*
-            // Testing by feeding in the right objects directly without going through ASR
-            String[] trueWordSeq = new String[graphGen.trueWords.size()];
-            trueWordSeq = graphGen.trueWords.toArray(trueWordSeq);
-            Hashtable<String, Hashtable<String, Double>> confusion_probability =
-            		confustionGen(trueWordSeq, trueObjectSet);
             
-            forward_viterbi(trueWordSeq,
+            // Testing by feeding in the right objects directly without going through ASR
+            double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
+            trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
+            Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
+            		confustionGen(trueObjectSeq, trueObjectSet);
+            
+            forward_viterbi(trueObjectSeq,
             		trueObjectSet, states,
                     start_probability,
                     transition_probability,
                     emission_probability,
-                    confusion_probability);*/
+                    confusion_probability,
+                    graphGen.trueObjects, 
+                    graphGen.trueStates);
 
-    		System.out.println("The tureWords is: " + graphGen.trueObjects);
+    		System.out.println("The trueObjects is: " + graphGen.trueObjects);
     		System.out.println("The trueStates is: " + graphGen.trueStates);	
     		
     		totalMyWordPercentage += myWordPercentage;
@@ -297,13 +299,13 @@ public class TranscriberSimulation
     	}*/
  
     	
-    	// actualObs is the initial result form ASR, i.e., Y; obs is the ground true vocalbulary, i.e., X.
-        public static void correct(String[] actualObs, String[] obs, String[] states,
+    	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
+        public static void correct(double[][] actualObs, double[][] obs, String[] states,
                         Hashtable<String, Double> start_p,
                         Hashtable<String, Hashtable<String, Double>> trans_p,
-                        Hashtable<String, Hashtable<String, Double>> emit_p,
-			Hashtable<String, Hashtable<String, Double>> conf_p,
-			ArrayList<String> trueWords, ArrayList<String> trueStates)
+                        Hashtable<String, Hashtable<double[], Double>> emit_p,
+			Hashtable<double[], Hashtable<double[], Double>> conf_p,
+			ArrayList<double[]> trueObjects, ArrayList<String> trueStates)
         {
         	// state_num is the number of different states
         	int state_num = states.length;
@@ -330,7 +332,7 @@ public class TranscriberSimulation
 
         	// t is the records the current time
         	int t = 0;
-            for (String input : actualObs)
+            for (double[] input : actualObs)
             {
             	// input is the current actual observation
             	t++;
@@ -347,7 +349,7 @@ public class TranscriberSimulation
                     double v_prob = 1;       
 			
                     // x is the current accurate observation (object)	
-                    for (String object : obs)		
+                    for (double[] object : obs)		
                     {
                     	// j is the previous state
                     	int j = -1; 
@@ -424,19 +426,19 @@ public class TranscriberSimulation
             System.out.println("\n*************************************\n");
             
             // report the results of fidelity
-            reportFidelity(actualObs, path, objects, trueWords, trueStates);
+            //reportFidelity(actualObs, path, objects, trueObjects, trueStates);
         }
         
         /*
          * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
          * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
          */
-        public static void reportFidelity(String[] actualObs, int[] path, String[] objects, ArrayList<String> trueWords, ArrayList<String> trueStates) 
+        public static void reportFidelity(String[] actualObs, int[] path, String[] objects, ArrayList<String> trueObjects, ArrayList<String> trueStates) 
         {
         	// gourndStateScore is the score of ground truth state
         	int groundStateScore = trueStates.size();
         	// groundWordScore is the score of ground truth objects
-        	int groundWordScore = trueWords.size();
+        	int groundWordScore = trueObjects.size();
         	if (groundWordScore != groundStateScore || objects.length != path.length) {
         		System.out.println("Error!!!");
         	}
@@ -452,15 +454,15 @@ public class TranscriberSimulation
         	// for the object recovery
         	for (int i = groundWordScore-1; i >= 0; i--) {
         		//System.out.println("objects[i+1]: " + objects[i+1]);
-        		//System.out.println("trueobjects.get(i): " + trueWords.get(i));
-    			//if (objects[i+1] == trueWords.get(i)) {
-        		if (objects[i+1].equals(trueWords.get(i))) {
+        		//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
+    			//if (objects[i+1] == trueObjects.get(i)) {
+        		if (objects[i+1].equals(trueObjects.get(i))) {
     				myWordScore++;
     			}
     			//System.out.println("actualObs[i]: " + actualObs[i]);
-    			//System.out.println("trueobjects.get(i): " + trueWords.get(i));
-    			//if (actualObs[i] == trueWords.get(i)) {
-    			if (actualObs[i].equals(trueWords.get(i))) {
+    			//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
+    			//if (actualObs[i] == trueObjects.get(i)) {
+    			if (actualObs[i].equals(trueObjects.get(i))) {
     				asrWordScore++;
     			}
     			//System.out.println("path[i+1]: " + path[i+1]);
@@ -482,56 +484,9 @@ public class TranscriberSimulation
         	
         }
         
-		// convolution_index calculates the overlapping similarity of two strings
-		// Notice that p_src is the string in the vocabulariy set, and p_dest is the
-		// the actual string that is heard.
-		public static double convolution_index(String p_src, String p_dest)
-    	{
-		    int len_src = p_src.length();
-		    int len_dest = p_dest.length();
-		    int steps = 2*len_src + len_dest;
-		    int i,c;
-		    double retval = 0;
-	   
-		    for(i=0; i<steps; ++i) {
-		        int cur_conv_index = 0;
-		        int start_s = Math.max(0, (len_src - 1 - i));
-		        int start_d = Math.max(0, i - len_src + 1);
-		        while(start_s < len_src && start_d < len_dest) {
-		            //System.out.println(p_src.substring(start_s,start_s+1) + " == " + p_dest.substring(start_d,start_d+1));
-		            if(p_src.substring(start_s,start_s+1).equals(p_dest.substring(start_d,start_d+1))) {
-		                ++cur_conv_index;
-		            }
-		            ++start_s;
-		            ++start_d;
-		        }
-		        if(cur_conv_index > retval)
-		            retval = cur_conv_index;
-		    }
-			//System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
-		    return retval/len_dest;       
-		}
-        
-        
         public static Hashtable<double[], Hashtable<double[], Double>> 
         	confustionGen(double[][] obs, double[][] trueObjectSet) throws IOException, InterruptedException
         {
-        	/*
-        	 * convert the object sequence into phonetic sequence by calling eSpeak.
-        	 */        	
-        	//String[] obsPhonemes;
-        	//String[] vocalPhonemes;
-        	
-        	//obsPhonemes = phonemeConversion(obs);
-        	
-        	//vocalPhonemes = phonemeConversion(trueObjectSet);        	
-        	
-/*        	for (String temp : obsPhonemes)
-        		System.out.println(temp);
-        	
-        	for (String temp : vocalPhonemes)
-        		System.out.println(temp);
-        	*/
         	
     		Hashtable<double[], Hashtable<double[], Double>> confusion_probability = 
     				new Hashtable<double[], Hashtable<double[], Double>>();
@@ -540,7 +495,7 @@ public class TranscriberSimulation
         		for (double[] trueObject : trueObjectSet) {
         			double similarityIndex;
         			double EDistance = computeEuclideanDistance(obsObject, trueObject);
-        			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range+mean+stdDev));
+        			double maxDistance = (double)(Math.sqrt(GraphGenSimulation.dimension)*(GraphGenSimulation.range + mean + stdDev*3));
         			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
         			c.put(trueObject, similarityIndex);
         		}
@@ -555,39 +510,23 @@ public class TranscriberSimulation
                double[] key = (double[]) obsObejct.nextElement();
                System.out.println(key + ": " +
             		   confusion_probability.get(key));
-            }
-        	
+            }       	
 			return confusion_probability;
         }
         
-        // Calcalate 
+        // Calculate the Euclidean distance between the observed object and true object  
         public static double computeEuclideanDistance(double[]obsObject, double[]trueObject)
         {
-			return 0;
+        	double EDistance = 0;
+        	if(obsObject.length != trueObject.length) {
+        		System.out.println("objects do not match!!!");
+        		System.exit(-1);
+        	}
+        	for (int i = 0; i < obsObject.length; i++) {
+        		EDistance += Math.pow((obsObject[i] - trueObject[i]), 2);
+        	}
+			return Math.sqrt(EDistance);
         }
-    	
-        private static int minimum(int a, int b, int c) {
-            return Math.min(Math.min(a, b), c);
-        }
 
-        public static int computeLevenshteinDistance(String str1,String str2) {
-            int[][] distance = new int[str1.length() + 1][str2.length() + 1];
-
-            for (int i = 0; i <= str1.length(); i++)
-            	distance[i][0] = i;
-            for (int j = 1; j <= str2.length(); j++)
-                distance[0][j] = j;
-
-            for (int i = 1; i <= str1.length(); i++)
-                for (int j = 1; j <= str2.length(); j++)
-                    distance[i][j] = minimum(
-                    		distance[i - 1][j] + 1,
-                            distance[i][j - 1] + 1,
-                            // TODO change the weight of substuting one character of the object to 2
-                            // distance[i - 1][j - 1]+ ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 2));
-                            distance[i - 1][j - 1]+ ((str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1));
-
-            return distance[str1.length()][str2.length()];    
-        }
 }
 

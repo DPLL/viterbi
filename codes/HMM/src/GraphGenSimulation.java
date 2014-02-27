@@ -44,7 +44,7 @@ public class GraphGenSimulation {
 	ArrayList<double[]> trueObjects;
 	
 	// the value of the coordinates can vary within [0, range)
-	static double range = 100; 
+	static int range = 10; 
 
 	
 	
