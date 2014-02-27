@@ -125,10 +125,14 @@ public class TranscriberSimulation
             // Testing by feeding in the right objects directly without going through ASR
             double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
             trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
+            System.out.println("The trueObjectSeq is as follows:");
+            for(double[] object : trueObjectSeq) {
+            	System.out.println(Arrays.toString(object));
+            }
             Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
             		confustionGen(trueObjectSeq, trueObjectSet);
             
-            forward_viterbi(trueObjectSeq,
+            correct(trueObjectSeq,
             		trueObjectSet, states,
                     start_probability,
                     transition_probability,
@@ -149,8 +153,8 @@ public class TranscriberSimulation
     	}
     	
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("myWordScore: " + (double)totalMyWordPercentage/runTime);
-    	System.out.println("asrWordScore: " + (double)totalASRWordPercentage/runTime);
+    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
+    	System.out.println("asrObjectScore: " + (double)totalASRWordPercentage/runTime);
     	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
 		
     }
@@ -230,6 +234,7 @@ public class TranscriberSimulation
 	        System.out.println("print out the trueObejctSet as follows:");
 	        for(double[] object : trueObjectSet)
 	        	System.out.println(Arrays.toString(object));
+	        System.out.println(Arrays.deepToString(trueObjectSet));
 	        //System.out.println(trueObjectSetList.size());
 	        // print the emission_probability
 	        System.out.println(emission_probability);
@@ -310,14 +315,13 @@ public class TranscriberSimulation
         	// state_num is the number of different states
         	int state_num = states.length;
         	// obs_num is the number of objects from ASR
-        	//int obs_num = obs.length;
         	int obs_num = actualObs.length;
         	//V[t][i] stores the overall largest probability ending at the state of i at time t
         	double V[][] = new double[obs_num+1][state_num];
         	//B[t][i]  stores the last source state corresponding to the V[t][i]
         	int B[][] = new int[obs_num+1][state_num];
-        	//X[t][i] stores the object that has been chosen corresponding to the V[t][i]
-        	String X[][] = new String[obs_num+1][state_num];
+        	//X[t][i][] stores the object that has been chosen corresponding to the V[t][i]
+        	double X[][][] = new double[obs_num+1][state_num][];
 		
         	int m = 0;
         	Arrays.sort(states);
@@ -326,7 +330,7 @@ public class TranscriberSimulation
         	{
         		V[0][m] = start_p.get(state);
         		B[0][m] = m;
-        		X[0][m] = "@";
+        		X[0][m] = new double[graphGen.dimension];
         		m++;
         	}
 
@@ -344,10 +348,9 @@ public class TranscriberSimulation
                     // Pmax is the max probability that reaching the current state
                     double Pmax = 0;
                     // v_object the object from the trueObject set who corresponds to Pmax.
-                    String v_object = "";	
+                    double[] v_object = new double[graphGen.dimension];	
                     // intermediate variable for calculating Pmax 
-                    double v_prob = 1;       
-			
+                    double v_prob = 1;       			
                     // x is the current accurate observation (object)	
                     for (double[] object : obs)		
                     {
@@ -405,7 +408,7 @@ public class TranscriberSimulation
             // If at the current stage, the output of ASR is too far-away from the trueObject set,
             // it needs special handling.
             int path[] = new int[obs_num + 1];
-            String objects[] = new String[obs_num + 1];
+            double objects[][] = new double[obs_num + 1][];
             
             path[obs_num]  = Smax;
             objects[obs_num] = X[obs_num][Smax];
@@ -416,70 +419,67 @@ public class TranscriberSimulation
             }
            	
             System.out.println("\n*************************************\n");         
-            System.out.println(Arrays.toString(actualObs));
+            System.out.println(Arrays.deepToString(actualObs));
             
             for (int x = 0; x < obs_num+1; x++)
             {
             	System.out.println("state: " + path[x] + 
-            			", with the object: " + objects[x]);
+            			", with the object: " + Arrays.toString(objects[x]));
             }
             System.out.println("\n*************************************\n");
             
             // report the results of fidelity
-            //reportFidelity(actualObs, path, objects, trueObjects, trueStates);
+            reportFidelity(actualObs, path, objects, trueObjects, trueStates);
         }
         
         /*
          * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
          * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
          */
-        public static void reportFidelity(String[] actualObs, int[] path, String[] objects, ArrayList<String> trueObjects, ArrayList<String> trueStates) 
+        public static void reportFidelity(double[][] actualObs, int[] path, double[][] objects, ArrayList<double[]> trueObjects, ArrayList<String> trueStates) 
         {
         	// gourndStateScore is the score of ground truth state
         	int groundStateScore = trueStates.size();
-        	// groundWordScore is the score of ground truth objects
-        	int groundWordScore = trueObjects.size();
-        	if (groundWordScore != groundStateScore || objects.length != path.length) {
+        	// groundObjectScore is the score of ground truth objects
+        	int groundObjectScore = trueObjects.size();
+        	if (groundObjectScore != groundStateScore || objects.length != path.length) {
         		System.out.println("Error!!!");
         	}
-        	if(groundWordScore != (objects.length-1) || actualObs.length != groundWordScore) {
+        	if(groundObjectScore != (objects.length-1) || actualObs.length != groundObjectScore) {
         		System.out.println("The ground truth and the speech recognition results do not match!!!");
         	}
         	// myStateScore is the score of state of my algo.
-        	int myStateScore = 0;
-        	// myWordScore is the score of objects of my algo.
-        	int myWordScore = 0;
-        	// asrWordScore is the score of objectsof my ASR.
-        	int asrWordScore = 0;
+        	double myStateScore = 0;
+        	// myObjectScore is the score of objects of my algo.
+        	double myObjectScore = 0;
+        	// asrObjectScore is the score of objects of my ASR.
+        	double asrObjectScore = 0;
         	// for the object recovery
-        	for (int i = groundWordScore-1; i >= 0; i--) {
+        	for (int i = groundObjectScore-1; i >= 0; i--) {
         		//System.out.println("objects[i+1]: " + objects[i+1]);
         		//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
     			//if (objects[i+1] == trueObjects.get(i)) {
-        		if (objects[i+1].equals(trueObjects.get(i))) {
-    				myWordScore++;
-    			}
-    			//System.out.println("actualObs[i]: " + actualObs[i]);
-    			//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
-    			//if (actualObs[i] == trueObjects.get(i)) {
-    			if (actualObs[i].equals(trueObjects.get(i))) {
-    				asrWordScore++;
-    			}
-    			//System.out.println("path[i+1]: " + path[i+1]);
-    			//System.out.println("trueStates.get(i): " + trueStates.get(i));
+        		double mySimilarity;
+        		double asrSimilarity;
+        		// treat the similarity between the objects as the metric 
+        		mySimilarity = computeSimilarity(objects[i+1], trueObjects.get(i));
+        		asrSimilarity = computeSimilarity(actualObs[i], trueObjects.get(i));
+        		myObjectScore += mySimilarity;
+        		asrObjectScore += asrSimilarity;
+        		// Only if the states matches, will myStateScore be increased
     			if (path[i+1] == Integer.parseInt(trueStates.get(i))) {
     				myStateScore++;
     			}
         	}
         	
         	// 
-            myWordPercentage =  ((double)myWordScore/groundWordScore);
-            asrWordPercentage = ((double)asrWordScore/groundWordScore);
+            myWordPercentage =  ((double)myObjectScore/groundObjectScore);
+            asrWordPercentage = ((double)asrObjectScore/groundObjectScore);
             myStatePercentage = ((double)myStateScore/groundStateScore);
         	
             
-        	System.out.println("myWordScore: " + myWordPercentage);
-        	System.out.println("asrWordScore: " + asrWordPercentage);
+        	System.out.println("myObjectScore: " + myWordPercentage);
+        	System.out.println("asrObjectScore: " + asrWordPercentage);
         	System.out.println("myStateScore: " + myStatePercentage);      	
         	
         }
@@ -494,9 +494,12 @@ public class TranscriberSimulation
         		Hashtable<double[], Double> c = new Hashtable<double[], Double>();
         		for (double[] trueObject : trueObjectSet) {
         			double similarityIndex;
+        			/*
         			double EDistance = computeEuclideanDistance(obsObject, trueObject);
         			double maxDistance = (double)(Math.sqrt(GraphGenSimulation.dimension)*(GraphGenSimulation.range + mean + stdDev*3));
         			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+        			*/
+        			similarityIndex = computeSimilarity(obsObject, trueObject);
         			c.put(trueObject, similarityIndex);
         		}
         		confusion_probability.put(obsObject, c);
@@ -512,6 +515,16 @@ public class TranscriberSimulation
             		   confusion_probability.get(key));
             }       	
 			return confusion_probability;
+        }
+        
+        // computeSimilarity computes the similarity between two objects
+        public static double computeSimilarity(double[] obsObject, double[] trueObject)
+        {
+			double similarityIndex;
+			double EDistance = computeEuclideanDistance(obsObject, trueObject);
+			double maxDistance = (double)(Math.sqrt(GraphGenSimulation.dimension)*(GraphGenSimulation.range + mean + stdDev*3));
+			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+			return similarityIndex;
         }
         
         // Calculate the Euclidean distance between the observed object and true object  
