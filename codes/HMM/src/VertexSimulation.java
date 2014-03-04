@@ -24,8 +24,8 @@ public class VertexSimulation {
 			System.out.println("Number of objects does not match!!!");
 			System.exit(-1);
 		}*/
-		// TODO?????????????????????????
-		objectMatrix = new double[objectNum][dimension];
+		// TODO
+		//objectMatrix = new double[objectNum][dimension];
 		objectMatrix = matrixOfObjects;
 	}
 	
