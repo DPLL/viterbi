@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -7,7 +8,11 @@ import java.util.Arrays;
  * @since Feb 06, 2014
  */
 
-public class VertexSimulation {
+public class VertexSimulation implements Serializable {
+	/**
+	 * auto-generated serialiVersionUID
+	 */
+	private static final long serialVersionUID = -2057884553721922686L;
 	int vertexID;
 	// objectNum is the number of objects for each node
 	int objectNum;

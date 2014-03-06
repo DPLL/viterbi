@@ -351,14 +351,6 @@ public class TestMHMM
                 }
             }
  
-            double total = 0;
-            String argmax = "";
-            double valmax = 0;
- 
-            double prob;
-            String v_path;
-            double v_prob;
-	
             /*
             for (int n = 0; n < obs_num+1; n++)
             	for (int z = 0; z < state_num; z++)

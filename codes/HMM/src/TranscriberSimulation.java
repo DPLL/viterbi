@@ -1,8 +1,11 @@
 import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -27,74 +30,104 @@ public class TranscriberSimulation
 {
     
     // graphGen is the randomGraph generator that generates a weigthed random graph
-    static GraphGenSimulation graphGen;
+	static GraphGenSimulation graphGen;
 	// objectSeq is the initial recognition results from Sphinx as a String array
-    static double[][] objectSeq;
+	static double[][] objectSeq;
     // states store the all the different states the workflow has
-    static String[] states;
+	static String[] states;
     // trueObjectSet stores all the trueObject the workflow has
-    static double[][] trueObjectSet;
+	static double[][] trueObjectSet;
     // emission_probability stores the emission probability matrix
-    static Hashtable<String, Hashtable<double[], Double>> emission_probability;
+	static Hashtable<String, Hashtable<double[], Double>> emission_probability;
     // transition_probability stores the transition probability matrix
-    static Hashtable<String, Hashtable<String, Double>> transition_probability;
+	static Hashtable<String, Hashtable<String, Double>> transition_probability;
     // transition_probability stores the start probability matrix
-    static Hashtable<String, Double> start_probability;
+	static Hashtable<String, Double> start_probability;
     // confusion_probability stores the confusion probability matrix
-    static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;
+	static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;
     // myWordPercentage is the percentage of object that my correction algo. is right
-    static double myWordPercentage;
+	static double myWordPercentage;
     // myStatePercentage is the percentage of state that my correction algo. is right
-    static double myStatePercentage;
+	static double myStatePercentage;
     // asrWordPercentage is the percentage of object that ASR is right
-    static double asrWordPercentage;
-    /*
-     * stat for noise adding
-     */
-    // mean is the average of sensor error
-    static double mean = 0;
-    // stdDev is the standard deviation of sensor error
-    static double stdDev = 10;
+	static double asrWordPercentage;
+
+    
+    public static final boolean DEBUG_MODE = true;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 10;
+    	int runTime = 1;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
-
     	
     	for(int i = 0; i < runTime; i++) {
-    	 	// Generate a random graph
         	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
-        	AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph;
+    		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
         	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-    		graphGen = new GraphGenSimulation();
-    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList
-    		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();
-            
-    		
-			while(true){
-				// graphGen(double densityOfGraph, int objectNumPerNode, int n)
-				graph = graphGen.GraphGen(0.19, 3, 3);
+    		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();	
+    		if (DEBUG_MODE) {
+    			// read from the predefined class
+    			graphGen = new GraphGenSimulation();
+
+    			try {
+    				FileInputStream fileIn = new FileInputStream("graph1.out");
+    				ObjectInputStream in = new ObjectInputStream(fileIn);   			
+    				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
+			        in.close();
+			        fileIn.close();
+				} catch(IOException ex)
+			    {
+			         ex.printStackTrace();
+			         return;
+			    } catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    			
+				System.out.println(graph.toString());
+    			graphGen.randomGraph = graph;
+    			graphGen.density = 0.5;
+    			graphGen.objectPerNode = 2;
+    			graphGen.dimension = 5;
+    			graphGen.numVertex = 10;
+    			graphGen.range = 100;
+    			graphGen.mean = 0;
+    			graphGen.stdDev = 0;
+    			
+    			graphGen.numEdge = 45;
+
+				diameterPath = graphGen.findDiameter();
+				graphGen.setGroundTruth(diameterPath);
+				noiseAddedResult = graphGen.trueObjects;
+				objectSeq = new double[noiseAddedResult.size()][];
+		        objectSeq = noiseAddedResult.toArray(objectSeq);
+		        System.out.println(Arrays.deepToString(objectSeq));
+
+    		} else {
+	    	 	// Generate a random graph
+
+        		graphGen = new GraphGenSimulation();
+	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
+        		
+        		//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
+				graph = graphGen.GraphGen(0.5, 3, 10, 15, 100, 0, 10);
 				System.out.println(graph.toString());				
 				diameterPath =graphGen.findDiameter();
-				if (graphGen.setGourdTruth(diameterPath))
-					break;
-				else 
-					System.out.println("\n@@@@@@@@@@@\nGraph is not ready, regenerating!!!\n@@@@@@@@@@@\n");
-			}
-			//System.out.println(graph.edgeSet().size());
-			
-			/*
-			 * Sensor simulator -- add noise to the trueObjects 
-			 */
-			noiseAddedResult= addNoise(graphGen);
-			objectSeq = new double[noiseAddedResult.size()][];
-	        objectSeq = noiseAddedResult.toArray(objectSeq);
-	        System.out.println(Arrays.deepToString(objectSeq));
-    		
+				graphGen.setGroundTruth(diameterPath);
+				
+				//System.out.println(graph.edgeSet().size());
+				
+				/*
+				 * Sensor simulator -- add noise to the trueObjects 
+				 */
+				noiseAddedResult= graphGen.addNoise();
+				objectSeq = new double[noiseAddedResult.size()][];
+		        objectSeq = noiseAddedResult.toArray(objectSeq);
+		        System.out.println(Arrays.deepToString(objectSeq));
+	    	}
     		/*
     		 *  Graph Interface
     		 */
@@ -155,7 +188,6 @@ public class TranscriberSimulation
         	totalASRWordPercentage += asrWordPercentage;
       	
         	System.out.println("in the " + i + " th interation, haha!!!!");
-    		
     	}
     	
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -188,8 +220,8 @@ public class TranscriberSimulation
 	        // for emission_probability
 	        emission_probability = 
 	        		new Hashtable<String, Hashtable<double[], Double>>();
-	        double emission_prob = (double)1/(GraphGenSimulation.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
-	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + GraphGenSimulation.objectPerNode);
+	        double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
+	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
 	        // for transition_probability
 	        transition_probability = 
 	        		new Hashtable<String, Hashtable<String, Double>>();
@@ -258,6 +290,7 @@ public class TranscriberSimulation
 	    	return;
 	    }
 	    
+	    /*
 	    public static ArrayList<double[]> addNoise(GraphGenSimulation graphGen)
 	    {
 	    	ArrayList<double[]> noiseAddedResults = new ArrayList<double[]>();
@@ -267,7 +300,7 @@ public class TranscriberSimulation
             	double[] objNoiseAdded = new double[obj.length];
             	for(int i = 0; i < obj.length; i++) {
             		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
-            		double error = fRandom.nextGaussian()*stdDev + mean;
+            		double error = fRandom.nextGaussian()*GraphGenSimulation.stdDev + GraphGenSimulation.mean;
             		System.out.println("error is: " + error);
             		objNoiseAdded[i] = obj[i] + error;            		
             	}
@@ -278,7 +311,7 @@ public class TranscriberSimulation
             for(double[] arr : noiseAddedResults)
             	System.out.println(Arrays.toString(arr));
     		return noiseAddedResults;
-	    }
+	    }*/
     	
     	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
         public static void correct(double[][] actualObs, double[][] obs, String[] states,
@@ -306,9 +339,10 @@ public class TranscriberSimulation
         	System.out.println("sorted states[] is: " + Arrays.toString(states));
         	for (String state : states)
         	{
-        		V[0][m] = start_p.get(state);
+        		//V[0][m] = start_p.get(state);
+        		V[0][m] = Math.log(start_p.get(state));
         		B[0][m] = m;
-        		X[0][m] = new double[GraphGenSimulation.dimension];
+        		X[0][m] = new double[graphGen.dimension];
         		m++;
         	}
 
@@ -324,31 +358,55 @@ public class TranscriberSimulation
                 	// max probability
                     int Smax = -1;
                     // Pmax is the max probability that reaching the current state
-                    double Pmax = 0;
+                    //double Pmax = 0;
+                    double Pmax = Double.NEGATIVE_INFINITY;
                     // v_object the object from the trueObject set who corresponds to Pmax.
-                    double[] v_object = new double[GraphGenSimulation.dimension];	
+                    double[] v_object = new double[graphGen.dimension];	
                     // intermediate variable for calculating Pmax 
                     double v_prob = 1;       			
                     // x is the current accurate observation (object)	
                     for (double[] object : obs)		
                     {
-                    	for (String source_state : states)
-                    	{
-                    		double p;
-                    		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
-                    				emit_p.get(next_state).get(object) == null || trans_p.get(source_state).get(next_state) == null)
-                    			p = 0;
-                    		else
-	                    		p = emit_p.get(next_state).get(object) * 
-	                    				trans_p.get(source_state).get(next_state) * conf_p.get(input).get(object);
-                    		v_prob = V[t-1][Integer.parseInt(source_state)] * p;
-						
-                    		if (v_prob >= Pmax)
-                    		{
+                    	if (t == 1) {
+                    		if (emit_p.get(next_state) == null || emit_p.get(next_state).get(object) == null) {
+                    			v_prob = Double.NEGATIVE_INFINITY;
+                    		}
+                    		else {
+                    			double start = Math.log(start_p.get(next_state));
+                    			double emit = Math.log(emit_p.get(next_state).get(object));
+                    			double conf = Math.log(conf_p.get(input).get(object));                    			
+                    			//double v_prob_prime = Math.log(start_p.get(next_state)) + Math.log(emit_p.get(next_state).get(object)) + Math.log(conf_p.get(input).get(object));
+                    			v_prob = start + emit + conf;
+                    		}
+                    		if (v_prob >= Pmax) {
                     			Pmax = v_prob;
-                    			Smax = Integer.parseInt(source_state);
+                    			Smax = Integer.parseInt(next_state);
                     			v_object = object;
                     		}
+                    	} else {
+	                    	for (String source_state : states)
+	                    	{
+	                    		double p;
+	                    		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
+	                    				emit_p.get(next_state).get(object) == null || trans_p.get(source_state).get(next_state) == null) {
+	                    			//p = 0;
+	                    			
+	                    			p = Double.NEGATIVE_INFINITY;
+	                    		} else {
+		                    		//p = emit_p.get(next_state).get(object) * trans_p.get(source_state).get(next_state) * conf_p.get(input).get(object);
+	                    			p = Math.log(emit_p.get(next_state).get(object)) + Math.log(trans_p.get(source_state).get(next_state)) +
+	                    					Math.log(conf_p.get(input).get(object));
+	                    		}
+	                    		//v_prob = V[t-1][Integer.parseInt(source_state)] * p;
+	                    		v_prob = V[t-1][Integer.parseInt(source_state)] + p;
+							
+	                    		if (v_prob >= Pmax)
+	                    		{
+	                    			Pmax = v_prob;
+	                    			Smax = Integer.parseInt(source_state);
+	                    			v_object = object;
+	                    		}
+	                    	}
                     	}
                     }
                     // Update the corresponding arrays.
@@ -371,7 +429,8 @@ public class TranscriberSimulation
 			*/
             // find the current max probability and its corresponding state.
             int Smax = -1;
-            double pMax = 0;
+            //double pMax = 0;
+            double pMax = Double.NEGATIVE_INFINITY;
             for (int n = 0; n < state_num; n++ ) 
             {
             	if (V[obs_num][n] >= pMax) {
@@ -503,7 +562,7 @@ public class TranscriberSimulation
         {
 			double similarityIndex;
 			double EDistance = computeEuclideanDistance(obsObject, trueObject);
-			double maxDistance = (double)(Math.sqrt(GraphGenSimulation.dimension)*(GraphGenSimulation.range + mean + stdDev*3));
+			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range + graphGen.mean + graphGen.stdDev*3));
 			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
 			return similarityIndex;
         }

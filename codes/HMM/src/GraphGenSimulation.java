@@ -1,5 +1,9 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,43 +26,56 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 
-public class GraphGenSimulation {
+public class GraphGenSimulation  implements Serializable {
 	
-	static AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> randomGraph;
+	AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> randomGraph;
 	VertexFactory<VertexSimulation> vFactory;
 	
 	// number of edges
-	static int numEdge;
+	int numEdge;
 	// density of the DAG
-	static double density;
+	double density;
 	// number of objects per node
 	// It is assumed that the objectPerNode is the same across different nodes.
-	static int objectPerNode;
+	int objectPerNode;
 	// the number of dimension of objects
-	static int dimension;
+	int dimension;
 	// ground truth of states
 	ArrayList<String> trueStates;
 	// ground truth of objects
 	ArrayList<double[]> trueObjects;
+	// noiseAddedResults is the trueObjects with noise added
+	ArrayList<double[]> noiseAddedResults;
 	// number of vertex
-	static int numVertex = 10;
+	int numVertex;
 	// the value of the coordinates can vary within [0, range)
-	static int range = 100; 
-
+	double range; 
+    /*
+     * stat for noise adding
+     */
+    // mean is the average of sensor error
+    double mean;
+    // stdDev is the standard deviation of sensor error
+    double stdDev;
 	
 	
 	GraphGenSimulation() 
 	{
 	}
 	
-	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, int n) throws FileNotFoundException 
+	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, 
+			int n, int nodeNum, double rangeValue, double meanValue, double stdDvValue) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
 		objectPerNode = objectNumPerNode;
+		numVertex = nodeNum;
+		range = rangeValue;
 		// cast numEdge to integer
 		numEdge = (int) (density * numVertex * (numVertex-1));
 		System.out.println("numEdge is: " + numEdge);
 		dimension = n;
+		mean = meanValue;
+		stdDev = stdDvValue;
 		
         // Create the simple directed weighted graph object; it is null at this point
 		// A simple directed graph is a non-simple directed graph in which neither multiple edges between any two vertices nor loops are permitted. 
@@ -101,7 +118,8 @@ public class GraphGenSimulation {
 		ArrayList<DefaultWeightedEdge> diameterPath;
 		
 		// see whether the graph is ready 
-		if (randomGraph == null || vFactory == null) {
+		//if (randomGraph == null || vFactory == null) {
+		if (randomGraph == null) {
 			System.out.println("The graph is not ready!");
 			System.exit(-1);
 		}
@@ -179,7 +197,7 @@ public class GraphGenSimulation {
 	
 	// TODO
 	// setGroundTruth will return true if it sets the states where the start vertex has incoming edges
-	public boolean setGourdTruth(List<DefaultWeightedEdge> pathEdgeList)
+	public boolean setGroundTruth(List<DefaultWeightedEdge> pathEdgeList)
 	{
 		trueStates = new ArrayList<String>();
 		trueObjects = new ArrayList<double[]>();
@@ -191,9 +209,9 @@ public class GraphGenSimulation {
 		for (DefaultWeightedEdge e : pathEdgeList) {
 			if (count++ == 0) { // this means it is the first state
 				// check whether the source has incoming edges
-				if (!hasIncomingEdge(randomGraph.getEdgeSource(e))) { // if it does not have incoming edges
-					return false;
-				}
+				//if (!hasIncomingEdge(randomGraph.getEdgeSource(e))) { // if it does not have incoming edges
+				//	return false;
+				//}
 				trueStates.add(Integer.toString(randomGraph.getEdgeSource(e).vertexID));
 				trueObjects.add(randomGraph.getEdgeSource(e).objectMatrix[0]);
 			} 
@@ -208,7 +226,7 @@ public class GraphGenSimulation {
 		return true;
 	}
 	
-    public static boolean replaceVertexID(VertexSimulation oldVertex, Integer id)
+    public boolean replaceVertexID(VertexSimulation oldVertex, Integer id)
     {
     	VertexSimulation newVertex;
     	
@@ -262,7 +280,7 @@ public class GraphGenSimulation {
      * uniformGen generates a random double number randomly distributed
      * in the range: 1...upperBound+1.
      */
-    public static double uniformGen(double upperBound) {
+    public double uniformGen(double upperBound) {
     	Random randomGen = new Random();
     	double uniRandomInt = randomGen.nextDouble()*upperBound + 1;
     	//System.out.println("uniRandomInt is: " + uniRandomInt);
@@ -278,7 +296,29 @@ public class GraphGenSimulation {
     	return true;
     }
     
-	public static void main(String [] args) throws FileNotFoundException 
+    public ArrayList<double[]> addNoise()
+    {
+    	noiseAddedResults = new ArrayList<double[]>();
+    	Random fRandom = new Random();
+        for(double[] obj: trueObjects) {
+        	// assume that each dimension of the object is subject to error that is i.i.d.
+        	double[] objNoiseAdded = new double[obj.length];
+        	for(int i = 0; i < obj.length; i++) {
+        		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+        		double error = fRandom.nextGaussian()*stdDev + mean;
+        		System.out.println("error is: " + error);
+        		objNoiseAdded[i] = obj[i] + error;            		
+        	}
+        	noiseAddedResults.add(objNoiseAdded);
+        }
+        
+        System.out.println("noiseAddedResults is as follows");
+        for(double[] arr : noiseAddedResults)
+        	System.out.println(Arrays.toString(arr));
+		return noiseAddedResults;
+    }
+    
+	public static void main(String [] args) 
 	{
 
 		/*
@@ -294,14 +334,89 @@ public class GraphGenSimulation {
 		numEdge = (int) (density * numVertex * (numVertex-1));
 			
 		*/
-		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph;
+		
+/*		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
 		ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		GraphGenSimulation test = new GraphGenSimulation();
-		graph = test.GraphGen(0.5, 2, 5);
+		try {
+			graph = test.GraphGen(0.5, 2, 5, 3, 100, 0 , 10);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(graph.toString());
 		System.out.println(graph.edgeSet().size());
 		diameterPath = test.findDiameter();
-		test.setGourdTruth(diameterPath);
+		test.setGroundTruth(diameterPath);*/
+		
+		/*
+		 * Serialize the graphGen
+		 */
+		GraphGenSimulation graphGen1 = new GraphGenSimulation();
+		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph1 = null;
+		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
+		try {
+			//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
+			graph1 = graphGen1.GraphGen(0.5, 2, 5, 10, 100, 0, 0);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(graph1.toString());
+		System.out.println(graph1.edgeSet().size());
+		diameterPath1 = graphGen1.findDiameter();
+		graphGen1.setGroundTruth(diameterPath1);
+		//graphGen1.addNoise();
+		
+/*		GraphGenSimulation graphGen2 = new GraphGenSimulation();
+		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph2 = null;
+		ArrayList<DefaultWeightedEdge> diameterPath2 = new ArrayList<DefaultWeightedEdge>();
+		try {
+			graph2 = graphGen2.GraphGen(0.5, 2, 1, 3, 10, 0, 1);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(graph2.toString());
+		System.out.println(graph2.edgeSet().size());
+		diameterPath2 = graphGen2.findDiameter();
+		graphGen2.setGroundTruth(diameterPath2);
+		graphGen2.addNoise();
+		
+		GraphGenSimulation graphGen3 = new GraphGenSimulation();
+		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph3 = null;
+		ArrayList<DefaultWeightedEdge> diameterPath3 = new ArrayList<DefaultWeightedEdge>();
+		try {
+			graph3 = graphGen3.GraphGen(0.75, 2, 2, 5, 10, 0, 10);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(graph3.toString());
+		System.out.println(graph3.edgeSet().size());
+		diameterPath3 = graphGen3.findDiameter();
+		graphGen3.setGroundTruth(diameterPath3);
+		graphGen3.addNoise();*/
+		
+		try
+		{
+			ObjectOutputStream out1 = new ObjectOutputStream(new FileOutputStream("graph1.out"));
+			out1.writeObject(graph1);
+			out1.close();
+			
+/*			// output the second graphGen: graph3Nodes6Edge2Obj
+			ObjectOutputStream out2 = new ObjectOutputStream(new FileOutputStream("graph2.out"));
+			out2.writeObject(graphGen2);
+			out2.close();
+			
+			// output the second graphGen: graph3Nodes6Edge2Obj
+			ObjectOutputStream out3 = new ObjectOutputStream(new FileOutputStream("graph3.out"));
+			out3.writeObject(graphGen3);
+			out3.close();*/
+		} catch(IOException i)
+		{
+			i.printStackTrace();
+		}
 
 	}
 }
