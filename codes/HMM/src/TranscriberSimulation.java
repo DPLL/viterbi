@@ -53,12 +53,12 @@ public class TranscriberSimulation
 	static double asrWordPercentage;
 
     
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 1;
+    	int runTime = 10;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -113,7 +113,7 @@ public class TranscriberSimulation
 	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
         		
         		//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
-				graph = graphGen.GraphGen(0.5, 3, 10, 15, 100, 0, 10);
+				graph = graphGen.GraphGen(0.6, 10, 30, 10, 100, 0, 19);
 				System.out.println(graph.toString());				
 				diameterPath =graphGen.findDiameter();
 				graphGen.setGroundTruth(diameterPath);
@@ -564,6 +564,8 @@ public class TranscriberSimulation
 			double EDistance = computeEuclideanDistance(obsObject, trueObject);
 			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range + graphGen.mean + graphGen.stdDev*3));
 			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+			// make the similarity function non-linear
+			similarityIndex = Math.pow(similarityIndex, 5);
 			return similarityIndex;
         }
         
