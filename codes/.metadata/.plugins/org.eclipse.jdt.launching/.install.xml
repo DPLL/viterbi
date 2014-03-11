@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <dirs>
-<entry loc="/usr/lib/jvm/java-6-openjdk-amd64" stamp="1384016793000"/>
+<entry loc="/usr/lib/jvm/java-6-openjdk-i386/jre" stamp="1386131920000"/>
+<entry loc="/usr/lib/jvm/java-6-openjdk-amd64" stamp="1385613513000"/>
+<entry loc="C:\Program Files\Java\jdk1.7.0_05\jre" stamp="1343367397101"/>
 <entry loc="C:\Program Files\Java\jdk1.7.0_05" stamp="1343367657181"/>
+<entry loc="/usr/lib/jvm/java-6-openjdk-i386" stamp="1386135870000"/>
+<entry loc="/usr/lib/jvm/java-6-openjdk-amd64/jre" stamp="1393796421000"/>
 </dirs>

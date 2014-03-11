@@ -1,2 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="java.io.BufferedReader"/>
+<fullyQualifiedTypeName name="java.io.InputStreamReader"/>
+<fullyQualifiedTypeName name="java.util.Enumeration"/>
+<fullyQualifiedTypeName name="java.net.DatagramSocket"/>
+<fullyQualifiedTypeName name="java.net.DatagramPacket"/>
+<fullyQualifiedTypeName name="java.net.InetAddress"/>
+<fullyQualifiedTypeName name="java.awt.List"/>
+<fullyQualifiedTypeName name="java.lang.reflect.Array"/>
+<fullyQualifiedTypeName name="java.lang.String"/>
+<fullyQualifiedTypeName name="org.jgrapht.demo.JGraphAdapterDemo"/>
+<fullyQualifiedTypeName name="java.lang.ArrayStoreException"/>
+<fullyQualifiedTypeName name="org.jgrapht.WeightedGraph"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.DefaultWeightedEdge"/>
+<fullyQualifiedTypeName name="org.jgrapht.generate.RandomGraphGenerator"/>
+<fullyQualifiedTypeName name="org.jgrapht.VertexFactory"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.ClassBasedVertexFactory"/>
+<fullyQualifiedTypeName name="java.util.HashSet"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.DefaultDirectedWeightedGraph"/>
+<fullyQualifiedTypeName name="java.util.Scanner"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.Arrays"/>
+<fullyQualifiedTypeName name="java.util.Iterator"/>
+<fullyQualifiedTypeName name="org.jgrapht.traverse.DepthFirstIterator"/>
+<fullyQualifiedTypeName name="org.jgrapht.alg.FloydWarshallShortestPaths"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.AbstractBaseGraph"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.SimpleDirectedWeightedGraph"/>
+<fullyQualifiedTypeName name="org.jgrapht.graph.SimpleDirectedGraph"/>
+<fullyQualifiedTypeName name="org.jgrapht.DirectedGraph"/>
+<fullyQualifiedTypeName name="org.jgraph.graph.DefaultEdge"/>
+<fullyQualifiedTypeName name="java.util.Random"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.io.Serializable"/>
+<fullyQualifiedTypeName name="java.io.ObjectOutputStream"/>
+<fullyQualifiedTypeName name="java.io.FileOutputStream"/>
+<fullyQualifiedTypeName name="java.io.FileInputStream"/>
+<fullyQualifiedTypeName name="java.io.ObjectInputStream"/>
+</qualifiedTypeNameHistroy>
