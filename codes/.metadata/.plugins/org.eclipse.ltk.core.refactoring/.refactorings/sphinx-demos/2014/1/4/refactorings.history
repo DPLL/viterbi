@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;10001-90210-01803.wav&apos; to &apos;sphinx-demos/src/(default package)&apos;&#x0A;- Original project: &apos;sphinx-demos&apos;&#x0A;- Destination element: &apos;sphinx-demos/src/(default package)&apos;&#x0A;- Original element: &apos;10001-90210-01803.wav&apos;" description="Copy file" destination="/src&lt;" element1="apps/edu/cmu/sphinx/demo/transcriber/10001-90210-01803.wav" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1390684589665" units="0" version="1.0"/>
+</session>

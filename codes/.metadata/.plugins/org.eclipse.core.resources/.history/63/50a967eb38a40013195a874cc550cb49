@@ -1,0 +1,25 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+
+	    public static ArrayList<double[]> addNoise(GraphGenSimulation graphGen)
+	    {
+	    	ArrayList<double[]> noiseAddedResults = new ArrayList<double[]>();
+	    	Random fRandom = new Random();
+            for(double[] obj: graphGen.trueObjects) {
+            	// assume that each dimension of the object is subject to error that is i.i.d.
+            	double[] objNoiseAdded = new double[obj.length];
+            	for(int i = 0; i < obj.length; i++) {
+            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+            		double error = fRandom.nextGaussian()*stdDev + mean;
+            		System.out.println("error is: " + error);
+            		objNoiseAdded[i] = obj[i] + error;            		
+            	}
+            	noiseAddedResults.add(objNoiseAdded);
+            }
+            
+            System.out.println("noiseAddedResults is as follows");
+            for(double[] arr : noiseAddedResults)
+            	System.out.println(Arrays.toString(arr));
+    		return noiseAddedResults;
+	    }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="312" key="DIALOG_WIDTH"/>
+		<item value="377" key="DIALOG_Y_ORIGIN"/>
+		<item value="437" key="DIALOG_HEIGHT"/>
+		<item value="1425" key="DIALOG_X_ORIGIN"/>
+		<item value="1|Ubuntu|11.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="true" key="wrap"/>
+		<item value="false" key="isRegEx"/>
+		<item value="true" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="false" key="wholeword"/>
+		<item value="diameter does not match!!!" key="selection"/>
+		<list key="findhistory">
+			<item value="diameter does not match!!!"/>
+			<item value="correct"/>
+			<item value="confustionGen"/>
+			<item value="sorted states[]"/>
+			<item value="start_prob:"/>
+			<item value="vFactory"/>
+			<item value="findDi"/>
+			<item value="The graph is not ready!"/>
+		</list>
+		<list key="replacehistory">
+			<item value="Double"/>
+			<item value="double"/>
+			<item value="sensorObjectScore"/>
+			<item value="asrObjectScore"/>
+			<item value="myObjectScore"/>
+			<item value="groundObjectScore"/>
+			<item value="trueObjects"/>
+			<item value="float"/>
+		</list>
+	</section>
+</section>

@@ -1,0 +1,68 @@
+import java.util.ArrayList;
+import java.util.Set;
+
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
+
+
+public class TraversalTest {
+	static AbstractBaseGraph<String, String> randomGraph;
+	
+	/*
+	 * Find the first path with depth l
+	 */
+	static public boolean DFS(int depth, String v, ArrayList<String> path) 
+	{
+		if (v == null)
+			return false;
+		if (depth == 0) {
+			System.out.println(path);
+			return true;
+		}
+		
+		Set<DefaultWeightedEdge> outgoingEdges;
+		outgoingEdges = randomGraph.outgoingEdgesOf(v);
+		for (DefaultWeightedEdge e: outgoingEdges) {
+			VertexSimulation ver = randomGraph.getEdgeTarget(e);
+			path.add(ver);
+			if (DFS(depth-1, ver, path))
+				break;
+			int size = path.size();
+			path.remove(size-1);
+		}
+		
+		return false;
+	}
+	
+	static public ArrayList<VertexSimulation> findPath(int pathLength)
+	{
+		Set<VertexSimulation> vertexSet = randomGraph.vertexSet();
+		ArrayList<VertexSimulation> path;
+		for (VertexSimulation v : vertexSet) {
+			path = new ArrayList<VertexSimulation>();
+			if (DFS(pathLength, v, path))
+				return path;
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+		randomGraph = new SimpleDirectedGraph<String, String>(String.class);
+		
+		
+		
+		randomGraph.addVertex("A");
+		randomGraph.addVertex("B");
+		randomGraph.addVertex("C");
+		randomGraph.addVertex("D");
+		
+		
+		randomGraph.addEdge("A", "B", "e1");
+		randomGraph.addEdge("A", "C", "e2");
+		randomGraph.addEdge("C", "D", "e3");
+		
+	}
+
+}

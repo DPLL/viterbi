@@ -1,0 +1,31 @@
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.SimpleDirectedGraph;
+
+
+public class TraversalTest {
+	public static void main(String[] args) {
+		DirectedGraph<String,String> g = new SimpleDirectedGraph<String, String>(String.class);
+		
+		
+		
+		g.addVertex("A");
+		g.addVertex("B");
+		g.addVertex("C");
+		g.addVertex("D");
+		
+		
+		g.addEdge("A", "B", "e1");
+		g.addEdge("A", "C", "e2");
+		g.addEdge("C", "D", "e3");
+		
+		
+		GraphIterator<String, String> iterator = new DepthFirstIterator<String, String>(g);
+		iterator.addTraversalListener( new MyListener( g));
+		
+		while (iterator.hasNext()) {
+			iterator.next();
+//			System.out.println( iterator.next() );
+		}
+	}
+
+}

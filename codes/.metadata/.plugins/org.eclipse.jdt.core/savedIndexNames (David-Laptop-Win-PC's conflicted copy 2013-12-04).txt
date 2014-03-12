@@ -1,0 +1,13 @@
+INDEX VERSION 1.126+C:\Users\David Gao\Dropbox\projects\ER\speech\viterbi\codes\.metadata\.plugins\org.eclipse.jdt.core
+2477571867.index
+3150105371.index
+2809119152.index
+40468915.index
+3093173433.index
+3472079297.index
+969871674.index
+3678571932.index
+2371886364.index
+1748927894.index
+4270917893.index
+2596184184.index

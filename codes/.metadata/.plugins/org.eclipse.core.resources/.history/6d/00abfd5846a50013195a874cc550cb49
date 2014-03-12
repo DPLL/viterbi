@@ -1,0 +1,587 @@
+import java.awt.List;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+import org.jgrapht.WeightedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+ 
+public class TranscriberSimulation
+{
+    
+    // graphGen is the randomGraph generator that generates a weigthed random graph
+	static GraphGenSimulation graphGen;
+	// objectSeq is the initial recognition results from Sphinx as a String array
+	static double[][] objectSeq;
+    // states store the all the different states the workflow has
+	static String[] states;
+    // trueObjectSet stores all the trueObject the workflow has
+	static double[][] trueObjectSet;
+    // emission_probability stores the emission probability matrix
+	static Hashtable<String, Hashtable<double[], Double>> emission_probability;
+    // transition_probability stores the transition probability matrix
+	static Hashtable<String, Hashtable<String, Double>> transition_probability;
+    // transition_probability stores the start probability matrix
+	static Hashtable<String, Double> start_probability;
+    // confusion_probability stores the confusion probability matrix
+	static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;
+    // myWordPercentage is the percentage of object that my correction algo. is right
+	static double myWordPercentage;
+    // myStatePercentage is the percentage of state that my correction algo. is right
+	static double myStatePercentage;
+    // asrWordPercentage is the percentage of object that ASR is right
+	static double asrWordPercentage;
+
+    
+    public static final boolean DEBUG_MODE = false;
+    
+    public static void main(String[] args) throws IOException, InterruptedException 
+    {
+    	//
+    	int runTime = 10;
+    	double totalMyWordPercentage = (double) 0.0;
+    	double totalASRWordPercentage = (double) 0.0;
+    	double totalMyStatePercentage = (double) 0.0;
+    	
+    	for(int i = 0; i < runTime; i++) {
+        	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
+    		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
+        	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
+    		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();	
+    		if (DEBUG_MODE) {
+    			// read from the predefined class
+    			graphGen = new GraphGenSimulation();
+
+    			try {
+    				FileInputStream fileIn = new FileInputStream("graph1.out");
+    				ObjectInputStream in = new ObjectInputStream(fileIn);   			
+    				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
+			        in.close();
+			        fileIn.close();
+				} catch(IOException ex)
+			    {
+			         ex.printStackTrace();
+			         return;
+			    } catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    			
+				System.out.println(graph.toString());
+    			graphGen.randomGraph = graph;
+    			graphGen.density = 0.5;
+    			graphGen.objectPerNode = 2;
+    			graphGen.dimension = 5;
+    			graphGen.numVertex = 10;
+    			graphGen.range = 100;
+    			graphGen.mean = 0;
+    			graphGen.stdDev = 0;
+    			
+    			graphGen.numEdge = 45;
+
+				diameterPath = graphGen.findDiameter();
+				graphGen.setGroundTruth(diameterPath);
+				noiseAddedResult = graphGen.trueObjects;
+				objectSeq = new double[noiseAddedResult.size()][];
+		        objectSeq = noiseAddedResult.toArray(objectSeq);
+		        System.out.println(Arrays.deepToString(objectSeq));
+
+    		} else {
+	    	 	// Generate a random graph
+
+        		graphGen = new GraphGenSimulation();
+	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
+        		
+        		//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
+				graph = graphGen.GraphGen(0.6, 10, 30, 10, 100, 0, 10);
+				System.out.println(graph.toString());				
+				diameterPath =graphGen.findDiameter();
+				graphGen.setGroundTruth(diameterPath);
+				
+				//System.out.println(graph.edgeSet().size());
+				
+				/*
+				 * Sensor simulator -- add noise to the trueObjects 
+				 */
+				noiseAddedResult= graphGen.addNoise();
+				objectSeq = new double[noiseAddedResult.size()][];
+		        objectSeq = noiseAddedResult.toArray(objectSeq);
+		        System.out.println(Arrays.deepToString(objectSeq));
+	    	}
+    		/*
+    		 *  Graph Interface
+    		 */
+    		graphParse(graph);
+            
+    		/*
+    		 * generate the confusion probability matrix
+    		 */
+            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+            
+            correct(objectSeq,
+            		trueObjectSet, states,
+                    start_probability,
+                    transition_probability,
+                    emission_probability,
+                    confusion_probability,
+                    graphGen.trueObjects, 
+                    graphGen.trueStates
+                    );
+            
+            
+            // Testing by feeding in the right objects directly without going through ASR
+            /*
+            double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
+            trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
+            System.out.println("The trueObjectSeq is as follows:");
+            for(double[] object : trueObjectSeq) {
+            	System.out.println(Arrays.toString(object));
+            }
+            Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
+            		confustionGen(trueObjectSeq, trueObjectSet);
+            
+            correct(trueObjectSeq,
+            		trueObjectSet, states,
+                    start_probability,
+                    transition_probability,
+                    emission_probability,
+                    confusion_probability,
+                    graphGen.trueObjects, 
+                    graphGen.trueStates);*/
+
+            StringBuilder str = new StringBuilder();
+            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+            	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
+            }
+            //System.out.println(str);
+    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+            
+    		System.out.println("The trueObjects is as follows:" + str);
+    		/*
+    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+    		}*/
+    		System.out.println("The trueStates is: " + graphGen.trueStates);	
+    		
+    		totalMyWordPercentage += myWordPercentage;
+    		totalMyStatePercentage += myStatePercentage;
+        	totalASRWordPercentage += asrWordPercentage;
+      	
+        	System.out.println("in the " + i + " th interation, haha!!!!");
+    	}
+    	
+    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
+    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
+    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
+		
+    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    	System.out.println("");
+    	
+    }
+    
+	    /*
+	     * read the graph and create interface for it. 
+	     */
+	    public static void graphParse(AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph)
+	    {
+			// verSet contains all the vertexes of the graph
+	        Set<VertexSimulation> verSet = new HashSet<VertexSimulation>();
+	        verSet.addAll(graph.vertexSet());
+	        
+	        // for states
+	        ArrayList<String> stateList = new ArrayList<String>();
+	        // for start_probability
+	        start_probability = new Hashtable<String, Double>();
+	        double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
+	        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
+	        // for trueObjectSet
+	        ArrayList<double[]> trueObjectSetList = new ArrayList<double[]>();
+	        // for emission_probability
+	        emission_probability = 
+	        		new Hashtable<String, Hashtable<double[], Double>>();
+	        double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
+	        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
+	        // for transition_probability
+	        transition_probability = 
+	        		new Hashtable<String, Hashtable<String, Double>>();
+	        
+	        for (VertexSimulation ver : verSet) {
+	        	// print the current vertex
+	        	//System.out.println("The current vertex is: " + ver);
+	        	// objects is the ArrayList form of objectList of this particular vertex. 
+	        	ArrayList<double[]> objects = new ArrayList<double[]>(Arrays.asList(ver.objectMatrix));
+	        	//System.out.println(objects);
+	        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
+	        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
+	        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
+	        	//System.out.println(outgoingEdges);
+	        	
+	        	// array of states
+	        	stateList.add(Integer.toString(ver.vertexID));
+	        	// start_probability
+	        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
+	        	// trueObjectSet and emission_probability
+	        	Hashtable<double[], Double> e = new Hashtable<double[], Double>();
+	        	for (double[] object : objects) {
+	            	// trueObjectSet
+	        		trueObjectSetList.add(object);
+	        		// emission_probability
+	        		e.put(object, emission_prob);
+	        	}
+	        	// emission_probability
+	        	emission_probability.put(Integer.toString(ver.vertexID), e);
+	        	// transition_probability
+	        	double transition_prob = (double)1/(graph.outDegreeOf(ver));
+	        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
+	            Hashtable<String, Double> t = new Hashtable<String, Double>();
+	            for(DefaultWeightedEdge edge : outgoingEdges) {
+	            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
+	            }
+	            transition_probability.put(Integer.toString(ver.vertexID), t);     
+	        }
+	        
+	        // print the states
+	        //System.out.println(stateList);
+	        states = new String[stateList.size()];
+	        states = stateList.toArray(states);
+	        //System.out.println(Arrays.toString(states));
+	        // print the start_probability
+	        //System.out.println(start_probability);
+	        // print the trueObjectSet
+	        //System.out.println(trueObjectSetList);
+	        trueObjectSet = new double[trueObjectSetList.size()][];
+	        trueObjectSet = trueObjectSetList.toArray(trueObjectSet);
+	        //System.out.println("print out the trueObejctSet as follows:");
+	        //for(double[] object : trueObjectSet)
+	        //	System.out.println(Arrays.toString(object));
+	        //System.out.println(Arrays.deepToString(trueObjectSet));
+	        //System.out.println(trueObjectSetList.size());
+	        // print the emission_probability
+	        //System.out.println("emission_probability: " + emission_probability);
+	        System.out.println("emission_probability: "); 
+            for(String state: emission_probability.keySet()) {
+            	System.out.println("State " + state + ":");
+            	for(double[] object : emission_probability.get(state).keySet())
+            		System.out.println(Arrays.toString(object) + ":" + emission_probability.get(state).get(object));
+            }
+	        // print the transition_probability
+	        System.out.println(transition_probability);
+	    	return;
+	    }
+	    
+	    /*
+	    public static ArrayList<double[]> addNoise(GraphGenSimulation graphGen)
+	    {
+	    	ArrayList<double[]> noiseAddedResults = new ArrayList<double[]>();
+	    	Random fRandom = new Random();
+            for(double[] obj: graphGen.trueObjects) {
+            	// assume that each dimension of the object is subject to error that is i.i.d.
+            	double[] objNoiseAdded = new double[obj.length];
+            	for(int i = 0; i < obj.length; i++) {
+            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+            		double error = fRandom.nextGaussian()*GraphGenSimulation.stdDev + GraphGenSimulation.mean;
+            		System.out.println("error is: " + error);
+            		objNoiseAdded[i] = obj[i] + error;            		
+            	}
+            	noiseAddedResults.add(objNoiseAdded);
+            }
+            
+            System.out.println("noiseAddedResults is as follows");
+            for(double[] arr : noiseAddedResults)
+            	System.out.println(Arrays.toString(arr));
+    		return noiseAddedResults;
+	    }*/
+    	
+    	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
+        public static void correct(double[][] actualObs, double[][] obs, String[] states,
+                        Hashtable<String, Double> start_p,
+                        Hashtable<String, Hashtable<String, Double>> trans_p,
+                        Hashtable<String, Hashtable<double[], Double>> emit_p,
+			Hashtable<double[], Hashtable<double[], Double>> conf_p,
+			ArrayList<double[]> trueObjects, ArrayList<String> trueStates)
+        {
+        	// state_num is the number of different states
+        	int state_num = states.length;
+        	// obs_num is the number of objects from ASR
+        	int obs_num = actualObs.length;
+        	//V[t][i] stores the overall largest probability ending at the state of i at time t
+        	double V[][] = new double[obs_num+1][state_num];
+        	//B[t][i]  stores the last source state corresponding to the V[t][i]
+        	int B[][] = new int[obs_num+1][state_num];
+        	//X[t][i][] stores the object that has been chosen corresponding to the V[t][i]
+        	double X[][][] = new double[obs_num+1][state_num][];
+		
+        	int m = 0;
+        	// PAY ATTENTION! We have to sort the states first so that int value of states will be 
+        	// acting as index in the later steps.
+        	Arrays.sort(states);
+        	System.out.println("sorted states[] is: " + Arrays.toString(states));
+        	for (String state : states)
+        	{
+        		//V[0][m] = start_p.get(state);
+        		V[0][m] = Math.log(start_p.get(state));
+        		B[0][m] = m;
+        		X[0][m] = new double[graphGen.dimension];
+        		m++;
+        	}
+
+        	// t is the records the current time
+        	int t = 0;
+            for (double[] input : actualObs)
+            {
+            	// input is the current actual observation
+            	t++;
+                for (String next_state : states)
+                {
+                	// Smax is the previous state that corresponds to the current 
+                	// max probability
+                    int Smax = -1;
+                    // Pmax is the max probability that reaching the current state
+                    //double Pmax = 0;
+                    double Pmax = Double.NEGATIVE_INFINITY;
+                    // v_object the object from the trueObject set who corresponds to Pmax.
+                    double[] v_object = new double[graphGen.dimension];	
+                    // intermediate variable for calculating Pmax 
+                    double v_prob = 1;       			
+                    // x is the current accurate observation (object)	
+                    for (double[] object : obs)		
+                    {
+                    	if (t == 1) {
+                    		if (emit_p.get(next_state) == null || emit_p.get(next_state).get(object) == null) {
+                    			v_prob = Double.NEGATIVE_INFINITY;
+                    		}
+                    		else {
+                    			double start = Math.log(start_p.get(next_state));
+                    			double emit = Math.log(emit_p.get(next_state).get(object));
+                    			double conf = Math.log(conf_p.get(input).get(object));                    			
+                    			//double v_prob_prime = Math.log(start_p.get(next_state)) + Math.log(emit_p.get(next_state).get(object)) + Math.log(conf_p.get(input).get(object));
+                    			v_prob = start + emit + conf;
+                    		}
+                    		if (v_prob >= Pmax) {
+                    			Pmax = v_prob;
+                    			Smax = Integer.parseInt(next_state);
+                    			v_object = object;
+                    		}
+                    	} else {
+	                    	for (String source_state : states)
+	                    	{
+	                    		double p;
+	                    		if(emit_p.get(next_state) == null || trans_p.get(source_state) == null ||
+	                    				emit_p.get(next_state).get(object) == null || trans_p.get(source_state).get(next_state) == null) {
+	                    			//p = 0;
+	                    			
+	                    			p = Double.NEGATIVE_INFINITY;
+	                    		} else {
+		                    		//p = emit_p.get(next_state).get(object) * trans_p.get(source_state).get(next_state) * conf_p.get(input).get(object);
+	                    			p = Math.log(emit_p.get(next_state).get(object)) + Math.log(trans_p.get(source_state).get(next_state)) +
+	                    					Math.log(conf_p.get(input).get(object));
+	                    		}
+	                    		//v_prob = V[t-1][Integer.parseInt(source_state)] * p;
+	                    		v_prob = V[t-1][Integer.parseInt(source_state)] + p;
+							
+	                    		if (v_prob >= Pmax)
+	                    		{
+	                    			Pmax = v_prob;
+	                    			Smax = Integer.parseInt(source_state);
+	                    			v_object = object;
+	                    		}
+	                    	}
+                    	}
+                    }
+                    // Update the corresponding arrays.
+                    V[t][Integer.parseInt(next_state)] = Pmax;
+                    B[t][Integer.parseInt(next_state)] = Smax;
+                    X[t][Integer.parseInt(next_state)] = v_object;
+                }
+            }
+	
+            /*
+            for (int n = 0; n < obs_num+1; n++)
+            	for (int z = 0; z < state_num; z++)
+            		System.out.println(V[n][z]);
+            for (int n = 0; n < obs_num+1; n++)
+            	for (int z = 0; z < state_num; z++)
+            		System.out.println(B[n][z]);
+            for (int n = 0; n < obs_num+1; n++) 
+            	for (int z = 0; z < state_num; z++)
+            		System.out.println(X[n][z]);
+			*/
+            // find the current max probability and its corresponding state.
+            int Smax = -1;
+            //double pMax = 0;
+            double pMax = Double.NEGATIVE_INFINITY;
+            for (int n = 0; n < state_num; n++ ) 
+            {
+            	if (V[obs_num][n] >= pMax) {
+            		pMax = V[obs_num][n];
+            		Smax = n;
+            	}
+            }
+
+            // If at the current stage, the output of ASR is too far-away from the trueObject set,
+            // it needs special handling.
+            int path[] = new int[obs_num + 1];
+            double objects[][] = new double[obs_num + 1][];
+            
+            path[obs_num]  = Smax;
+            objects[obs_num] = X[obs_num][Smax];
+            for (int x = obs_num-1; x >= 0; x--)
+            {
+            	path[x] = B[x+1][path[x+1]];
+            	objects[x] = X[x][path[x]]; 
+            }
+           	
+            System.out.println("\n*************************************\n");         
+            System.out.println(Arrays.deepToString(actualObs));
+            
+            for (int x = 0; x < obs_num+1; x++)
+            {
+            	System.out.println("state: " + path[x] + 
+            			", with the object: " + Arrays.toString(objects[x]));
+            }
+            System.out.println("\n*************************************\n");
+            
+            // report the results of fidelity
+            reportFidelity(actualObs, path, objects, trueObjects, trueStates);
+        }
+        
+        /*
+         * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
+         * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
+         */
+        public static void reportFidelity(double[][] actualObs, int[] path, double[][] objects, ArrayList<double[]> trueObjects, ArrayList<String> trueStates) 
+        {
+        	// gourndStateScore is the score of ground truth state
+        	int groundStateScore = trueStates.size();
+        	// groundObjectScore is the score of ground truth objects
+        	int groundObjectScore = trueObjects.size();
+        	if (groundObjectScore != groundStateScore || objects.length != path.length) {
+        		System.out.println("Error!!!");
+        	}
+        	if(groundObjectScore != (objects.length-1) || actualObs.length != groundObjectScore) {
+        		System.out.println("The ground truth and the speech recognition results do not match!!!");
+        	}
+        	// myStateScore is the score of state of my algo.
+        	double myStateScore = 0;
+        	// myObjectScore is the score of objects of my algo.
+        	double myObjectScore = 0;
+        	// sensorObjectScore is the score of objects of my ASR.
+        	double sensorObjectScore = 0;
+        	// for the object recovery
+        	for (int i = groundObjectScore-1; i >= 0; i--) {
+        		//System.out.println("objects[i+1]: " + objects[i+1]);
+        		//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
+    			//if (objects[i+1] == trueObjects.get(i)) {
+        		double mySimilarity;
+        		double asrSimilarity;
+        		// treat the similarity between the objects as the metric 
+        		mySimilarity = computeSimilarity(objects[i+1], trueObjects.get(i));
+        		asrSimilarity = computeSimilarity(actualObs[i], trueObjects.get(i));
+        		myObjectScore += mySimilarity;
+        		sensorObjectScore += asrSimilarity;
+        		// Only if the states matches, will myStateScore be increased
+    			if (path[i+1] == Integer.parseInt(trueStates.get(i))) {
+    				myStateScore++;
+    			}
+        	}
+        	
+        	// 
+            myWordPercentage =  ((double)myObjectScore/groundObjectScore);
+            asrWordPercentage = ((double)sensorObjectScore/groundObjectScore);
+            myStatePercentage = ((double)myStateScore/groundStateScore);
+        	
+            
+        	System.out.println("myObjectScore: " + myWordPercentage);
+        	System.out.println("sensorObjectScore: " + asrWordPercentage);
+        	System.out.println("myStateScore: " + myStatePercentage);      	
+        	
+        }
+        
+        public static Hashtable<double[], Hashtable<double[], Double>> 
+        	confustionGen(double[][] obs, double[][] trueObjectSet) throws IOException, InterruptedException
+        {
+        	
+    		Hashtable<double[], Hashtable<double[], Double>> confusion_probability = 
+    				new Hashtable<double[], Hashtable<double[], Double>>();
+        	for (double[] obsObject : obs) {
+        		Hashtable<double[], Double> c = new Hashtable<double[], Double>();
+        		for (double[] trueObject : trueObjectSet) {
+        			double similarityIndex;
+        			/*
+        			double EDistance = computeEuclideanDistance(obsObject, trueObject);
+        			double maxDistance = (double)(Math.sqrt(GraphGenSimulation.dimension)*(GraphGenSimulation.range + mean + stdDev*3));
+        			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+        			*/
+        			similarityIndex = computeSimilarity(obsObject, trueObject);
+        			c.put(trueObject, similarityIndex);
+        		}
+        		confusion_probability.put(obsObject, c);
+        	}
+        	
+        	//System.out.println("Hi, I am here");
+        	/*
+        	Enumeration<double[]> obsObejct;	
+        	obsObejct = confusion_probability.keys();
+            while(obsObejct.hasMoreElements()) {
+               double[] key = (double[]) obsObejct.nextElement();
+               System.out.println(key + ": " +
+            		   confusion_probability.get(key));
+            }*/
+            
+            for(double[] obsObject: confusion_probability.keySet()) {
+            	System.out.println("obsObject " + Arrays.toString(obsObject) + ":");
+            	for(double[] trueObject : confusion_probability.get(obsObject).keySet())
+            		System.out.println(Arrays.toString(trueObject) + ":" + confusion_probability.get(obsObject).get(trueObject));
+            }
+			return confusion_probability;
+        }
+        
+        // computeSimilarity computes the similarity between two objects
+        public static double computeSimilarity(double[] obsObject, double[] trueObject)
+        {
+			double similarityIndex;
+			double EDistance = computeEuclideanDistance(obsObject, trueObject);
+			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range + graphGen.mean + graphGen.stdDev*3));
+			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
+			// make the similarity function non-linear
+			similarityIndex = Math.pow(similarityIndex, 5);
+			return similarityIndex;
+        }
+        
+        // Calculate the Euclidean distance between the observed object and true object  
+        public static double computeEuclideanDistance(double[]obsObject, double[]trueObject)
+        {
+        	double EDistance = 0;
+        	if(obsObject.length != trueObject.length) {
+        		System.out.println("objects do not match!!!");
+        		System.exit(-1);
+        	}
+        	for (int i = 0; i < obsObject.length; i++) {
+        		EDistance += Math.pow((obsObject[i] - trueObject[i]), 2);
+        	}
+			return Math.sqrt(EDistance);
+        }
+
+}
+

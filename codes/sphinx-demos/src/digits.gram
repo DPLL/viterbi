@@ -1,0 +1,14 @@
+#JSGF V1.0;
+
+/**
+ * JSGF Digits Grammar for test example
+ */
+
+grammar digits;
+
+public <numbers> = (oh | zero | one | two | three | four | five | six | seven | eight | nine) * ;
+
+/*
+ * public <words> = (oxygen | defibrillator | flat | asystole | shock | electric | intravenous | push | epinephrine | amiodarone) * ;
+ */
+ 
