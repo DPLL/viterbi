@@ -25,9 +25,9 @@ public class TraversalTest {
 		
 		Set<DefaultEdge> outgoingEdges;
 		outgoingEdges = randomGraph.outgoingEdgesOf(v);
-		if (outgoingEdges.isEmpty())
+		if (outgoingEdges.isEmpty()) {
 			return false;
-		else {
+		} else {
 			for (DefaultEdge e: outgoingEdges) {
 				String ver = randomGraph.getEdgeTarget(e);
 				path.add(ver);

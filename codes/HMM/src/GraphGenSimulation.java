@@ -109,7 +109,7 @@ public class GraphGenSimulation  implements Serializable {
 	}
 	
 	/*
-	 * Find the first path with depth l
+	 * Find the first path with specified depth 
 	 */
 	public boolean DFS(int depth, VertexSimulation v, ArrayList<VertexSimulation> path) 
 	{
@@ -122,16 +122,19 @@ public class GraphGenSimulation  implements Serializable {
 		
 		Set<DefaultWeightedEdge> outgoingEdges;
 		outgoingEdges = randomGraph.outgoingEdgesOf(v);
-		for (DefaultWeightedEdge e: outgoingEdges) {
-			VertexSimulation ver = randomGraph.getEdgeTarget(e);
-			path.add(ver);
-			if (DFS(depth-1, ver, path))
-				break;
-			int size = path.size();
-			path.remove(size-1);
+		if (outgoingEdges.isEmpty()) {
+			return false;
+		} else {
+			for (DefaultWeightedEdge e: outgoingEdges) {
+				VertexSimulation ver = randomGraph.getEdgeTarget(e);
+				path.add(ver);
+				if (DFS(depth-1, ver, path))
+					break;
+				int size = path.size();
+				path.remove(size-1);
+			}
+			return true;
 		}
-		
-		return false;
 	}
 	
 	public ArrayList<VertexSimulation> findPath(int pathLength)
@@ -141,7 +144,8 @@ public class GraphGenSimulation  implements Serializable {
 		for (VertexSimulation v : vertexSet) {
 			path = new ArrayList<VertexSimulation>();
 			if (DFS(pathLength, v, path))
-				return path;
+				if (path.size() == pathLength)
+					return path;
 		}
 		return null;
 	}
@@ -149,10 +153,100 @@ public class GraphGenSimulation  implements Serializable {
 	 /*
      * Find the diameter of the graph, and thus find a proper source and destination pair
      */
+//	public ArrayList<DefaultWeightedEdge> findDiameter()
+	public ArrayList<VertexSimulation> findDiameterInVertex()
+	{
+		// ArrayList of the diameter
+		ArrayList<DefaultWeightedEdge> diameterPath;
+		// ArrayList of the diameter in vertex form
+		ArrayList<VertexSimulation> diameterPathInVertex;
+		
+		// see whether the graph is ready 
+		//if (randomGraph == null || vFactory == null) {
+		if (randomGraph == null) {
+			System.out.println("The graph is not ready!");
+			System.exit(-1);
+		}
+		
+		VertexSimulation startVertex = new VertexSimulation();
+        VertexSimulation endVertex = new VertexSimulation();
+        ///The diameter of the graph
+        double diameter;
+    
+        //System.out.println("Number of vertex is: "+ randomGraph.vertexSet().size());    
+        FloydWarshallShortestPaths<VertexSimulation, DefaultWeightedEdge> shortestPaths = new FloydWarshallShortestPaths<VertexSimulation, DefaultWeightedEdge>(randomGraph);
+        diameter = shortestPaths.getDiameter();
+        //System.out.println("diameter of the graph is: "+ diameter);
+        
+        // Find the source and the destination node
+        Iterator<VertexSimulation> nodeIterator1 = randomGraph.vertexSet().iterator();
+        double maxShortestPath = 0;
+        //int find = 0;
+        int nodeCntr = 0;
+        while (nodeIterator1.hasNext()) {
+        	VertexSimulation vet1 = nodeIterator1.next();
+        	//System.out.println("vet1 is: " + vet1);
+        	Iterator<VertexSimulation> nodeIterator2 = randomGraph.vertexSet().iterator();
+            while (nodeIterator2.hasNext()) {
+            	VertexSimulation vet2 = nodeIterator2.next();
+            	//System.out.println("vet2 is " + vet2);
+            	if (vet2.vertexID != vet1.vertexID) {
+            		nodeCntr++;
+	            	double shortestPathDis = shortestPaths.shortestDistance(vet1, vet2);
+	            	//System.out.println("The current shortestPathDis is: " + shortestPathDis);
+	            	//if (shortestPathDis > maxShortestPath && shortestPathDis < numVertex*costBound) {//This is only valid when the link cost is not 1
+            		if (shortestPathDis > maxShortestPath && shortestPathDis < numVertex*1) {
+	            		startVertex = vet1;
+	            		endVertex = vet2;
+	            		maxShortestPath = shortestPathDis;
+	            	}
+            	}
+            }
+        } 
+
+        //System.out.println("It has traversed " +  nodeCntr + " edges");
+        //System.out.println("startVertex is: "+ startVertex.toString() + "!!!");
+        //System.out.println("endVertex is: "+ endVertex.toString() + "!!!");
+        //System.out.println("The current maxShorestPath is: " + maxShortestPath);
+        // Sanity Check 1: see whether the diameter I got is the same with diameter = shortestPaths.getDiameter();
+        if(diameter != maxShortestPath) {
+        	System.out.println("diameter does not match!!!");
+        	System.exit(-1);
+        }
+        // Sanity Check 2: see whether the startVertex and endVertex meet the requirement of diameter
+        DijkstraShortestPath<VertexSimulation, DefaultWeightedEdge> dijkstraPath = 
+        		new DijkstraShortestPath<VertexSimulation, DefaultWeightedEdge>(randomGraph, startVertex, endVertex);
+        if(dijkstraPath.getPathLength() != maxShortestPath) {
+        	System.out.println("startVertex and EndVertex cannot meet the requirement of diameter!!!");
+        	System.exit(-1);
+        }        
+
+        System.out.println(dijkstraPath.getPathEdgeList());
+        diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
+        
+        // manipulate the diameterPath and extract the vertex array from it
+        diameterPathInVertex = new ArrayList<VertexSimulation>();
+        int count = 0;
+        for (DefaultWeightedEdge e : diameterPath) {
+			if (count++ == 0) { 
+				diameterPathInVertex.add(randomGraph.getEdgeSource(e));
+			} 
+			diameterPathInVertex.add(randomGraph.getEdgeTarget(e));
+		}
+        
+        //return diameterPath;
+        return diameterPathInVertex;
+	}
+	
+	 /*
+     * Find the diameter of the graph, and thus find a proper source and destination pair
+     */
 	public ArrayList<DefaultWeightedEdge> findDiameter()
 	{
-		// return the ArrayList of the diameter
+		// ArrayList of the diameter
 		ArrayList<DefaultWeightedEdge> diameterPath;
+		// ArrayList of the diameter in vertex form
+		ArrayList<VertexSimulation> diameterPathInVertex;
 		
 		// see whether the graph is ready 
 		//if (randomGraph == null || vFactory == null) {
@@ -216,21 +310,9 @@ public class GraphGenSimulation  implements Serializable {
         
         System.out.println(dijkstraPath.getPathEdgeList());
         diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
-        return diameterPath;
         
-        /*
-        // Traverse all the edges to see connection relationship.
-        Set<DefaultWeightedEdge> edges = new HashSet<DefaultWeightedEdge>();
-        edges.addAll(randomGraph.edgeSet());
-        for (DefaultWeightedEdge edge : edges) {
-            //Traverse all the edges in the edgeSet
-        	System.out.println("source of the edge is: "+ randomGraph.getEdgeSource(edge));
-        	System.out.println("target of the edge is: "+ randomGraph.getEdgeTarget(edge));
-        	System.out.println("the weight of the edge is: "+ randomGraph.getEdgeWeight(edge));
-        }
-        */
+        return diameterPath;
 	}
-	
 	
 	// TODO
 	// setGroundTruth will return true if it sets the states where the start vertex has incoming edges
@@ -239,7 +321,6 @@ public class GraphGenSimulation  implements Serializable {
 		trueStates = new ArrayList<String>();
 		trueObjects = new ArrayList<double[]>();
 		
-		VertexSimulation startVer;
 		// specify the states that have been gone through
 		// Version one: select the first object from the objectlist
 		int count = 0;
@@ -262,6 +343,27 @@ public class GraphGenSimulation  implements Serializable {
 
 		return true;
 	}
+	
+	// setGroundTruthInVertex will return true if it sets the states where the start vertex has incoming edges
+	// Notice that the difference between 'setGroundTruthInVertex' and 'setGroundTruth' is that setGroundTruthInVertex takes the pathList in the form of vertex list 
+	public boolean setGroundTruthInVertex(List<VertexSimulation> pathVertexList)
+	{
+		trueStates = new ArrayList<String>();
+		trueObjects = new ArrayList<double[]>();
+		
+		// specify the states that have been gone through
+		// Version one: select the first object from the objectlist
+		for (VertexSimulation v : pathVertexList) {
+			trueStates.add(Integer.toString(v.vertexID));
+			trueObjects.add(v.objectMatrix[0]);
+		}
+		System.out.println("The trueStates is: " + trueStates);
+		System.out.println("The trueObjects is as the following:");
+		for(double[] arr : trueObjects)
+			System.out.println(Arrays.toString(arr));
+		return true;
+	}
+	
 	
     public boolean replaceVertexID(VertexSimulation oldVertex, Integer id)
     {
@@ -392,6 +494,7 @@ public class GraphGenSimulation  implements Serializable {
 		GraphGenSimulation graphGen1 = new GraphGenSimulation();
 		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph1 = null;
 		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
+		ArrayList<VertexSimulation> diameterPath1InVertex = new ArrayList<VertexSimulation>();
 		try {
 			//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
 			graph1 = graphGen1.GraphGen(0.5, 2, 5, 10, 100, 0, 0);
@@ -401,8 +504,16 @@ public class GraphGenSimulation  implements Serializable {
 		}
 		System.out.println(graph1.toString());
 		System.out.println(graph1.edgeSet().size());
+		diameterPath1InVertex = graphGen1.findDiameterInVertex();
+		graphGen1.setGroundTruthInVertex(diameterPath1InVertex);
 		diameterPath1 = graphGen1.findDiameter();
 		graphGen1.setGroundTruth(diameterPath1);
+		
+		if (graphGen1.findPath(4) == null) 
+		{
+			System.out.println("could not find such path!");
+		}
+		graphGen1.setGroundTruthInVertex(graphGen1.findPath(4));
 		//graphGen1.addNoise();
 		
 /*		GraphGenSimulation graphGen2 = new GraphGenSimulation();
