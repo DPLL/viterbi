@@ -51,6 +51,9 @@ public class TranscriberSimulation
 	static double myStatePercentage;
     // asrWordPercentage is the percentage of object that ASR is right
 	static double asrWordPercentage;
+	
+	// similairtyFunction power
+	static int similarityPower = 5;
 
     
     public static final boolean DEBUG_MODE = false;
@@ -58,7 +61,7 @@ public class TranscriberSimulation
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 10;
+    	int runTime = 1;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -73,7 +76,7 @@ public class TranscriberSimulation
     			graphGen = new GraphGenSimulation();
 
     			try {
-    				FileInputStream fileIn = new FileInputStream("graph1.out");
+    				FileInputStream fileIn = new FileInputStream("special.out");
     				ObjectInputStream in = new ObjectInputStream(fileIn);   			
     				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
 			        in.close();
@@ -91,13 +94,13 @@ public class TranscriberSimulation
     			graphGen.randomGraph = graph;
     			graphGen.density = 0.5;
     			graphGen.objectPerNode = 2;
-    			graphGen.dimension = 5;
-    			graphGen.numVertex = 10;
+    			graphGen.dimension = 1;
+    			graphGen.numVertex = 3;
     			graphGen.range = 100;
     			graphGen.mean = 0;
     			graphGen.stdDev = 0;
     			
-    			graphGen.numEdge = 45;
+    			graphGen.numEdge = 6;
 
 				diameterPath = graphGen.findDiameter();
 				graphGen.setGroundTruth(diameterPath);
@@ -112,11 +115,20 @@ public class TranscriberSimulation
         		graphGen = new GraphGenSimulation();
 	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
         		
-        		//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
-				graph = graphGen.GraphGen(0.6, 10, 30, 10, 100, 0, 19);
+        		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
+				graph = graphGen.GraphGen(0.6, 10, 30, 32, 100, 0, 20, 12);
+				System.out.println(graphGen.numVertex);
 				System.out.println(graph.toString());				
-				diameterPath =graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
+				//diameterPath = graphGen.findDiameter();
+				//graphGen.setGroundTruth(diameterPath);
+				System.out.println(graphGen.pathLength);
+				ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
+				if (pathInVertex == null) 
+				{
+					System.out.println("could not find such path!");
+					System.exit(-1);
+				}
+				graphGen.setGroundTruthInVertex(pathInVertex);
 				
 				//System.out.println(graph.edgeSet().size());
 				
@@ -279,14 +291,14 @@ public class TranscriberSimulation
 	        //System.out.println(trueObjectSetList.size());
 	        // print the emission_probability
 	        //System.out.println("emission_probability: " + emission_probability);
-	        System.out.println("emission_probability: "); 
+/*			System.out.println("emission_probability: "); 
             for(String state: emission_probability.keySet()) {
             	System.out.println("State " + state + ":");
             	for(double[] object : emission_probability.get(state).keySet())
             		System.out.println(Arrays.toString(object) + ":" + emission_probability.get(state).get(object));
-            }
+            }*/
 	        // print the transition_probability
-	        System.out.println(transition_probability);
+	        //System.out.println(transition_probability);
 	    	return;
 	    }
 	    
@@ -332,11 +344,12 @@ public class TranscriberSimulation
         	//X[t][i][] stores the object that has been chosen corresponding to the V[t][i]
         	double X[][][] = new double[obs_num+1][state_num][];
 		
-        	int m = 0;
+
         	// PAY ATTENTION! We have to sort the states first so that int value of states will be 
         	// acting as index in the later steps.
-        	Arrays.sort(states);
-        	System.out.println("sorted states[] is: " + Arrays.toString(states));
+        	//Arrays.sort(states);
+        	System.out.println("states[] is: " + Arrays.toString(states));
+/*        	int m = 0;
         	for (String state : states)
         	{
         		//V[0][m] = start_p.get(state);
@@ -344,8 +357,14 @@ public class TranscriberSimulation
         		B[0][m] = m;
         		X[0][m] = new double[graphGen.dimension];
         		m++;
+        	}*/
+        	for (String state : states)
+        	{
+        		V[0][Integer.parseInt(state)] = Math.log(start_p.get(state));
+        		B[0][Integer.parseInt(state)] = Integer.parseInt(state);
+        		X[0][Integer.parseInt(state)] = new double[graphGen.dimension];
         	}
-
+        	
         	// t is the records the current time
         	int t = 0;
             for (double[] input : actualObs)
@@ -565,7 +584,7 @@ public class TranscriberSimulation
 			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range + graphGen.mean + graphGen.stdDev*3));
 			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
 			// make the similarity function non-linear
-			similarityIndex = Math.pow(similarityIndex, 5);
+			similarityIndex = Math.pow(similarityIndex, similarityPower);
 			return similarityIndex;
         }
         

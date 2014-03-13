@@ -57,6 +57,8 @@ public class GraphGenSimulation  implements Serializable {
     double mean;
     // stdDev is the standard deviation of sensor error
     double stdDev;
+    // pathLength
+    int pathLength; 
 	
 	
 	GraphGenSimulation() 
@@ -64,7 +66,7 @@ public class GraphGenSimulation  implements Serializable {
 	}
 	
 	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, 
-			int n, int nodeNum, double rangeValue, double meanValue, double stdDvValue) throws FileNotFoundException 
+			int n, int nodeNum, double rangeValue, double meanValue, double stdDvValue, int length) throws FileNotFoundException 
 	{
 		density = densityOfGraph;
 		objectPerNode = objectNumPerNode;
@@ -76,6 +78,7 @@ public class GraphGenSimulation  implements Serializable {
 		dimension = n;
 		mean = meanValue;
 		stdDev = stdDvValue;
+		pathLength = length;
 		
         // Create the simple directed weighted graph object; it is null at this point
 		// A simple directed graph is a non-simple directed graph in which neither multiple edges between any two vertices nor loops are permitted. 
@@ -100,11 +103,11 @@ public class GraphGenSimulation  implements Serializable {
         System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
         Iterator<VertexSimulation> iter2 = new DepthFirstIterator<VertexSimulation, DefaultWeightedEdge>(randomGraph);
         VertexSimulation ver2;
-        while (iter2.hasNext()) {
+/*        while (iter2.hasNext()) {
         	ver2 = iter2.next();
             System.out.println("VertexSimulation " + ver2.toString() + " is connected to: "
                     + randomGraph.edgesOf(ver2).toString());
-        }
+        }*/
         return randomGraph;
 	}
 	
@@ -383,8 +386,8 @@ public class GraphGenSimulation  implements Serializable {
         		objects[i][j] = Math.random() * range;
         	}
         }
-        for (double[] row : objects)
-        	System.out.println(Arrays.toString(row));
+/*        for (double[] row : objects)
+        	System.out.println(Arrays.toString(row));*/
         
     	newVertex = new VertexSimulation(id, objectPerNode, dimension, objects);
         
@@ -445,7 +448,7 @@ public class GraphGenSimulation  implements Serializable {
         	for(int i = 0; i < obj.length; i++) {
         		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
         		double error = fRandom.nextGaussian()*stdDev + mean;
-        		System.out.println("error is: " + error);
+        		//System.out.println("error is: " + error);
         		objNoiseAdded[i] = obj[i] + error;            		
         	}
         	noiseAddedResults.add(objNoiseAdded);
@@ -497,7 +500,7 @@ public class GraphGenSimulation  implements Serializable {
 		ArrayList<VertexSimulation> diameterPath1InVertex = new ArrayList<VertexSimulation>();
 		try {
 			//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
-			graph1 = graphGen1.GraphGen(0.5, 2, 5, 10, 100, 0, 0);
+			graph1 = graphGen1.GraphGen(0.5, 2, 5, 10, 100, 0, 0, 4);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -509,7 +512,7 @@ public class GraphGenSimulation  implements Serializable {
 		diameterPath1 = graphGen1.findDiameter();
 		graphGen1.setGroundTruth(diameterPath1);
 		
-		if (graphGen1.findPath(4) == null) 
+		if (graphGen1.findPath(graphGen1.pathLength) == null) 
 		{
 			System.out.println("could not find such path!");
 		}
