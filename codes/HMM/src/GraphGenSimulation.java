@@ -351,6 +351,9 @@ public class GraphGenSimulation  implements Serializable {
 	// Notice that the difference between 'setGroundTruthInVertex' and 'setGroundTruth' is that setGroundTruthInVertex takes the pathList in the form of vertex list 
 	public boolean setGroundTruthInVertex(List<VertexSimulation> pathVertexList)
 	{
+		if (pathVertexList == null) {
+			return false;
+		}
 		trueStates = new ArrayList<String>();
 		trueObjects = new ArrayList<double[]>();
 		
@@ -499,24 +502,24 @@ public class GraphGenSimulation  implements Serializable {
 		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<VertexSimulation> diameterPath1InVertex = new ArrayList<VertexSimulation>();
 		try {
-			//[densityOfGraph] [objectNumPerNode] [dimension] [nodeNum] [rangeValue] [meanValue] [stdDvValue]
-			graph1 = graphGen1.GraphGen(0.5, 2, 5, 10, 100, 0, 0, 4);
+			//1.[densityOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
+			graph1 = graphGen1.GraphGen(0.5, 2, 1, 3, 100, 0, 0, 1);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println(graph1.toString());
 		System.out.println(graph1.edgeSet().size());
-		diameterPath1InVertex = graphGen1.findDiameterInVertex();
-		graphGen1.setGroundTruthInVertex(diameterPath1InVertex);
+/*		diameterPath1InVertex = graphGen1.findDiameterInVertex();
+		graphGen1.setGroundTruthInVertex(diameterPath1InVertex);*/
 		diameterPath1 = graphGen1.findDiameter();
 		graphGen1.setGroundTruth(diameterPath1);
 		
-		if (graphGen1.findPath(graphGen1.pathLength) == null) 
+/*		if (graphGen1.findPath(graphGen1.pathLength) == null) 
 		{
 			System.out.println("could not find such path!");
 		}
-		graphGen1.setGroundTruthInVertex(graphGen1.findPath(4));
+		graphGen1.setGroundTruthInVertex(graphGen1.findPath(graphGen1.pathLength));*/
 		//graphGen1.addNoise();
 		
 /*		GraphGenSimulation graphGen2 = new GraphGenSimulation();

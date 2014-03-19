@@ -56,12 +56,12 @@ public class TranscriberSimulation
 	static int similarityPower = 5;
 
     
-    public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_MODE = true;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 1;
+    	int runTime = 10;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -76,7 +76,7 @@ public class TranscriberSimulation
     			graphGen = new GraphGenSimulation();
 
     			try {
-    				FileInputStream fileIn = new FileInputStream("special.out");
+    				FileInputStream fileIn = new FileInputStream("graph1.out");
     				ObjectInputStream in = new ObjectInputStream(fileIn);   			
     				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
 			        in.close();
@@ -116,19 +116,21 @@ public class TranscriberSimulation
 	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
         		
         		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-				graph = graphGen.GraphGen(0.6, 10, 30, 32, 100, 0, 20, 12);
+				graph = graphGen.GraphGen(0.3, 5, 20, 30, 100, 0, 40, 12);
 				System.out.println(graphGen.numVertex);
 				System.out.println(graph.toString());				
-				//diameterPath = graphGen.findDiameter();
-				//graphGen.setGroundTruth(diameterPath);
-				System.out.println(graphGen.pathLength);
+				diameterPath = graphGen.findDiameter();
+				graphGen.setGroundTruth(diameterPath);
+				
+				// instead of choosing the diameter as the path, choose a path specified length 
+/*				System.out.println(graphGen.pathLength);
 				ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
-				if (pathInVertex == null) 
+				if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
 				{
 					System.out.println("could not find such path!");
 					System.exit(-1);
 				}
-				graphGen.setGroundTruthInVertex(pathInVertex);
+
 				
 				//System.out.println(graph.edgeSet().size());
 				
@@ -488,9 +490,15 @@ public class TranscriberSimulation
         /*
          * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
          * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
+         * actualObs[][] are the objects with noise added, objects[][] are the output of my algorithm, trueObjects are the groundTruth objects 
          */
         public static void reportFidelity(double[][] actualObs, int[] path, double[][] objects, ArrayList<double[]> trueObjects, ArrayList<String> trueStates) 
         {
+        	// misclassification_probability measures the misclassification probability, and it comes from confusion_probability, acutalObs and trueObjects
+        	Hashtable<double[], Hashtable<double[], Double>> misclassification_probability = new Hashtable<double[], Hashtable<double[], Double>>();
+        	// classifiedObjects is the output from the sensor after classification
+        	ArrayList<double[]> classifiedObjects = new ArrayList<double[]>();
+        	
         	// gourndStateScore is the score of ground truth state
         	int groundStateScore = trueStates.size();
         	// groundObjectScore is the score of ground truth objects
@@ -501,6 +509,52 @@ public class TranscriberSimulation
         	if(groundObjectScore != (objects.length-1) || actualObs.length != groundObjectScore) {
         		System.out.println("The ground truth and the speech recognition results do not match!!!");
         	}
+        	// compute the misclassification_prbability
+/*        	for (int i = 0; i < actualObs.length; i++) {
+        		Hashtable<double[], Double> c = new Hashtable<double[], Double>();
+        		Hashtable<double[], Double> d = confusion_probability.get(actualObs[i]);
+        		Enumeration<double[]> enumKey = d.keys();
+        		// 'total' is the sum of all the values of hashtable d, used for normalization. 
+        		Double total = (double) 0;
+        		while(enumKey.hasMoreElements()) {
+        			double[] key = enumKey.nextElement();
+        			Double val = d.get(key);
+        			total += val;
+        		}
+        		for (double[] key : d.keySet()) {
+        			double misclassificationProb;
+
+        			misclassificationProb = d.get(key)/total;
+        			c.put(key, misclassificationProb);
+        		}
+        		misclassification_probability.put(trueObjects.get(i), c);
+        	}
+        	System.out.println("print out the misclassification_probability");
+            for(double[] object: misclassification_probability.keySet()) {
+            	System.out.println("object " + Arrays.toString(object) + ":");
+            	for(double[] trueObject : misclassification_probability.get(object).keySet())
+            		System.out.println(Arrays.toString(trueObject) + ":" + misclassification_probability.get(object).get(trueObject));
+            }*/
+        	
+            // compute the classifiedObjects based on the results of confusion_probability and actualObs[][]
+        	for (int i = 0; i < actualObs.length; i++) {
+        		double[] actualOb = actualObs[i];
+        		Hashtable<double[], Double> d = confusion_probability.get(actualOb);
+        		
+         		Enumeration<double[]> enumKey = d.keys();
+        		Double maxSimilarity = (double) 0;
+        		double[] maxMatch = null;
+        		while(enumKey.hasMoreElements()) {
+        			double[] key = enumKey.nextElement();
+        			Double val = d.get(key);
+        			if (val >= maxSimilarity) {
+        				maxSimilarity = val;
+        				maxMatch = key;
+        			}
+        		}
+        		classifiedObjects.add(maxMatch);
+        	}
+            
         	// myStateScore is the score of state of my algo.
         	double myStateScore = 0;
         	// myObjectScore is the score of objects of my algo.
@@ -511,17 +565,27 @@ public class TranscriberSimulation
         	for (int i = groundObjectScore-1; i >= 0; i--) {
         		//System.out.println("objects[i+1]: " + objects[i+1]);
         		//System.out.println("trueobjects.get(i): " + trueObjects.get(i));
-    			//if (objects[i+1] == trueObjects.get(i)) {
-        		double mySimilarity;
-        		double asrSimilarity;
+
+        		//double mySimilarity;
+        		//double asrSimilarity;
         		// treat the similarity between the objects as the metric 
-        		mySimilarity = computeSimilarity(objects[i+1], trueObjects.get(i));
-        		asrSimilarity = computeSimilarity(actualObs[i], trueObjects.get(i));
-        		myObjectScore += mySimilarity;
-        		sensorObjectScore += asrSimilarity;
+        		//mySimilarity = computeSimilarity(objects[i+1], trueObjects.get(i));
+        		//asrSimilarity = computeSimilarity(actualObs[i], trueObjects.get(i));
+        		//myObjectScore += mySimilarity;
+        		//sensorObjectScore += asrSimilarity;
+        		
+        		if (objects[i+1] == trueObjects.get(i)) {
+        			myObjectScore += 1;
+        		}
+        		// Calculate sensor score based on 'misclassification_probability'
+        		//sensorObjectScore += misclassification_probability.get(trueObjects.get(i)).get(trueObjects.get(i));       		
+        		// calculate sensor score based on 'classifiedObjects'
+        		if (classifiedObjects.get(i) == trueObjects.get(i)) {
+        			sensorObjectScore += 1;
+        		}
         		// Only if the states matches, will myStateScore be increased
     			if (path[i+1] == Integer.parseInt(trueStates.get(i))) {
-    				myStateScore++;
+    				myStateScore += 1;
     			}
         	}
         	

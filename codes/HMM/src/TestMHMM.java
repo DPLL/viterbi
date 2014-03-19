@@ -58,7 +58,7 @@ public class TestMHMM
 
 	
     
-    static final int port = 9998;
+    static final int port = 9999;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
@@ -214,7 +214,8 @@ public class TestMHMM
              */
             // manipulate the received string 
             // Pay attention to the match case of "|" in java!!!
-            String[] wordSeq = revStr.split("\\|"); 
+            //String[] wordSeq = revStr.split("\\|");
+	        String[] wordSeq = revStr.split("\\$"); 
             System.out.println("split.size: " + wordSeq.length);
             System.out.println("The received seq after manipulation is:");
             for (String str : wordSeq) {
