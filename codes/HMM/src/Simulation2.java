@@ -51,17 +51,14 @@ public class Simulation2
 	static double myStatePercentage;
     // asrWordPercentage is the percentage of object that ASR is right
 	static double asrWordPercentage;
-	
-	// similairtyFunction power
-	static int similarityPower = 5;
 
     
-    public static final boolean DEBUG_MODE = true;
+    public static final boolean DEBUG_MODE = false;
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 10;
+    	int runTime = 1;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -110,7 +107,7 @@ public class Simulation2
 	    	 	// Generate a random graph
         		graphGen = new SimulationGraph2();
         		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-				graph = graphGen.GraphGen(0.3, 5, 20, 0.5, 12);
+				graph = graphGen.GraphGen(0.5, 2, 3, 0.5, 12);
 				System.out.println(graphGen.numVertex);
 				System.out.println(graph.toString());				
 				diameterPath = graphGen.findDiameter();
@@ -132,7 +129,7 @@ public class Simulation2
 				classifiedResult= graphGen.classify();
 				objectSeq = new ObjectSimulation2[classifiedResult.size()];
 		        objectSeq = classifiedResult.toArray(objectSeq);
-		        System.out.println(Arrays.deepToString(objectSeq));
+		        System.out.println("objectSeq is " + Arrays.deepToString(objectSeq));
 	    	}
     		/*
     		 *  Graph Interface
@@ -177,7 +174,7 @@ public class Simulation2
 
             StringBuilder str = new StringBuilder();
             for(int m = 0; m < graphGen.trueObjects.size(); m++) {
-            	str.append(graphGen.trueObjects.get(m));
+            	str.append(graphGen.trueObjects.get(m) + " ");
             }
             //System.out.println(str);
     		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
@@ -205,32 +202,6 @@ public class Simulation2
     	System.out.println("");
     	
     }
-    
-    
-/*    public Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> misclassificationMatrixGenTest()
-    {
-    	ObjectSimulation2 o1 = {37.38957217505584};
-    	ObjectSimulation2 o2 = {79.36935937500014};
-    	ObjectSimulation2 o3 = {5.896338987409688};
-    	Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> misclassificationMatrixTest = 
-        		new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
-        Hashtable<ObjectSimulation2, Double> t0 = new Hashtable<ObjectSimulation2, Double>();
-        t0.put(o1, 0.7d);
-        t0.put(o2, 0.1d);
-        t0.put(o3, 0.2d);
-        Hashtable<ObjectSimulation2, Double> t1 = new Hashtable<ObjectSimulation2, Double>();
-        t1.put(o1, 0.1d);
-        t1.put(o2, 0.8d);
-        t1.put(o2, 0.1d);
-        Hashtable<ObjectSimulation2, Double> t2 = new Hashtable<ObjectSimulation2, Double>();
-        t2.put(o3, 0.2d);
-        t2.put(o3, 0.2d);
-        t2.put(o3, 0.6d);
-        misclassificationMatrixTest.put(o1, t0);
-        misclassificationMatrixTest.put(o2, t1);
-        misclassificationMatrixTest.put(o3, t2);
-    	return null;
-    }*/
     
 	    /*
 	     * read the graph and create interface for it. 
@@ -321,30 +292,8 @@ public class Simulation2
 	        //System.out.println(transition_probability);
 	    	return;
 	    }
-	    
-	    /*
-	    public static ArrayList<ObjectSimulation2> addNoise(SimulationGraph2 graphGen)
-	    {
-	    	ArrayList<ObjectSimulation2> noiseAddedResults = new ArrayList<ObjectSimulation2>();
-	    	Random fRandom = new Random();
-            for(ObjectSimulation2 obj: graphGen.trueObjects) {
-            	// assume that each dimension of the object is subject to error that is i.i.d.
-            	ObjectSimulation2 objNoiseAdded = new double[obj.length];
-            	for(int i = 0; i < obj.length; i++) {
-            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
-            		double error = fRandom.nextGaussian()*SimulationGraph2.stdDev + SimulationGraph2.mean;
-            		System.out.println("error is: " + error);
-            		objNoiseAdded[i] = obj[i] + error;            		
-            	}
-            	noiseAddedResults.add(objNoiseAdded);
-            }
-            
-            System.out.println("noiseAddedResults is as follows");
-            for(ObjectSimulation2 arr : noiseAddedResults)
-            	System.out.println(Arrays.toString(arr));
-    		return noiseAddedResults;
-	    }*/
     	
+	    
     	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
         public static void correct(ObjectSimulation2[] actualObs, ObjectSimulation2[] obs, String[] states,
                         Hashtable<String, Double> start_p,
@@ -361,12 +310,9 @@ public class Simulation2
         	double V[][] = new double[obs_num+1][state_num];
         	//B[t][i]  stores the last source state corresponding to the V[t][i]
         	int B[][] = new int[obs_num+1][state_num];
-        	//X[t][i][] stores the object that has been chosen corresponding to the V[t][i]
+        	//X[t][i] stores the object that has been chosen corresponding to the V[t][i]
         	ObjectSimulation2 X[][] = new ObjectSimulation2[obs_num+1][state_num];
 		
-
-        	// PAY ATTENTION! We have to sort the states first so that int value of states will be 
-        	// acting as index in the later steps.
         	//Arrays.sort(states);
         	System.out.println("states[] is: " + Arrays.toString(states));
 /*        	int m = 0;
@@ -512,10 +458,8 @@ public class Simulation2
          */
         public static void reportFidelity(ObjectSimulation2[] actualObs, int[] path, ObjectSimulation2[] objects, ArrayList<ObjectSimulation2> trueObjects, ArrayList<String> trueStates) 
         {
-        	// misclassification_probability measures the misclassification probability, and it comes from confusion_probability, acutalObs and trueObjects
-        	Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> misclassification_probability = new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
         	// classifiedObjects is the output from the sensor after classification
-        	ArrayList<ObjectSimulation2> classifiedObjects = new ArrayList<ObjectSimulation2>();
+        	//ArrayList<ObjectSimulation2> classifiedObjects = new ArrayList<ObjectSimulation2>();
         	
         	// gourndStateScore is the score of ground truth state
         	int groundStateScore = trueStates.size();
@@ -524,38 +468,12 @@ public class Simulation2
         	if (groundObjectScore != groundStateScore || objects.length != path.length) {
         		System.out.println("Error!!!");
         	}
-        	if(groundObjectScore != (objects.length-1) || actualObs.length != groundObjectScore) {
+        	if (groundObjectScore != (objects.length-1) || actualObs.length != groundObjectScore) {
         		System.out.println("The ground truth and the speech recognition results do not match!!!");
         	}
-        	// compute the misclassification_prbability
-/*        	for (int i = 0; i < actualObs.length; i++) {
-        		Hashtable<ObjectSimulation2, Double> c = new Hashtable<ObjectSimulation2, Double>();
-        		Hashtable<ObjectSimulation2, Double> d = confusion_probability.get(actualObs[i]);
-        		Enumeration<ObjectSimulation2> enumKey = d.keys();
-        		// 'total' is the sum of all the values of hashtable d, used for normalization. 
-        		Double total = (double) 0;
-        		while(enumKey.hasMoreElements()) {
-        			ObjectSimulation2 key = enumKey.nextElement();
-        			Double val = d.get(key);
-        			total += val;
-        		}
-        		for (ObjectSimulation2 key : d.keySet()) {
-        			double misclassificationProb;
-
-        			misclassificationProb = d.get(key)/total;
-        			c.put(key, misclassificationProb);
-        		}
-        		misclassification_probability.put(trueObjects.get(i), c);
-        	}
-        	System.out.println("print out the misclassification_probability");
-            for(ObjectSimulation2 object: misclassification_probability.keySet()) {
-            	System.out.println("object " + Arrays.toString(object) + ":");
-            	for(ObjectSimulation2 trueObject : misclassification_probability.get(object).keySet())
-            		System.out.println(Arrays.toString(trueObject) + ":" + misclassification_probability.get(object).get(trueObject));
-            }*/
         	
             // compute the classifiedObjects based on the results of confusion_probability and actualObs[][]
-        	for (int i = 0; i < actualObs.length; i++) {
+/*        	for (int i = 0; i < actualObs.length; i++) {
         		ObjectSimulation2 actualOb = actualObs[i];
         		Hashtable<ObjectSimulation2, Double> d = confusion_probability.get(actualOb);
         		
@@ -572,7 +490,7 @@ public class Simulation2
         		}
         		classifiedObjects.add(maxMatch);
         	}
-            
+            */
         	// myStateScore is the score of state of my algo.
         	double myStateScore = 0;
         	// myObjectScore is the score of objects of my algo.
@@ -592,13 +510,13 @@ public class Simulation2
         		//myObjectScore += mySimilarity;
         		//sensorObjectScore += asrSimilarity;
         		
-        		if (objects[i+1] == trueObjects.get(i)) {
+        		if (objects[i+1].objectID == trueObjects.get(i).objectID) {
         			myObjectScore += 1;
         		}
         		// Calculate sensor score based on 'misclassification_probability'
         		//sensorObjectScore += misclassification_probability.get(trueObjects.get(i)).get(trueObjects.get(i));       		
         		// calculate sensor score based on 'classifiedObjects'
-        		if (classifiedObjects.get(i) == trueObjects.get(i)) {
+        		if (actualObs[i].objectID == trueObjects.get(i).objectID) {
         			sensorObjectScore += 1;
         		}
         		// Only if the states matches, will myStateScore be increased
@@ -657,32 +575,6 @@ public class Simulation2
             }
 			return confusion_probability;
         }
-        
-/*        // computeSimilarity computes the similarity between two objects
-        public static double computeSimilarity(ObjectSimulation2 obsObject, ObjectSimulation2 trueObject)
-        {
-			double similarityIndex;
-			double EDistance = computeEuclideanDistance(obsObject, trueObject);
-			double maxDistance = (double)(Math.sqrt(graphGen.dimension)*(graphGen.range + graphGen.mean + graphGen.stdDev*3));
-			similarityIndex = ( EDistance <= maxDistance ? (1 - ((double)EDistance/maxDistance)) : 0);
-			// make the similarity function non-linear
-			similarityIndex = Math.pow(similarityIndex, similarityPower);
-			return similarityIndex;
-        }
-        
-        // Calculate the Euclidean distance between the observed object and true object  
-        public static double computeEuclideanDistance(ObjectSimulation2obsObject, ObjectSimulation2trueObject)
-        {
-        	double EDistance = 0;
-        	if(obsObject.length != trueObject.length) {
-        		System.out.println("objects do not match!!!");
-        		System.exit(-1);
-        	}
-        	for (int i = 0; i < obsObject.length; i++) {
-        		EDistance += Math.pow((obsObject[i] - trueObject[i]), 2);
-        	}
-			return Math.sqrt(EDistance);
-        }*/
 
 }
 
