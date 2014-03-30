@@ -58,149 +58,137 @@ public class Simulation2
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 1;
+    	int runTime = 100;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
     	
-    	for(int i = 0; i < runTime; i++) {
-        	//SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
-    		AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> graph = null;
-        	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-    		ArrayList<ObjectSimulation2> classifiedResult = new ArrayList<ObjectSimulation2>();	
-    		if (DEBUG_MODE) {
-    			// read from the predefined class
-    			graphGen = new SimulationGraph2();
+    	double totalPathLength = 0.0;
+    	
+		AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> graph = null;
+    	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
+		ArrayList<ObjectSimulation2> classifiedResult = new ArrayList<ObjectSimulation2>();
+		
+		if (DEBUG_MODE) {
+			// read from the predefined class
+			graphGen = new SimulationGraph2();
 
-    			try {
-    				FileInputStream fileIn = new FileInputStream("graph2.out");
-    				ObjectInputStream in = new ObjectInputStream(fileIn);   			
-    				graph = (AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge>) in.readObject();
-			        in.close();
-			        fileIn.close();
-				} catch(IOException ex)
-			    {
-			         ex.printStackTrace();
-			         return;
-			    } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    			
-				System.out.println(graph.toString());
-    			graphGen.randomGraph = graph;
-    			graphGen.density = 0.5;
-    			graphGen.objectPerNode = 2;
-    			graphGen.numVertex = 3;
-    			graphGen.recall = 0.5;
-    			
-    			graphGen.numEdge = 6;
+			try {
+				FileInputStream fileIn = new FileInputStream("graph2.out");
+				ObjectInputStream in = new ObjectInputStream(fileIn);   			
+				graph = (AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge>) in.readObject();
+		        in.close();
+		        fileIn.close();
+			} catch(IOException ex)
+		    {
+		         ex.printStackTrace();
+		         return;
+		    } catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			System.out.println(graph.toString());
+			graphGen.randomGraph = graph;
+			graphGen.density = 0.5;
+			graphGen.objectPerNode = 2;
+			graphGen.numVertex = 3;
+			graphGen.recall = 0.5;
+			
+			graphGen.numEdge = 6;
 
-				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
-				classifiedResult = graphGen.trueObjects;
-				objectSeq = new ObjectSimulation2[classifiedResult.size()];
-		        objectSeq = classifiedResult.toArray(objectSeq);
-		        System.out.println(Arrays.deepToString(objectSeq));
+			diameterPath = graphGen.findDiameter();
+			graphGen.setGroundTruth(diameterPath);
+			classifiedResult = graphGen.trueObjects;
+			objectSeq = new ObjectSimulation2[classifiedResult.size()];
+	        objectSeq = classifiedResult.toArray(objectSeq);
+	        System.out.println(Arrays.deepToString(objectSeq));
 
-    		} else {
-	    	 	// Generate a random graph
-        		graphGen = new SimulationGraph2();
-        		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-				graph = graphGen.GraphGen(0.5, 2, 3, 0.5, 12);
-				System.out.println(graphGen.numVertex);
-				System.out.println(graph.toString());				
-				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
-				
-				// instead of choosing the diameter as the path, choose a path specified length 
-/*				System.out.println(graphGen.pathLength);
-				ArrayList<VertexSimulation2> pathInVertex = graphGen.findPath(graphGen.pathLength);
-				if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
-				{
-					System.out.println("could not find such path!");
-					System.exit(-1);
-				}				
-				//System.out.println(graph.edgeSet().size());
-				
-				/*
-				 * Sensor simulator -- simulate the classification process of sensors
-				 */
-				classifiedResult= graphGen.classify();
-				objectSeq = new ObjectSimulation2[classifiedResult.size()];
-		        objectSeq = classifiedResult.toArray(objectSeq);
-		        System.out.println("objectSeq is " + Arrays.deepToString(objectSeq));
-	    	}
+		} else {
+    	 	// Generate a random graph
+    		graphGen = new SimulationGraph2();
+    		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
+			graph = graphGen.GraphGen(0.6, 10, 20, 0.9, 5);
+			System.out.println(graphGen.numVertex);
+			System.out.println(graph.toString());	
     		/*
     		 *  Graph Interface
     		 */
     		graphParse(graph);
-            
-    		/*
-    		 * generate the confusion probability matrix
-    		 */
-            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
-            
-            correct(objectSeq,
-            		trueObjectSet, states,
-                    start_probability,
-                    transition_probability,
-                    emission_probability,
-                    confusion_probability,
-                    graphGen.trueObjects, 
-                    graphGen.trueStates
-                    );
-            
-            
-            // Testing by feeding in the right objects directly without going through ASR
-            /*
-            ObjectSimulation2[] trueObjectSeq = new double[graphGen.trueObjects.size()][];
-            trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
-            System.out.println("The trueObjectSeq is as follows:");
-            for(ObjectSimulation2 object : trueObjectSeq) {
-            	System.out.println(Arrays.toString(object));
-            }
-            Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> confusion_probability =
-            		confustionGen(trueObjectSeq, trueObjectSet);
-            
-            correct(trueObjectSeq,
-            		trueObjectSet, states,
-                    start_probability,
-                    transition_probability,
-                    emission_probability,
-                    confusion_probability,
-                    graphGen.trueObjects, 
-                    graphGen.trueStates);*/
-
-            StringBuilder str = new StringBuilder();
-            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
-            	str.append(graphGen.trueObjects.get(m) + " ");
-            }
-            //System.out.println(str);
-    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
-            
-    		System.out.println("The trueObjects is as follows:" + str);
-    		/*
-    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
-    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
-    		}*/
-    		System.out.println("The trueStates is: " + graphGen.trueStates);	
     		
-    		totalMyWordPercentage += myWordPercentage;
-    		totalMyStatePercentage += myStatePercentage;
-        	totalASRWordPercentage += asrWordPercentage;
-      	
-        	System.out.println("in the " + i + " th interation, haha!!!!");
+    		// pathLength records the length of the path in terms of number of vertex.
+    		double pathLength;
+    		// use the diameter as the ground truth
+			diameterPath = graphGen.findDiameter();
+			graphGen.setGroundTruth(diameterPath);
+			pathLength = diameterPath.size() + 1;
+    		
+			// instead of choosing the diameter as the path, choose a path specified length 
+/*			System.out.println(graphGen.pathLength);
+			ArrayList<VertexSimulation2> pathInVertex = graphGen.findPath(graphGen.pathLength);
+			pathLength = pathInVertex.size();
+			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
+			{
+				System.out.println("could not find such path!");
+				System.exit(-1);
+			}	*/			
+			
+			/*
+			 * Sensor simulator -- simulate the classification process of sensors
+			 */
+	    	for(int i = 0; i < runTime; i++) {
+		        //SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
+				classifiedResult= graphGen.classify();
+				objectSeq = new ObjectSimulation2[classifiedResult.size()];
+		        objectSeq = classifiedResult.toArray(objectSeq);
+		        System.out.println("objectSeq is " + Arrays.deepToString(objectSeq));
+		        
+	    		/*
+	    		 * generate the confusion probability matrix
+	    		 */
+	            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+	            
+	            correct(objectSeq,
+	            		trueObjectSet, states,
+	                    start_probability,
+	                    transition_probability,
+	                    emission_probability,
+	                    confusion_probability,
+	                    graphGen.trueObjects, 
+	                    graphGen.trueStates
+	                    );
+
+	            StringBuilder str = new StringBuilder();
+	            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+	            	str.append(graphGen.trueObjects.get(m) + " ");
+	            }
+	            //System.out.println(str);
+	    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+	            
+	    		System.out.println("The trueObjects is as follows:" + str);
+	    		/*
+	    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+	    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+	    		}*/
+	    		System.out.println("The trueStates is: " + graphGen.trueStates);	
+	    		
+	    		totalMyWordPercentage += myWordPercentage;
+	    		totalMyStatePercentage += myStatePercentage;
+	        	totalASRWordPercentage += asrWordPercentage;
+	        	totalPathLength += pathLength;
+	      	
+	        	System.out.println("in the " + i + " th interation, haha!!!!");
+	    	}
+	    	
+	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
+	    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
+	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);    
+	    	System.out.println("averagePathLength: " + (double)totalPathLength/runTime);     
+	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	    	System.out.println("");
     	}
-    	
-    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
-    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
-    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
 		
-    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("");
-    	
     }
     
 	    /*
@@ -210,8 +198,7 @@ public class Simulation2
 	    {
 			// verSet contains all the vertexes of the graph
 	        Set<VertexSimulation2> verSet = new HashSet<VertexSimulation2>();
-	        verSet.addAll(graph.vertexSet());
-	        
+	        verSet.addAll(graph.vertexSet());	        
 	        // for states
 	        ArrayList<String> stateList = new ArrayList<String>();
 	        // for start_probability
@@ -363,7 +350,7 @@ public class Simulation2
                     			//double v_prob_prime = Math.log(start_p.get(next_state)) + Math.log(emit_p.get(next_state).get(object)) + Math.log(conf_p.get(input).get(object));
                     			v_prob = start + emit + conf;
                     		}
-                    		if (v_prob >= Pmax) {
+                    		if (v_prob > Pmax) {
                     			Pmax = v_prob;
                     			Smax = Integer.parseInt(next_state);
                     			v_object = object;
@@ -385,7 +372,7 @@ public class Simulation2
 	                    		//v_prob = V[t-1][Integer.parseInt(source_state)] * p;
 	                    		v_prob = V[t-1][Integer.parseInt(source_state)] + p;
 							
-	                    		if (v_prob >= Pmax)
+	                    		if (v_prob > Pmax)
 	                    		{
 	                    			Pmax = v_prob;
 	                    			Smax = Integer.parseInt(source_state);
@@ -568,11 +555,11 @@ public class Simulation2
             		   confusion_probability.get(key));
             }*/
             
-            for(ObjectSimulation2 obsObject: confusion_probability.keySet()) {
+/*            for(ObjectSimulation2 obsObject: confusion_probability.keySet()) {
             	System.out.println("obsObject " + obsObject + ":");
             	for(ObjectSimulation2 trueObject : confusion_probability.get(obsObject).keySet())
             		System.out.println(trueObject + ":" + confusion_probability.get(obsObject).get(trueObject));
-            }
+            }*/
 			return confusion_probability;
         }
 

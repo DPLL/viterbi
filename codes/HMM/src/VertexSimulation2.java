@@ -15,6 +15,7 @@ public class VertexSimulation2 implements Serializable {
 	int vertexID;
 	// objectNum is the number of objects for each node
 	int objectNum;
+	boolean visit;
 	ObjectSimulation2[] objectMatrix;
 	
 	public VertexSimulation2(int id, int numberOfWords, ObjectSimulation2[] matrixOfObjects) 
@@ -22,6 +23,7 @@ public class VertexSimulation2 implements Serializable {
 		vertexID = id;
 		objectNum = numberOfWords;
 		objectMatrix = matrixOfObjects;
+		visit = false;
 	}
 	
 	public VertexSimulation2(int id) 

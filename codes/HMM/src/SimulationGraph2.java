@@ -123,11 +123,14 @@ public class SimulationGraph2  implements Serializable {
 		} else {
 			for (DefaultWeightedEdge e: outgoingEdges) {
 				VertexSimulation2 ver = randomGraph.getEdgeTarget(e);
-				path.add(ver);
-				if (DFS(depth-1, ver, path))
-					break;
-				int size = path.size();
-				path.remove(size-1);
+				if (ver.visit == false) {
+					ver.visit = true;
+					path.add(ver);
+					if (DFS(depth-1, ver, path))
+						break;
+					int size = path.size();
+					path.remove(size-1);
+				}
 			}
 			return true;
 		}
@@ -440,11 +443,11 @@ public class SimulationGraph2  implements Serializable {
     	classifiedResults = new ArrayList<ObjectSimulation2>();
         for(ObjectSimulation2 obj: trueObjects) {
     		double error = Math.random();  
-    		System.out.println("error is " + error);
+    		//System.out.println("error is " + error);
     		// min and max are the lower and upper bound of obj, respectively.
     		double min = obj.objectID * errorGranularity;
     		double max = obj.objectID * errorGranularity + recall;
-    		System.out.println("min is " + min + ", and max is " + max);
+    		//System.out.println("min is " + min + ", and max is " + max);
     		int id;
     		if (0 <= error && error < min) {
     			id = (int) (error/errorGranularity);
@@ -455,9 +458,9 @@ public class SimulationGraph2  implements Serializable {
     		}
         	classifiedResults.add(new ObjectSimulation2(id));
         }
-        System.out.println("classifiedResults is as follows");
+/*        System.out.println("classifiedResults is as follows");
         for(ObjectSimulation2 arr : classifiedResults)
-        	System.out.println(arr);
+        	System.out.println(arr);*/
 		return classifiedResults;
     }
     
@@ -473,7 +476,7 @@ public class SimulationGraph2  implements Serializable {
 		ArrayList<VertexSimulation2> diameterPath1InVertex = new ArrayList<VertexSimulation2>();
 		try {
 			//1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-			graph1 = graphGen1.GraphGen(0.5, 2, 3, 0.5, 1);
+			graph1 = graphGen1.GraphGen(0.5, 2, 3, 0.5, 2);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -486,11 +489,14 @@ public class SimulationGraph2  implements Serializable {
 		graphGen1.setGroundTruth(diameterPath1);
 		graphGen1.classify();
 		
-/*		double one = 0.05;
-		double two = 0.005;
-		double three = 0.033;
-		int test = (int) (one/three); 
-		System.out.println(test);*/
+		// instead of choosing the diameter as the path, choose a path specified length 
+		System.out.println("pathLength is " + graphGen1.pathLength);
+		ArrayList<VertexSimulation2> pathInVertex = graphGen1.findPath(graphGen1.pathLength);
+		if (!graphGen1.setGroundTruthInVertex(pathInVertex)) 
+		{
+			System.out.println("could not find such path!");
+			System.exit(-1);
+		}		
 		
 		try
 		{
