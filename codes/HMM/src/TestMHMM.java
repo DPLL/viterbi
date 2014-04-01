@@ -58,7 +58,7 @@ public class TestMHMM
 
 	
     
-    static final int port = 9999;
+    static final int port = 9998;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
@@ -182,11 +182,21 @@ public class TestMHMM
 /*
         System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
         
-        
         ArrayList<String> strArr = new ArrayList<String>(); 
         
 		DatagramSocket serverSocket = new DatagramSocket(port);
         System.out.println("In the UDPserver");
+        
+/*        String str1 = "Oxygen$ Sicily$ electric$ intravenous$\n";
+        str1 = str1.replace("\n", " ");
+        System.out.println("after replacement, the str is: " + str1);
+        String[] strSeq = str1.split("\\$ "); 
+        System.out.println("split.size: " + strSeq.length);
+        System.out.println("The received seq after manipulation is:");
+        for (String st : strSeq) {
+            System.out.println(st);
+        }
+        System.out.println("haha");*/
 
         while(true)
         {
@@ -200,7 +210,8 @@ public class TestMHMM
 	    	String revStr = new String(receiveData, 0, receivePacket.getLength());
 	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
 	        //System.out.println("revStr.length(): " + revStr.length());
-	        System.out.println("RECEIVED: " + revStr);
+	    	// get rid of the newline char
+	        System.out.println("RECEIVED: " + revStr.replace("\n", " "));
 	        
 	        if(revStr.equals("over"))
 	        		break;
@@ -215,7 +226,7 @@ public class TestMHMM
             // manipulate the received string 
             // Pay attention to the match case of "|" in java!!!
             //String[] wordSeq = revStr.split("\\|");
-	        String[] wordSeq = revStr.split("\\$"); 
+	        String[] wordSeq = revStr.split("\\$ "); 
             System.out.println("split.size: " + wordSeq.length);
             System.out.println("The received seq after manipulation is:");
             for (String str : wordSeq) {
@@ -245,16 +256,7 @@ public class TestMHMM
 	                confusion_probability);
         }
         serverSocket.close();
-        
-
-/*        
-        forward_viterbi(actualVocabularySet,
-        		vocabularySet, states,
-                start_probability,
-                transition_probability,
-                emission_probability,
-                confusion_probability);*/
-        }
+    }
  
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
                         Hashtable<String, Double> start_p,
@@ -273,14 +275,12 @@ public class TestMHMM
         	//X[t][i] stores the word that has been chosen corresponding to the V[t][i]
         	String X[][] = new String[obs_num+1][state_num];
 		
-        	int m = 0;
         	for (String state : states)
         	{
         		//V[0][m] = start_p.get(state);
-                V[0][m] = Math.log(start_p.get(state));
-        		B[0][m] = m;
-        		X[0][m] = "@";
-        		m++;
+                V[0][Integer.parseInt(state)] = Math.log(start_p.get(state));
+        		B[0][Integer.parseInt(state)] = Integer.parseInt(state);
+        		X[0][Integer.parseInt(state)] = "@";
         	}
 
         	// t is the records the current time
@@ -314,7 +314,8 @@ public class TestMHMM
                             }
                             if (v_prob >= Pmax) {
                                 Pmax = v_prob;
-                                Smax = i;
+                                //Smax = i;
+                                Smax = Integer.parseInt(next_state);
                                 v_word = word;
                             }
                         } else {
@@ -335,20 +336,24 @@ public class TestMHMM
     	                    				Math.log(trans_p.get(source_state).get(next_state)) + Math.log(conf_p.get(input).get(word));
  
                         		//v_prob = V[t-1][j] * p;
-                                v_prob= V[t-1][j] + p;
+                                v_prob= V[t-1][Integer.parseInt(source_state)] + p;
     						
                         		if (v_prob >= Pmax)
                         		{
                         			Pmax = v_prob;
-                        			Smax = j;
+                        			//Smax = j;
+                        			Smax = Integer.parseInt(source_state);
                         			v_word = word;
                         		}
                         	}
                         }
                     }
-                    V[t][i] = Pmax;
+/*                  V[t][i] = Pmax;
                     B[t][i] = Smax;
-                    X[t][i] = v_word;
+                    X[t][i] = v_word;*/
+                    V[t][Integer.parseInt(next_state)] = Pmax;
+                    B[t][Integer.parseInt(next_state)] = Smax;
+                    X[t][Integer.parseInt(next_state)] = v_word;
                 }
             }
  
@@ -426,7 +431,7 @@ public class TestMHMM
 		        if(cur_conv_index > retval)
 		            retval = cur_conv_index;
 		    }
-			System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
+			//System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
 		    return retval/len_dest;       
 		}
 

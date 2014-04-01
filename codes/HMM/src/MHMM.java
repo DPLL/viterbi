@@ -1,3 +1,9 @@
+/*
+ * MHMM.java is a deprecated file which only test the initial working functionality of HMM. It differs from TestMHMM.java in the
+ * following ways: 1. its implementation of HMM has some flaw.  It treats the first round the same as the rest of the rounds 2. It 
+ * does not have convolution_index, 3. B[0][m] = m; 
+ */
+
 import java.awt.List;
 import java.io.BufferedReader;
 import java.io.IOException;

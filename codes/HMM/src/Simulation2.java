@@ -1,3 +1,7 @@
+/*
+ * Simulation2.java is java file that implements our NIUBI algorithm
+ */
+
 import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,7 +62,7 @@ public class Simulation2
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 100;
+    	int runTime = 1;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -102,7 +106,7 @@ public class Simulation2
 			classifiedResult = graphGen.trueObjects;
 			objectSeq = new ObjectSimulation2[classifiedResult.size()];
 	        objectSeq = classifiedResult.toArray(objectSeq);
-	        System.out.println(Arrays.deepToString(objectSeq));
+	        System.out.println(Arrays.toString(objectSeq));
 
 		} else {
     	 	// Generate a random graph
@@ -141,7 +145,7 @@ public class Simulation2
 				classifiedResult= graphGen.classify();
 				objectSeq = new ObjectSimulation2[classifiedResult.size()];
 		        objectSeq = classifiedResult.toArray(objectSeq);
-		        System.out.println("objectSeq is " + Arrays.deepToString(objectSeq));
+		        System.out.println("objectSeq is " + Arrays.toString(objectSeq));
 		        
 	    		/*
 	    		 * generate the confusion probability matrix
@@ -265,7 +269,7 @@ public class Simulation2
 	        //System.out.println("print out the trueObejctSet as follows:");
 	        //for(ObjectSimulation2 object : trueObjectSet)
 	        //	System.out.println(Arrays.toString(object));
-	        //System.out.println(Arrays.deepToString(trueObjectSet));
+	        //System.out.println(Arrays.toString(trueObjectSet));
 	        //System.out.println(trueObjectSetList.size());
 	        // print the emission_probability
 	        //System.out.println("emission_probability: " + emission_probability);
@@ -425,7 +429,7 @@ public class Simulation2
             }
            	
             System.out.println("\n*************************************\n");         
-            System.out.println(Arrays.deepToString(actualObs));
+            System.out.println(Arrays.toString(actualObs));
             
             for (int x = 0; x < obs_num+1; x++)
             {

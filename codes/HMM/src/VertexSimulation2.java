@@ -43,12 +43,14 @@ public class VertexSimulation2 implements Serializable {
 	
 	public String toString() 
 	{
-		StringBuilder str = new StringBuilder(Integer.toString(vertexID)+ ": ");
+/*		StringBuilder str = new StringBuilder(Integer.toString(vertexID)+ ": ");
 		
 		for (ObjectSimulation2 obj : objectMatrix) {
 			str.append(obj.objectID + " ");
 		}
-		System.out.println(Arrays.toString(objectMatrix));
+		System.out.println(Arrays.toString(objectMatrix));*/
+		System.out.println("haha");
+		StringBuilder str = new StringBuilder(Integer.toString(vertexID));
 		return str.toString(); 
 	}
 	
