@@ -1,4 +1,5 @@
-/*
+/* 
+ * SimulationGraph2.java & Simulation2.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
  * This class generates objects and misclassification matrix. It does not depend on the distance measure
  */
 import java.io.File;
@@ -36,8 +37,8 @@ public class SimulationGraph2  implements Serializable {
 	
 	// number of edges
 	int numEdge;
-	// density of the DAG
-	double density;
+	// avgDegree of the DAG
+	int avgDegree;
 	// number of objects per node
 	// It is assumed that the objectPerNode is the same across different nodes.
 	int objectPerNode;
@@ -61,14 +62,17 @@ public class SimulationGraph2  implements Serializable {
 	{
 	}
 	
-	public AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, 
+	public AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> GraphGen(int avgDegreeOfGraph, int objectNumPerNode, 
 			int nodeNum, double recallValue, int length) throws FileNotFoundException 
 	{
-		density = densityOfGraph;
+		avgDegree = avgDegreeOfGraph;
 		objectPerNode = objectNumPerNode;
 		numVertex = nodeNum;
-		// cast numEdge to integer
-		numEdge = (int) (density * numVertex * (numVertex-1));
+		if (avgDegree > numVertex-1) {
+			System.out.println("number edges exceeds the max possible value");
+			System.exit(-1);
+		}
+		numEdge = avgDegree * numVertex;
 		System.out.println("numEdge is: " + numEdge);
 		recall = recallValue;
 		pathLength = length;
@@ -475,8 +479,8 @@ public class SimulationGraph2  implements Serializable {
 		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<VertexSimulation2> diameterPath1InVertex = new ArrayList<VertexSimulation2>();
 		try {
-			//1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-			graph1 = graphGen1.GraphGen(0.5, 2, 3, 0.5, 2);
+			//1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
+			graph1 = graphGen1.GraphGen(5, 2, 3, 0.5, 2);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,5 +1,9 @@
 /*
- * TransciberSimulation generates simulation results based on distance similarity measurements of objects, where objects are represented by N-dimensional real-number objects.
+ * GraphGenSimulation.java & TranscriberSimulation.java & VertexSimulation.java
+ * are in the same set.
+ * 
+ * TransciberSimulation generates simulation results based on distance similarity measurements of objects, 
+ * where objects are represented by N-dimensional real-number objects.
  * Its corresponding graph generation class is 'GraphGenSimulation.class'.
  */
 
@@ -36,8 +40,11 @@ public class TranscriberSimulation
     
     // graphGen is the randomGraph generator that generates a weigthed random graph
 	static GraphGenSimulation graphGen;
-	// objectSeq is the initial recognition results from Sphinx as a String array
-	static double[][] objectSeq;
+	// noiseAddedSeq is the intermediate results with noise added
+	static double[][] noiseAddedSeq;
+	// classifiedSeq output of the sensor, and it is also the input to our algorithm
+	static double[][] classfiedSeq;
+
     // states store the all the different states the workflow has
 	static String[] states;
     // trueObjectSet stores all the trueObject the workflow has
@@ -48,8 +55,14 @@ public class TranscriberSimulation
 	static Hashtable<String, Hashtable<String, Double>> transition_probability;
     // transition_probability stores the start probability matrix
 	static Hashtable<String, Double> start_probability;
-    // confusion_probability stores the confusion probability matrix
-	static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;
+/*    // confusion_probability stores the confusion probability matrix
+	static Hashtable<double[], Hashtable<double[], Double>> confusion_probability;*/
+	
+    //  classificationMatrix stores the probability matrix for the sensor classifying
+	static Hashtable<double[], Hashtable<double[], Double>> classificationMatrix;
+    // similarityMatrix stores the similarity metric between the true objects
+	static Hashtable<double[], Hashtable<double[], Double>> similarityMatrix;
+	
     // myWordPercentage is the percentage of object that my correction algo. is right
 	static double myWordPercentage;
     // myStatePercentage is the percentage of state that my correction algo. is right
@@ -66,97 +79,107 @@ public class TranscriberSimulation
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 10;
+    	int runTime = 1;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
     	
-    	for(int i = 0; i < runTime; i++) {
-        	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
-    		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
-        	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
-    		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();	
-    		if (DEBUG_MODE) {
-    			// read from the predefined class
-    			graphGen = new GraphGenSimulation();
+    	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
+		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
+    	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
+		ArrayList<double[]> noiseAddedResult = new ArrayList<double[]>();	
+		ArrayList<double[]> classifiedResult = new ArrayList<double[]>();	
+		
+    	if (DEBUG_MODE) { 		
+			// read from the predefined class
+			graphGen = new GraphGenSimulation();
 
-    			try {
-    				FileInputStream fileIn = new FileInputStream("graph1.out");
-    				ObjectInputStream in = new ObjectInputStream(fileIn);   			
-    				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
-			        in.close();
-			        fileIn.close();
-				} catch(IOException ex)
-			    {
-			         ex.printStackTrace();
-			         return;
-			    } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			try {
+				FileInputStream fileIn = new FileInputStream("graph1.out");
+				ObjectInputStream in = new ObjectInputStream(fileIn);   			
+				graph = (AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge>) in.readObject();
+		        in.close();
+		        fileIn.close();
+			} catch(IOException ex)
+		    {
+		         ex.printStackTrace();
+		         return;
+		    } catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			System.out.println(graph.toString());
+			graphGen.randomGraph = graph;
+			graphGen.avgDegree = 5;
+			graphGen.objectPerNode = 2;
+			graphGen.dimension = 1;
+			graphGen.numVertex = 30;
+			graphGen.range = 100;
+			graphGen.mean = 0;
+			graphGen.stdDev = 30;
+			
+			graphGen.numEdge = 6;
+
+			diameterPath = graphGen.findDiameter();
+			graphGen.setGroundTruth(diameterPath);
+			
+	    	ArrayList<double[]> randomNoise = new ArrayList<double[]>();
+	    	Random fRandom = new Random();
+            for(double[] obj: graphGen.trueObjects) {
+            	// assume that each dimension of the object is subject to error that is i.i.d.
+            	double[] objNoiseAdded = new double[obj.length];
+            	for(int j = 0; j < obj.length; j++) {
+            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+            		double error = fRandom.nextGaussian()*graphGen.stdDev + graphGen.mean;
+            		//System.out.println("error is: " + error);
+            		objNoiseAdded[j] = error;            		
+            	}
+            	randomNoise.add(objNoiseAdded);
+            }	            
+            System.out.println("randomNoise is as follows");
+            for(double[] arr : randomNoise)
+            	System.out.println(Arrays.toString(arr));
+			
+			// manually add noise
+			double[][] noise = {{20}, {24}, {10}};
+			//noiseAddedResult = graphGen.trueObjects;
+			for (int j = 0; j < 3; j++) {
+				double[] temp = new double[noise[0].length];
+				for (int m = 0; m < noise[0].length; m++) {
+					temp[m] = noise[j][m] + graphGen.trueObjects.get(j)[m];
 				}
-    			
-				System.out.println(graph.toString());
-    			graphGen.randomGraph = graph;
-    			graphGen.density = 0.5;
-    			graphGen.objectPerNode = 2;
-    			graphGen.dimension = 1;
-    			graphGen.numVertex = 30;
-    			graphGen.range = 100;
-    			graphGen.mean = 0;
-    			graphGen.stdDev = 30;
-    			
-    			graphGen.numEdge = 6;
+				noiseAddedResult.add(temp);
+			}
+			System.out.println("noiseAdded result is:");
+	        for(double[] arr : noiseAddedResult)
+	        	System.out.println(Arrays.toString(arr));
+			noiseAddedSeq = new double[noiseAddedResult.size()][];
+	        noiseAddedSeq = noiseAddedResult.toArray(noiseAddedSeq);
+	        System.out.println(Arrays.deepToString(noiseAddedSeq));
 
-				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
-				
-		    	ArrayList<double[]> randomNoise = new ArrayList<double[]>();
-		    	Random fRandom = new Random();
-	            for(double[] obj: graphGen.trueObjects) {
-	            	// assume that each dimension of the object is subject to error that is i.i.d.
-	            	double[] objNoiseAdded = new double[obj.length];
-	            	for(int j = 0; j < obj.length; j++) {
-	            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
-	            		double error = fRandom.nextGaussian()*graphGen.stdDev + graphGen.mean;
-	            		//System.out.println("error is: " + error);
-	            		objNoiseAdded[j] = error;            		
-	            	}
-	            	randomNoise.add(objNoiseAdded);
-	            }	            
-	            System.out.println("randomNoise is as follows");
-	            for(double[] arr : randomNoise)
-	            	System.out.println(Arrays.toString(arr));
-				
-				// manually add noise
-				double[][] noise = {{20}, {24}, {10}};
-				//noiseAddedResult = graphGen.trueObjects;
-				for (int j = 0; j < 3; j++) {
-					double[] temp = new double[noise[0].length];
-					for (int m = 0; m < noise[0].length; m++) {
-						temp[m] = noise[j][m] + graphGen.trueObjects.get(j)[m];
-					}
-					noiseAddedResult.add(temp);
-				}
-				System.out.println("noiseAdded result is:");
-		        for(double[] arr : noiseAddedResult)
-		        	System.out.println(Arrays.toString(arr));
-				objectSeq = new double[noiseAddedResult.size()][];
-		        objectSeq = noiseAddedResult.toArray(objectSeq);
-		        System.out.println(Arrays.deepToString(objectSeq));
-
-    		} else {
+    	} else {
+    		
+			for(int i = 0; i < runTime; i++) {				
 	    	 	// Generate a random graph
-
-        		graphGen = new GraphGenSimulation();
+	    		graphGen = new GraphGenSimulation();
 	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
-        		
-        		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-				graph = graphGen.GraphGen(0.5, 10, 5, 20, 100, 0, 30, 12);
+	    		
+	    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
+				graph = graphGen.GraphGen(1, 2, 1, 3, 100, 0, 30, 2);
 				System.out.println(graphGen.numVertex);
-				System.out.println(graph.toString());				
-				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
+				System.out.println(graph.toString());
+	    		/*
+	    		 *  Graph Interface
+	    		 */
+	    		graphParse(graph);
 				
+	    		/*
+	    		 * Set groundTruth
+	    		 */
+	    		// use the diameter as the ground truth
+				diameterPath = graphGen.findDiameter();
+				graphGen.setGroundTruth(diameterPath);				
 				// instead of choosing the diameter as the path, choose a path specified length 
 /*				System.out.println(graphGen.pathLength);
 				ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
@@ -164,89 +187,90 @@ public class TranscriberSimulation
 				{
 					System.out.println("could not find such path!");
 					System.exit(-1);
-				}
-
-				
+				} */
 				//System.out.println(graph.edgeSet().size());
-				
-				/*
-				 * Sensor simulator -- add noise to the trueObjects 
-				 */
+								
+				//Sensor simulator -- add noise to the trueObjects
 				noiseAddedResult= graphGen.addNoise();
-				objectSeq = new double[noiseAddedResult.size()][];
-		        objectSeq = noiseAddedResult.toArray(objectSeq);
-		        System.out.println(Arrays.deepToString(objectSeq));
-	    	}
-    		/*
-    		 *  Graph Interface
-    		 */
-    		graphParse(graph);
-            
-    		/*
-    		 * generate the confusion probability matrix
-    		 */
-            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
-            
-            correct(objectSeq,
-            		trueObjectSet, states,
-                    start_probability,
-                    transition_probability,
-                    emission_probability,
-                    confusion_probability,
-                    graphGen.trueObjects, 
-                    graphGen.trueStates
-                    );
-            
-            
-            // Testing by feeding in the right objects directly without going through ASR
-            /*
-            double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
-            trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
-            System.out.println("The trueObjectSeq is as follows:");
-            for(double[] object : trueObjectSeq) {
-            	System.out.println(Arrays.toString(object));
-            }
-            Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
-            		confustionGen(trueObjectSeq, trueObjectSet);
-            
-            correct(trueObjectSeq,
-            		trueObjectSet, states,
-                    start_probability,
-                    transition_probability,
-                    emission_probability,
-                    confusion_probability,
-                    graphGen.trueObjects, 
-                    graphGen.trueStates);*/
-
-            StringBuilder str = new StringBuilder();
-            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
-            	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
-            }
-            //System.out.println(str);
-    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
-            
-    		System.out.println("The trueObjects is as follows:" + str);
-    		/*
-    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
-    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
-    		}*/
-    		System.out.println("The trueStates is: " + graphGen.trueStates);	
-    		
-    		totalMyWordPercentage += myWordPercentage;
-    		totalMyStatePercentage += myStatePercentage;
-        	totalASRWordPercentage += asrWordPercentage;
-      	
-        	System.out.println("in the " + i + " th interation, haha!!!!");
-    	}
-    	
-    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
-    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
-    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
+				noiseAddedSeq = new double[noiseAddedResult.size()][];
+		        noiseAddedSeq = noiseAddedResult.toArray(noiseAddedSeq);
+		        System.out.println("noiseAddedSeq is: " + Arrays.deepToString(noiseAddedSeq));
+		        
+	    		/*
+	    		 * generate the classificationMatrix
+	    		 */
+	            classificationMatrix =	confustionGen(noiseAddedSeq, trueObjectSet);
+		        
+		        //Sensor simulator -- classify
+	            classifiedResult = graphGen.classify(classificationMatrix);
+	            classfiedSeq = new double[classifiedResult.size()][];
+	            classfiedSeq = classifiedResult.toArray(classfiedSeq);
+	            System.out.println("classfiedSeq is " + classfiedSeq);
+	    		/*
+	    		 * generate the similarityMatrix
+	    		 */
+	            similarityMatrix =	confustionGen(trueObjectSet, trueObjectSet);;
+	        
+		        correct(classfiedSeq,
+		        		trueObjectSet, states,
+		                start_probability,
+		                transition_probability,
+		                emission_probability,
+		                similarityMatrix,
+		                graphGen.trueObjects, 
+		                graphGen.trueStates
+		                );
+	        
+	        
+		        // Testing by feeding in the right objects directly without going through ASR
+		        /*
+		        double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
+		        trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
+		        System.out.println("The trueObjectSeq is as follows:");
+		        for(double[] object : trueObjectSeq) {
+		        	System.out.println(Arrays.toString(object));
+		        }
+		        Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
+		        		confustionGen(trueObjectSeq, trueObjectSet);
+		        
+		        correct(trueObjectSeq,
+		        		trueObjectSet, states,
+		                start_probability,
+		                transition_probability,
+		                emission_probability,
+		                confusion_probability,
+		                graphGen.trueObjects, 
+		                graphGen.trueStates);*/
 		
-    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-    	System.out.println("");
-    	
+		        StringBuilder str = new StringBuilder();
+		        for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+		        	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
+		        }
+		        //System.out.println(str);
+				//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+		        
+				System.out.println("The trueObjects is as follows:" + str);
+				/*
+				for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+					System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+				}*/
+				System.out.println("The trueStates is: " + graphGen.trueStates);	
+				
+				totalMyWordPercentage += myWordPercentage;
+				totalMyStatePercentage += myStatePercentage;
+		    	totalASRWordPercentage += asrWordPercentage;
+		  	
+		    	System.out.println("in the " + i + " th interation, haha!!!!");
+			}
+	    	
+	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
+	    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
+	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
+			
+	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	    	System.out.println("");
+    	}   	
     }
     
 	    /*
@@ -525,7 +549,7 @@ public class TranscriberSimulation
         /*
          * reportFidelity reports the speech recognition results and compare them. It is based on an important assumption that
          * ground truth objects and the actual observations have the same length, i.e., Sphinx does not miss any object.
-         * actualObs[][] are the objects with noise added, objects[][] are the output of my algorithm, trueObjects are the groundTruth objects 
+         * actualObs[][] are the objects classified by the sensors, objects[][] are the output of my algorithm, trueObjects are the groundTruth objects 
          */
         public static void reportFidelity(double[][] actualObs, int[] path, double[][] objects, ArrayList<double[]> trueObjects, ArrayList<String> trueStates) 
         {
@@ -571,29 +595,6 @@ public class TranscriberSimulation
             		System.out.println(Arrays.toString(trueObject) + ":" + misclassification_probability.get(object).get(trueObject));
             }*/
         	
-            // compute the classifiedObjects based on the results of confusion_probability and actualObs[][]
-        	for (int i = 0; i < actualObs.length; i++) {
-        		double[] actualOb = actualObs[i];
-        		Hashtable<double[], Double> d = confusion_probability.get(actualOb);
-        		
-         		Enumeration<double[]> enumKey = d.keys();
-        		Double maxSimilarity = (double) 0;
-        		double[] maxMatch = null;
-        		while(enumKey.hasMoreElements()) {
-        			double[] key = enumKey.nextElement();
-        			Double val = d.get(key);
-        			if (val >= maxSimilarity) {
-        				maxSimilarity = val;
-        				maxMatch = key;
-        			}
-        		}
-        		classifiedObjects.add(maxMatch);
-        	}
-            System.out.println("The classifiedObjects are:");
-            for (double[] item : classifiedObjects) {
-            	System.out.println(Arrays.toString(item));
-            }
-        	
         	// myStateScore is the score of state of my algo.
         	double myStateScore = 0;
         	// myObjectScore is the score of objects of my algo.
@@ -618,8 +619,8 @@ public class TranscriberSimulation
         		}
         		// Calculate sensor score based on 'misclassification_probability'
         		//sensorObjectScore += misclassification_probability.get(trueObjects.get(i)).get(trueObjects.get(i));       		
-        		// calculate sensor score based on 'classifiedObjects'
-        		if (classifiedObjects.get(i) == trueObjects.get(i)) {
+        		// calculate sensor score based on actualObs[][]
+        		if (actualObs[i] == trueObjects.get(i)) {
         			sensorObjectScore += 1;
         		}
         		// Only if the states matches, will myStateScore be increased

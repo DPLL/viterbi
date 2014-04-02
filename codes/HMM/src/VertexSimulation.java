@@ -1,3 +1,8 @@
+/*
+ * GraphGenSimulation.java & TranscriberSimulation.java & VertexSimulation.java
+ * are in the same set.
+ */
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -17,6 +22,7 @@ public class VertexSimulation implements Serializable {
 	// objectNum is the number of objects for each node
 	int objectNum;
 	int dimension;
+	boolean visit;
 	double[][] objectMatrix;
 	
 	public VertexSimulation(int id, int numberOfWords, int n, double[][] matrixOfObjects) 
@@ -24,6 +30,7 @@ public class VertexSimulation implements Serializable {
 		vertexID = id;
 		objectNum = numberOfWords;
 		dimension = n;
+		visit = false;
 		/*
 		if (numberOfWords != listOfWords.length) {
 			System.out.println("Number of objects does not match!!!");

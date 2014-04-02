@@ -1,3 +1,8 @@
+/*
+ * GraphGenSimulation.java & TranscriberSimulation.java & VertexSimulation.java
+ * are in the same set.
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -6,7 +11,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -33,8 +40,8 @@ public class GraphGenSimulation  implements Serializable {
 	
 	// number of edges
 	int numEdge;
-	// density of the DAG
-	double density;
+	// avgDegree of the DAG
+	int avgDegree;
 	// number of objects per node
 	// It is assumed that the objectPerNode is the same across different nodes.
 	int objectPerNode;
@@ -46,6 +53,8 @@ public class GraphGenSimulation  implements Serializable {
 	ArrayList<double[]> trueObjects;
 	// noiseAddedResults is the trueObjects with noise added
 	ArrayList<double[]> noiseAddedResults;
+	// classifiedResults is the results after sensor classification
+	ArrayList<double[]> classifiedResults;
 	// number of vertex
 	int numVertex;
 	// the value of the coordinates can vary within [0, range)
@@ -65,15 +74,20 @@ public class GraphGenSimulation  implements Serializable {
 	{
 	}
 	
-	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(double densityOfGraph, int objectNumPerNode, 
+	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(int avgDegreeOfGraph, int objectNumPerNode, 
 			int n, int nodeNum, double rangeValue, double meanValue, double stdDvValue, int length) throws FileNotFoundException 
 	{
-		density = densityOfGraph;
+		avgDegree = avgDegreeOfGraph;
 		objectPerNode = objectNumPerNode;
 		numVertex = nodeNum;
+		if (avgDegree > numVertex-1) {
+			System.out.println("number edges exceeds the max possible value");
+			System.exit(-1);
+		}
 		range = rangeValue;
 		// cast numEdge to integer
-		numEdge = (int) (density * numVertex * (numVertex-1));
+		//numEdge = (int) (density * numVertex * (numVertex-1));
+		numEdge = avgDegree * numVertex;
 		System.out.println("numEdge is: " + numEdge);
 		dimension = n;
 		mean = meanValue;
@@ -130,11 +144,14 @@ public class GraphGenSimulation  implements Serializable {
 		} else {
 			for (DefaultWeightedEdge e: outgoingEdges) {
 				VertexSimulation ver = randomGraph.getEdgeTarget(e);
-				path.add(ver);
-				if (DFS(depth-1, ver, path))
-					break;
-				int size = path.size();
-				path.remove(size-1);
+				if (ver.visit == false) {
+					ver.visit = true;
+					path.add(ver);
+					if (DFS(depth-1, ver, path))
+						break;
+					int size = path.size();
+					path.remove(size-1);
+				}
 			}
 			return true;
 		}
@@ -463,22 +480,36 @@ public class GraphGenSimulation  implements Serializable {
 		return noiseAddedResults;
     }
     
+    public ArrayList<double[]> classify(Hashtable<double[], Hashtable<double[], Double>> classificationMatrix)
+    {
+    	classifiedResults = new ArrayList<double[]>();
+        // compute the classifiedObjects based on the results of confusion_probability and actualObs[][]
+    	for (int i = 0; i < noiseAddedResults.size(); i++) {
+    		double[] actualOb = noiseAddedResults.get(i);
+    		Hashtable<double[], Double> d = classificationMatrix.get(actualOb);
+    		
+     		Enumeration<double[]> enumKey = d.keys();
+    		Double maxSimilarity = (double) 0;
+    		double[] maxMatch = null;
+    		while(enumKey.hasMoreElements()) {
+    			double[] key = enumKey.nextElement();
+    			Double val = d.get(key);
+    			if (val > maxSimilarity) {
+    				maxSimilarity = val;
+    				maxMatch = key;
+    			}
+    		}
+    		classifiedResults.add(maxMatch);
+    	}
+        System.out.println("The classifiedObjects are:");
+        for (double[] item : classifiedResults) {
+        	System.out.println(Arrays.toString(item));
+        } 	
+    	return classifiedResults;
+    }
+    
 	public static void main(String [] args) 
 	{
-
-		/*
-		if (args.length != 3) {
-			System.out.println("Correct Usage: ./GraphGenerator [density] [objectPerNode] [objectLength]");
-			System.exit(-1);
-		}
-		
-		density = Double.parseDouble(args[0]);
-		objectPerNode = Integer.parseInt(args[1]);
-		objectLength = Integer.parseInt(args[2]);
-		// cast numEdge to integer
-		numEdge = (int) (density * numVertex * (numVertex-1));
-			
-		*/
 		
 /*		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
 		ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
@@ -502,8 +533,8 @@ public class GraphGenSimulation  implements Serializable {
 		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<VertexSimulation> diameterPath1InVertex = new ArrayList<VertexSimulation>();
 		try {
-			//1.[densityOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-			graph1 = graphGen1.GraphGen(0.5, 2, 1, 3, 100, 0, 0, 1);
+			//1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
+			graph1 = graphGen1.GraphGen(1, 2, 1, 3, 100, 0, 0, 1);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

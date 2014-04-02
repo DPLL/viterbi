@@ -1,4 +1,5 @@
 /*
+ * SimulationGraph2.java & Simulation2.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
  * Simulation2.java is java file that implements our NIUBI algorithm
  */
 
@@ -62,7 +63,7 @@ public class Simulation2
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	//
-    	int runTime = 1;
+    	int runTime = 20;
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
@@ -94,7 +95,7 @@ public class Simulation2
 			
 			System.out.println(graph.toString());
 			graphGen.randomGraph = graph;
-			graphGen.density = 0.5;
+			graphGen.avgDegree = 5;
 			graphGen.objectPerNode = 2;
 			graphGen.numVertex = 3;
 			graphGen.recall = 0.5;
@@ -111,8 +112,8 @@ public class Simulation2
 		} else {
     	 	// Generate a random graph
     		graphGen = new SimulationGraph2();
-    		// 1.[densityOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-			graph = graphGen.GraphGen(0.6, 10, 20, 0.9, 5);
+    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
+			graph = graphGen.GraphGen(5, 10, 20, 0.5, 5);
 			System.out.println(graphGen.numVertex);
 			System.out.println(graph.toString());	
     		/*

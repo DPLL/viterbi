@@ -2,6 +2,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
+ * SimulationGraph2.java & Simulation2.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
  * Vertex defines the properties of a vertex used in a random graph
  *
  * @author Yunlong Gao
