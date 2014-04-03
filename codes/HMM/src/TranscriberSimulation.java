@@ -172,34 +172,49 @@ public class TranscriberSimulation
     		for (int n = 0; n < graphNum; n++) {
 	    	 	// Generate a random graph
 	    		graphGen = new GraphGenSimulation();
-	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
-	    		
-	    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-				graph = graphGen.GraphGen(2, 2, 10, 30, 100, 0, 30, 7);
-				System.out.println(graphGen.numVertex);
-				System.out.println(graph.toString());
-	    		/*
-	    		 *  Graph Interface
-	    		 */
-	    		graphParse(graph);
-				
-	    		/*
-	    		 * Set groundTruth
-	    		 */
 	    		double pathLength;
-	    		// use the diameter as the ground truth
-				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);
-				pathLength = diameterPath.size() + 1;				
-				// instead of choosing the diameter as the path, choose a path specified length 
-/*				System.out.println(graphGen.pathLength);
-				ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
-				if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
-				{
-					System.out.println("could not find such path!");
-					System.exit(-1);
-				} 
-				pathLength = pathInVertex.size();*/
+	    		
+	    		//keep generating graphs that meet the requirement of pathLength
+	    		while (true) {
+		    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
+					graph = graphGen.GraphGen(2, 2, 10, 30, 100, 0, 30, 8);
+					System.out.println(graphGen.numVertex);
+					System.out.println(graph.toString());
+		    		/*
+		    		 *  Graph Interface
+		    		 */
+		    		graphParse(graph);
+					
+		    		/*
+		    		 * Set groundTruth
+		    		 */
+		    		// use the diameter as the ground truth
+					diameterPath = graphGen.findDiameter();
+					graphGen.setGroundTruth(diameterPath);
+					pathLength = diameterPath.size() + 1;	
+					break;			
+					// instead of choosing the diameter as the path, choose a path specified length 
+/*					System.out.println(graphGen.pathLength);
+					ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
+					pathLength = graphGen.pathLength;
+					
+					if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
+					{
+						System.out.println("could not find such path!");
+						// Purely for testing the length of the path
+						diameterPath = graphGen.findDiameter();
+						if (diameterPath.size()+1 >= graphGen.pathLength) {
+							System.out.println("WHAT???");
+							System.exit(-1);
+						}
+						System.out.println("BAD LUCK!!!");
+					} else {
+						// if such path could be found, then break out of while loop and keep on with the rest
+						break;
+					}*/
+					
+	    		}
+	    		
 	    		/*
 	    		 * generate the similarityMatrix for my algorithm
 	    		 */

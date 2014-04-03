@@ -162,8 +162,14 @@ public class GraphGenSimulation  implements Serializable {
 		Set<VertexSimulation> vertexSet = randomGraph.vertexSet();
 		ArrayList<VertexSimulation> path;
 		for (VertexSimulation v : vertexSet) {
+			// need to renew all the nodes in the graph by setting 'visit' to be false
+			Set<VertexSimulation> vers = randomGraph.vertexSet();
+			for (VertexSimulation ver : vers) {
+				ver.visit = false;
+			}	
 			path = new ArrayList<VertexSimulation>();
 			if (DFS(pathLength, v, path))
+				System.out.println("hoho");
 				if (path.size() == pathLength)
 					return path;
 		}

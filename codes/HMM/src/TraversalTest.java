@@ -55,6 +55,11 @@ public class TraversalTest {
 		Set<TraversalVertex> vertexSet = randomGraph.vertexSet();
 		ArrayList<TraversalVertex> path;
 		for (TraversalVertex v : vertexSet) {
+			// need to renew all the nodes in the graph by setting 'visit' to be false
+			Set<TraversalVertex> vers = randomGraph.vertexSet();
+			for (TraversalVertex ver : vers) {
+				ver.visit = false;
+			}		
 			System.out.println("current is vertex is: " + v);
 			path = new ArrayList<TraversalVertex>();
 			if (DFS(pathLength, v, path))
@@ -66,13 +71,13 @@ public class TraversalTest {
 	
 
 	
-	public ArrayList<TraversalVertex> DFS2(int depth, TraversalVertex v, ArrayList<TraversalVertex> path) 
+	public void DFS2(int depth, TraversalVertex v, ArrayList<TraversalVertex> path) 
 	{
 		if (v == null)
-			return null;
+			return;
 		if (depth == 0) {
-			//System.out.println(path);
-			return path;
+			System.out.println(path);
+			return;
 		}
 		
 		Set<DefaultWeightedEdge> outgoingEdges;
@@ -87,7 +92,7 @@ public class TraversalTest {
 				path.remove(size-1);
 			}
 		}		
-		return path;
+		return;
 	}
 	
 	public void findPath2(int pathLength)
@@ -101,14 +106,16 @@ public class TraversalTest {
 				ver.visit = false;
 			}			
 			System.out.println("current is vertex is: " + v);
-			v.visit = true;
 			path = new ArrayList<TraversalVertex>();
-			DFS2(pathLength-1, v, path);
+			DFS2(pathLength, v, path);
 			//System.out.println(path);
 		}
 		return;
 	}
 
+	/*
+	 * Difference between DFS2 and DFS is that DFS2 outputs all the possible paths
+	 */
 	
 	void formGraph()
 	{
@@ -156,7 +163,7 @@ public class TraversalTest {
 		return;
 	}
 	
-/*	public ArrayList<DefaultWeightedEdge> findDiameter()
+	public ArrayList<DefaultWeightedEdge> findDiameter()
 	{
 		// ArrayList of the diameter
 		ArrayList<DefaultWeightedEdge> diameterPath;
@@ -193,7 +200,7 @@ public class TraversalTest {
             	if (vet2.vertexID != vet1.vertexID) {
             		nodeCntr++;
 	            	double shortestPathDis = shortestPaths.shortestDistance(vet1, vet2);
-            		if (shortestPathDis > maxShortestPath && shortestPathDis < numVertex*1) {
+            		if (shortestPathDis > maxShortestPath && shortestPathDis < 9*1) {
 	            		startVertex = vet1;
 	            		endVertex = vet2;
 	            		maxShortestPath = shortestPathDis;
@@ -218,21 +225,23 @@ public class TraversalTest {
         diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
         
         return diameterPath;
-	}*/
+	}
 	
 	public static void main(String[] args) {
 		
 		TraversalTest test = new TraversalTest();
 		test.formGraph();
 		
-		//test.findPath(3);
+		//test.findPath(5);		
+		//test.findPath2(5);
+		ArrayList<DefaultWeightedEdge> diameter = new ArrayList<DefaultWeightedEdge>();
+		diameter = test.findDiameter();
+		System.out.println("The diameter is " + diameter);
 		
-		test.findPath2(3);
-		
-/*		if (test.findPath(4) == null) 
+		if (test.findPath(5) == null) 
 		{
 			System.out.println("could not find such path!");
-		}*/
+		}
 		
 	}
 
