@@ -35,18 +35,22 @@ public class TraversalTest {
 		if (outgoingEdges.isEmpty()) {
 			return false;
 		} else {
-			for (DefaultWeightedEdge e: outgoingEdges) {
+			for (DefaultWeightedEdge e: outgoingEdges) {				
 				TraversalVertex ver = randomGraph.getEdgeTarget(e);
 				if (ver.visit == false) {
 					ver.visit = true;
 					path.add(ver);
 					if (DFS(depth-1, ver, path))
-						break;
+						return true;
 					int size = path.size();
+					// remove because it does not meet the pathlength requirement.
+					// But we have to make it visit untrue so that even though it is 
+					// not in the current path, it might be selected in the future.
+					path.get(size-1).visit = false;
 					path.remove(size-1);
 				}
 			}
-			return true;
+			return false;
 		}
 	}
 	
@@ -63,9 +67,12 @@ public class TraversalTest {
 			System.out.println("current is vertex is: " + v);
 			path = new ArrayList<TraversalVertex>();
 			if (DFS(pathLength, v, path))
+				System.out.println("hoho");
 				if (path.size() == pathLength)
 					return path;
 		}
+		// Here we return null means we have loop through every outgoing adjacent node but could not
+		// find a path that meets the requirement.  Otherwise, it will return in the above 'return path' statement.
 		return null;
 	}
 	
@@ -89,6 +96,10 @@ public class TraversalTest {
 				path.add(ver);
 				DFS2(depth-1, ver, path);
 				int size = path.size();
+				// remove because it does not meet the pathlength requirement.
+				// But we have to make it visit untrue so that even though it is 
+				// not in the current path, it might be selected in the future.
+				path.get(size-1).visit = false;
 				path.remove(size-1);
 			}
 		}		
@@ -120,44 +131,33 @@ public class TraversalTest {
 	void formGraph()
 	{
 		randomGraph = new SimpleDirectedGraph<TraversalVertex, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+		TraversalVertex v0 = new TraversalVertex("0");
 		TraversalVertex v1 = new TraversalVertex("1");
 		TraversalVertex v2 = new TraversalVertex("2");
 		TraversalVertex v3 = new TraversalVertex("3");
 		TraversalVertex v4 = new TraversalVertex("4");
-		TraversalVertex v5 = new TraversalVertex("5");
-		TraversalVertex v6 = new TraversalVertex("6");
-		TraversalVertex v7 = new TraversalVertex("7");
-		TraversalVertex v8 = new TraversalVertex("8");
-		TraversalVertex v9 = new TraversalVertex("9");
+		//TraversalVertex v5 = new TraversalVertex("5");
 		
+		randomGraph.addVertex(v0);
 		randomGraph.addVertex(v1);
 		randomGraph.addVertex(v2);
 		randomGraph.addVertex(v3);
 		randomGraph.addVertex(v4);
-		randomGraph.addVertex(v5);
-		randomGraph.addVertex(v6);
-		randomGraph.addVertex(v7);
-		randomGraph.addVertex(v8);
-		randomGraph.addVertex(v9);
+		//randomGraph.addVertex(v5);
 		
 		
-		randomGraph.addEdge(v1, v2);
-		randomGraph.addEdge(v2, v1);
+		randomGraph.addEdge(v0, v1);
+		randomGraph.addEdge(v0, v2);
+		randomGraph.addEdge(v0, v4);
+		randomGraph.addEdge(v1, v0);
 		randomGraph.addEdge(v1, v3);
-		randomGraph.addEdge(v3, v1);
-		randomGraph.addEdge(v3, v6);
-		randomGraph.addEdge(v6, v3);
-		randomGraph.addEdge(v3, v7);
-		randomGraph.addEdge(v7, v3);
-		
 		randomGraph.addEdge(v2, v4);
-		randomGraph.addEdge(v4, v2);
-		randomGraph.addEdge(v2, v5);
-		randomGraph.addEdge(v5, v2);
-		randomGraph.addEdge(v4, v8);
-		randomGraph.addEdge(v8, v4);
-		randomGraph.addEdge(v5, v9);
-		randomGraph.addEdge(v9, v5);
+		randomGraph.addEdge(v3, v0);
+		randomGraph.addEdge(v3, v1);
+		randomGraph.addEdge(v3, v4);
+		randomGraph.addEdge(v4, v1);
+		//randomGraph.addEdge(v5, v4);
+		//randomGraph.addEdge(v5, v2);
 
 		
 		return;
@@ -238,7 +238,7 @@ public class TraversalTest {
 		diameter = test.findDiameter();
 		System.out.println("The diameter is " + diameter);
 		
-		if (test.findPath(5) == null) 
+		if (test.findPath(3) == null) 
 		{
 			System.out.println("could not find such path!");
 		}

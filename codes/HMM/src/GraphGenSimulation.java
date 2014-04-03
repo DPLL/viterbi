@@ -148,12 +148,16 @@ public class GraphGenSimulation  implements Serializable {
 					ver.visit = true;
 					path.add(ver);
 					if (DFS(depth-1, ver, path))
-						break;
+						return true;
 					int size = path.size();
+					// remove because it does not meet the pathlength requirement.
+					// But we have to make its 'visit' untrue so that even though it is 
+					// not in the current path, it might be selected in the future.
+					path.get(size-1).visit = false;
 					path.remove(size-1);
 				}
 			}
-			return true;
+			return false;
 		}
 	}
 	
@@ -169,7 +173,7 @@ public class GraphGenSimulation  implements Serializable {
 			}	
 			path = new ArrayList<VertexSimulation>();
 			if (DFS(pathLength, v, path))
-				System.out.println("hoho");
+				//System.out.println("hoho");
 				if (path.size() == pathLength)
 					return path;
 		}

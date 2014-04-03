@@ -158,9 +158,9 @@ public class TranscriberSimulation
         	// runTime is how many runs in total
         	int runTime;
         	// graphNum is the number of graphs generated
-        	int graphNum = 10;
+        	int graphNum = 1000;
         	// runPerGraph is number of runs for each graph
-        	int runPerGraph = 10;
+        	int runPerGraph = 1;
         	runTime = graphNum * runPerGraph; 
         			
         	double totalMyWordPercentage = (double) 0.0;
@@ -177,7 +177,7 @@ public class TranscriberSimulation
 	    		//keep generating graphs that meet the requirement of pathLength
 	    		while (true) {
 		    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-					graph = graphGen.GraphGen(2, 2, 10, 30, 100, 0, 30, 8);
+					graph = graphGen.GraphGen(2, 3, 2, 30, 100, 0, 30, 8);
 					System.out.println(graphGen.numVertex);
 					System.out.println(graph.toString());
 		    		/*
@@ -189,12 +189,12 @@ public class TranscriberSimulation
 		    		 * Set groundTruth
 		    		 */
 		    		// use the diameter as the ground truth
-					diameterPath = graphGen.findDiameter();
+/*					diameterPath = graphGen.findDiameter();
 					graphGen.setGroundTruth(diameterPath);
 					pathLength = diameterPath.size() + 1;	
-					break;			
+					break;	*/		
 					// instead of choosing the diameter as the path, choose a path specified length 
-/*					System.out.println(graphGen.pathLength);
+					System.out.println(graphGen.pathLength);
 					ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
 					pathLength = graphGen.pathLength;
 					
@@ -203,7 +203,7 @@ public class TranscriberSimulation
 						System.out.println("could not find such path!");
 						// Purely for testing the length of the path
 						diameterPath = graphGen.findDiameter();
-						if (diameterPath.size()+1 >= graphGen.pathLength) {
+						if (diameterPath.size() >= graphGen.pathLength) {
 							System.out.println("WHAT???");
 							System.exit(-1);
 						}
@@ -211,7 +211,7 @@ public class TranscriberSimulation
 					} else {
 						// if such path could be found, then break out of while loop and keep on with the rest
 						break;
-					}*/
+					}
 					
 	    		}
 	    		
@@ -279,7 +279,7 @@ public class TranscriberSimulation
 					for(int j = 0; j < graphGen.trueObjects.size(); j++) {
 						System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
 					}*/
-					//System.out.println("The trueStates is: " + graphGen.trueStates);	
+					System.out.println("The trueStates is: " + graphGen.trueStates);	
 					
 					totalMyWordPercentage += myWordPercentage;
 					totalMyStatePercentage += myStatePercentage;
