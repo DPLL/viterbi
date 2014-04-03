@@ -59,8 +59,8 @@ public class VertexSimulation implements Serializable {
 	public String toString() 
 	{
 		StringBuilder str = new StringBuilder(Integer.toString(vertexID)+ " ");
-		/*
-		for (double[] arr : objectMatrix) {
+		
+/*		for (double[] arr : objectMatrix) {
 			str.append(Arrays.toString(arr));
 		}*/
 		//System.out.println(Arrays.deepToString(objectMatrix));

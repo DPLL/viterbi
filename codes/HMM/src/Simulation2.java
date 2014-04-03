@@ -131,12 +131,13 @@ public class Simulation2
 			// instead of choosing the diameter as the path, choose a path specified length 
 /*			System.out.println(graphGen.pathLength);
 			ArrayList<VertexSimulation2> pathInVertex = graphGen.findPath(graphGen.pathLength);
-			pathLength = pathInVertex.size();
 			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
 			{
 				System.out.println("could not find such path!");
 				System.exit(-1);
-			}	*/			
+			}	
+			pathLength = pathInVertex.size();
+			*/			
 			
 			/*
 			 * Sensor simulator -- simulate the classification process of sensors

@@ -78,11 +78,6 @@ public class TranscriberSimulation
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
-    	//
-    	int runTime = 1;
-    	double totalMyWordPercentage = (double) 0.0;
-    	double totalASRWordPercentage = (double) 0.0;
-    	double totalMyStatePercentage = (double) 0.0;
     	
     	//SimpleDirectedWeightedGraph<VertexSimulation, DefaultWeightedEdge> graph;
 		AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> graph = null;
@@ -130,7 +125,7 @@ public class TranscriberSimulation
             	// assume that each dimension of the object is subject to error that is i.i.d.
             	double[] objNoiseAdded = new double[obj.length];
             	for(int j = 0; j < obj.length; j++) {
-            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj\
+            		// added Gaussian noise with the distribution of N(mean, stdDev^2) to obj
             		double error = fRandom.nextGaussian()*graphGen.stdDev + graphGen.mean;
             		//System.out.println("error is: " + error);
             		objNoiseAdded[j] = error;            		
@@ -160,13 +155,27 @@ public class TranscriberSimulation
 
     	} else {
     		
-			for(int i = 0; i < runTime; i++) {				
+        	// runTime is how many runs in total
+        	int runTime;
+        	// graphNum is the number of graphs generated
+        	int graphNum = 10;
+        	// runPerGraph is number of runs for each graph
+        	int runPerGraph = 10;
+        	runTime = graphNum * runPerGraph; 
+        			
+        	double totalMyWordPercentage = (double) 0.0;
+        	double totalASRWordPercentage = (double) 0.0;
+        	double totalMyStatePercentage = (double) 0.0;
+        	double totalPathLength = 0.0;
+    	
+        	int count = 0;
+    		for (int n = 0; n < graphNum; n++) {
 	    	 	// Generate a random graph
 	    		graphGen = new GraphGenSimulation();
 	    		//sphinxResult stores the initial recognition results from Sphinx as an ArrayList 
 	    		
 	    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[dimension] 4.[nodeNum] 5.[rangeValue] 6.[meanValue] 7.[stdDvValue] 8.[pathLength]
-				graph = graphGen.GraphGen(1, 2, 1, 3, 100, 0, 30, 2);
+				graph = graphGen.GraphGen(2, 2, 10, 30, 100, 0, 30, 7);
 				System.out.println(graphGen.numVertex);
 				System.out.println(graph.toString());
 	    		/*
@@ -177,9 +186,11 @@ public class TranscriberSimulation
 	    		/*
 	    		 * Set groundTruth
 	    		 */
+	    		double pathLength;
 	    		// use the diameter as the ground truth
 				diameterPath = graphGen.findDiameter();
-				graphGen.setGroundTruth(diameterPath);				
+				graphGen.setGroundTruth(diameterPath);
+				pathLength = diameterPath.size() + 1;				
 				// instead of choosing the diameter as the path, choose a path specified length 
 /*				System.out.println(graphGen.pathLength);
 				ArrayList<VertexSimulation> pathInVertex = graphGen.findPath(graphGen.pathLength);
@@ -187,87 +198,88 @@ public class TranscriberSimulation
 				{
 					System.out.println("could not find such path!");
 					System.exit(-1);
-				} */
-				//System.out.println(graph.edgeSet().size());
+				} 
+				pathLength = pathInVertex.size();*/
+	    		/*
+	    		 * generate the similarityMatrix for my algorithm
+	    		 */
+	            similarityMatrix =	confustionGen(trueObjectSet, trueObjectSet);			
 								
-				//Sensor simulator -- add noise to the trueObjects
-				noiseAddedResult= graphGen.addNoise();
-				noiseAddedSeq = new double[noiseAddedResult.size()][];
-		        noiseAddedSeq = noiseAddedResult.toArray(noiseAddedSeq);
-		        System.out.println("noiseAddedSeq is: " + Arrays.deepToString(noiseAddedSeq));
+				for(int i = 0; i < runPerGraph; i++) {		
+					count++;
+					//Sensor simulator -- add noise to the trueObjects
+					noiseAddedResult= graphGen.addNoise();
+					noiseAddedSeq = new double[noiseAddedResult.size()][];
+			        noiseAddedSeq = noiseAddedResult.toArray(noiseAddedSeq);
+			        //System.out.println("noiseAddedSeq is: " + Arrays.deepToString(noiseAddedSeq));
+			        
+		    		/*
+		    		 * generate the classificationMatrix
+		    		 */
+		            classificationMatrix =	confustionGen(noiseAddedSeq, trueObjectSet);
+			        
+			        //Sensor simulator -- classify
+		            classifiedResult = graphGen.classify(classificationMatrix);
+		            classfiedSeq = new double[classifiedResult.size()][];
+		            classfiedSeq = classifiedResult.toArray(classfiedSeq);
+		            //System.out.println("classfiedSeq is " + Arrays.deepToString(classfiedSeq));
 		        
-	    		/*
-	    		 * generate the classificationMatrix
-	    		 */
-	            classificationMatrix =	confustionGen(noiseAddedSeq, trueObjectSet);
+			        correct(classfiedSeq,
+			        		trueObjectSet, states,
+			                start_probability,
+			                transition_probability,
+			                emission_probability,
+			                similarityMatrix,
+			                graphGen.trueObjects, 
+			                graphGen.trueStates
+			                );
 		        
-		        //Sensor simulator -- classify
-	            classifiedResult = graphGen.classify(classificationMatrix);
-	            classfiedSeq = new double[classifiedResult.size()][];
-	            classfiedSeq = classifiedResult.toArray(classfiedSeq);
-	            System.out.println("classfiedSeq is " + classfiedSeq);
-	    		/*
-	    		 * generate the similarityMatrix
-	    		 */
-	            similarityMatrix =	confustionGen(trueObjectSet, trueObjectSet);;
-	        
-		        correct(classfiedSeq,
-		        		trueObjectSet, states,
-		                start_probability,
-		                transition_probability,
-		                emission_probability,
-		                similarityMatrix,
-		                graphGen.trueObjects, 
-		                graphGen.trueStates
-		                );
-	        
-	        
-		        // Testing by feeding in the right objects directly without going through ASR
-		        /*
-		        double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
-		        trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
-		        System.out.println("The trueObjectSeq is as follows:");
-		        for(double[] object : trueObjectSeq) {
-		        	System.out.println(Arrays.toString(object));
-		        }
-		        Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
-		        		confustionGen(trueObjectSeq, trueObjectSet);
 		        
-		        correct(trueObjectSeq,
-		        		trueObjectSet, states,
-		                start_probability,
-		                transition_probability,
-		                emission_probability,
-		                confusion_probability,
-		                graphGen.trueObjects, 
-		                graphGen.trueStates);*/
-		
-		        StringBuilder str = new StringBuilder();
-		        for(int m = 0; m < graphGen.trueObjects.size(); m++) {
-		        	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
-		        }
-		        //System.out.println(str);
-				//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
-		        
-				System.out.println("The trueObjects is as follows:" + str);
-				/*
-				for(int j = 0; j < graphGen.trueObjects.size(); j++) {
-					System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
-				}*/
-				System.out.println("The trueStates is: " + graphGen.trueStates);	
-				
-				totalMyWordPercentage += myWordPercentage;
-				totalMyStatePercentage += myStatePercentage;
-		    	totalASRWordPercentage += asrWordPercentage;
-		  	
-		    	System.out.println("in the " + i + " th interation, haha!!!!");
-			}
-	    	
+			        // Testing by feeding in the right objects directly without going through ASR
+			        /*
+			        double[][] trueObjectSeq = new double[graphGen.trueObjects.size()][];
+			        trueObjectSeq = graphGen.trueObjects.toArray(trueObjectSeq);
+			        System.out.println("The trueObjectSeq is as follows:");
+			        for(double[] object : trueObjectSeq) {
+			        	System.out.println(Arrays.toString(object));
+			        }
+			        Hashtable<double[], Hashtable<double[], Double>> confusion_probability =
+			        		confustionGen(trueObjectSeq, trueObjectSet);
+			        
+			        correct(trueObjectSeq,
+			        		trueObjectSet, states,
+			                start_probability,
+			                transition_probability,
+			                emission_probability,
+			                confusion_probability,
+			                graphGen.trueObjects, 
+			                graphGen.trueStates);*/
+			
+/*			        StringBuilder str = new StringBuilder();
+			        for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+			        	str.append(Arrays.toString(graphGen.trueObjects.get(m)));
+			        }			        
+					System.out.println("The trueObjects is as follows:" + str);*/
+					/*
+					for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+						System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+					}*/
+					//System.out.println("The trueStates is: " + graphGen.trueStates);	
+					
+					totalMyWordPercentage += myWordPercentage;
+					totalMyStatePercentage += myStatePercentage;
+			    	totalASRWordPercentage += asrWordPercentage;
+			    	totalPathLength += pathLength;
+			  	
+			    	System.out.println("in the " + count + " th interation, haha!!!!\n----------------");
+				} // end for (within the same graph)
+    		} // end for (between different graphs)
+	    	System.out.println("count is: " + count);
 	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
 	    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
-	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);      	
-			
+	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime + "\n");      	
+	    	System.out.println("averagePathLength: " + (double)totalPathLength/runTime);  
 	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	    	System.out.println("");
     	}   	
@@ -458,7 +470,7 @@ public class TranscriberSimulation
                     			//double v_prob_prime = Math.log(start_p.get(next_state)) + Math.log(emit_p.get(next_state).get(object)) + Math.log(conf_p.get(input).get(object));
                     			v_prob = start + emit + conf;
                     		}
-                    		if (v_prob >= Pmax) {
+                    		if (v_prob > Pmax) {
                     			Pmax = v_prob;
                     			Smax = Integer.parseInt(next_state);
                     			v_object = object;
@@ -480,7 +492,7 @@ public class TranscriberSimulation
 	                    		//v_prob = V[t-1][Integer.parseInt(source_state)] * p;
 	                    		v_prob = V[t-1][Integer.parseInt(source_state)] + p;
 							
-	                    		if (v_prob >= Pmax)
+	                    		if (v_prob > Pmax)
 	                    		{
 	                    			Pmax = v_prob;
 	                    			Smax = Integer.parseInt(source_state);
@@ -532,7 +544,7 @@ public class TranscriberSimulation
             	objects[x] = X[x][path[x]]; 
             }
            	
-            System.out.println("\n*************************************\n");         
+/*            System.out.println("\n*************************************\n");         
             System.out.println(Arrays.deepToString(actualObs));
             
             for (int x = 0; x < obs_num+1; x++)
@@ -540,10 +552,12 @@ public class TranscriberSimulation
             	System.out.println("state: " + path[x] + 
             			", with the object: " + Arrays.toString(objects[x]));
             }
-            System.out.println("\n*************************************\n");
+            System.out.println("\n*************************************\n");*/
             
             // report the results of fidelity
             reportFidelity(actualObs, path, objects, trueObjects, trueStates);
+            
+            //System.out.println("Purely for the sake of debugging");
         }
         
         /*
@@ -672,11 +686,11 @@ public class TranscriberSimulation
             		   confusion_probability.get(key));
             }*/
             
-            for(double[] obsObject: confusion_probability.keySet()) {
+/*            for(double[] obsObject: confusion_probability.keySet()) {
             	System.out.println("obsObject " + Arrays.toString(obsObject) + ":");
             	for(double[] trueObject : confusion_probability.get(obsObject).keySet())
             		System.out.println(Arrays.toString(trueObject) + ":" + confusion_probability.get(obsObject).get(trueObject));
-            }
+            }*/
 			return confusion_probability;
         }
         

@@ -356,10 +356,10 @@ public class GraphGenSimulation  implements Serializable {
 			trueStates.add(Integer.toString(randomGraph.getEdgeTarget(e).vertexID));
 			trueObjects.add(randomGraph.getEdgeTarget(e).objectMatrix[0]);
 		}
-		System.out.println("The trueStates is: " + trueStates);
+/*		System.out.println("The trueStates is: " + trueStates);
 		System.out.println("The trueObjects is as the following:");
 		for(double[] arr : trueObjects)
-			System.out.println(Arrays.toString(arr));
+			System.out.println(Arrays.toString(arr));*/
 
 		return true;
 	}
@@ -380,10 +380,10 @@ public class GraphGenSimulation  implements Serializable {
 			trueStates.add(Integer.toString(v.vertexID));
 			trueObjects.add(v.objectMatrix[0]);
 		}
-		System.out.println("The trueStates is: " + trueStates);
+/*		System.out.println("The trueStates is: " + trueStates);
 		System.out.println("The trueObjects is as the following:");
 		for(double[] arr : trueObjects)
-			System.out.println(Arrays.toString(arr));
+			System.out.println(Arrays.toString(arr));*/
 		return true;
 	}
 	
@@ -474,9 +474,9 @@ public class GraphGenSimulation  implements Serializable {
         	noiseAddedResults.add(objNoiseAdded);
         }
         
-        System.out.println("noiseAddedResults is as follows");
+/*        System.out.println("noiseAddedResults is as follows");
         for(double[] arr : noiseAddedResults)
-        	System.out.println(Arrays.toString(arr));
+        	System.out.println(Arrays.toString(arr));*/
 		return noiseAddedResults;
     }
     
@@ -501,10 +501,10 @@ public class GraphGenSimulation  implements Serializable {
     		}
     		classifiedResults.add(maxMatch);
     	}
-        System.out.println("The classifiedObjects are:");
+/*        System.out.println("The classifiedObjects are:");
         for (double[] item : classifiedResults) {
         	System.out.println(Arrays.toString(item));
-        } 	
+        } 	*/
     	return classifiedResults;
     }
     
