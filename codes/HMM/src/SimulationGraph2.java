@@ -2,7 +2,7 @@
  * SimulationGraph2.java & Simulation2.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
  * This class generates objects and misclassification matrix. It does not depend on the distance measure
  */
-import java.io.File;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,13 +10,17 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.apache.commons.collections15.Factory;
+import org.apache.commons.collections15.functors.ConstantTransformer;
 import org.jgrapht.VertexFactory;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -29,37 +33,193 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
+import edu.uci.ics.jung.algorithms.layout.PolarPoint;
+import edu.uci.ics.jung.algorithms.layout.RadialTreeLayout;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
+import edu.uci.ics.jung.graph.DelegateTree;
 
-public class SimulationGraph2  implements Serializable {
+
+public class SimulationGraph2 implements Serializable  {
 	
 	AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> randomGraph;
 	VertexFactory<VertexSimulation2> vFactory;
 	
-	// number of edges
-	int numEdge;
-	// avgDegree of the DAG
-	int avgDegree;
-	// number of objects per node
+	/*
+	 * stat for the tree only
+	 */
+	DelegateTree<VertexSimulation2, DefaultWeightedEdge> kAryTree;
+	int order;
+	int height;
+	/*
+	 * stat for both the tree and the graph
+	 */
 	// It is assumed that the objectPerNode is the same across different nodes.
+	// number of objects per node
 	int objectPerNode;
-	// ground truth of states
-	ArrayList<String> trueStates;
-	// ground truth of objects
-	ArrayList<ObjectSimulation2> trueObjects;
-	// classifiedResults is the trueObjects with noise added
-	ArrayList<ObjectSimulation2> classifiedResults;
-	// number of vertex
-	int numVertex;
 	// recall represents the recall of the graph
 	double recall;
 	// errorGranularity is the probability of misclassification of one object
 	double errorGranularity;
     // pathLength
     int pathLength; 
-	
-	
-	SimulationGraph2() 
+	// number of vertex
+	int numVertex;
+    
+	/*
+	 * stat for the graph only
+	 */
+	// number of edges
+	int numEdge;
+	// avgDegree of the DAG
+	int avgDegree;
+
+	// ground truth of states
+	ArrayList<String> trueStates;
+	// ground truth of objects
+	ArrayList<ObjectSimulation2> trueObjects;
+	// classifiedResults is the trueObjects with noise added
+	ArrayList<ObjectSimulation2> classifiedResults;
+    
+	public SimulationGraph2() 
 	{
+	}
+	
+	Factory<DefaultWeightedEdge> edgeFactory = new Factory<DefaultWeightedEdge>() {
+		//DefaultWeightedEdge i=0;
+		public DefaultWeightedEdge create() {
+			return new DefaultWeightedEdge();
+		}};
+	
+	public DelegateTree<VertexSimulation2, DefaultWeightedEdge> 
+		PerfectKAryTreeGen(int orderVal, int heightVal, int objectNumPerNode, double recallVal, int pathLengthVal) 
+	{
+		// kAryTree is a perfect k-ary tree
+		kAryTree = new DelegateTree<VertexSimulation2, DefaultWeightedEdge>();
+		order = orderVal;
+		height = heightVal;
+		objectPerNode = objectNumPerNode;
+		recall = recallVal;
+	    pathLength = pathLengthVal; 
+		// numNodes is the total number of nodes that a tree has 
+		numVertex = (int) ((Math.pow(order, (height+1))-1)/(order-1));
+		System.out.println("numNodes is " + numVertex);
+		
+		// sort and store the verteces in order 
+		ArrayList<VertexSimulation2> vertexArray = new ArrayList<VertexSimulation2>(numVertex);
+		// set up a set of nodes and associated objects in the tree
+		for (int i = 0; i < numVertex; i++) {
+			if (!replaceTreeVertexID(i, vertexArray)) {
+				System.out.println("error in replacing tree vertex");
+				System.exit(-1);
+			}
+		}
+		System.out.println(vertexArray);
+		
+		// add the root to the tree
+    	if(!kAryTree.addVertex(vertexArray.get(0))) {
+    		System.out.println("adding vertex error");
+    	}
+		/*
+		 * add edges to this tree
+		 */
+		//Set<VertexSimulation2> vertexSet = (Set<VertexSimulation2>) kAryTree.getVertices();		
+		for (int i= 0; i < numVertex - Math.pow(order, height); i++) {
+			// add edges to the nonleaf nodes
+			for (int j = 0; j < order; j++) {
+				kAryTree.addEdge(edgeFactory.create(), vertexArray.get(i), vertexArray.get(order*i+1+j));
+			}
+
+		}
+		
+		System.out.println(kAryTree.toString());
+		for (VertexSimulation2 ver : vertexArray) {
+			HashSet<VertexSimulation2> children = new HashSet<VertexSimulation2>(kAryTree.getChildren(ver));
+			if (children.size() != 0)
+				System.out.println("Parent " + ver + " is connected with" + children);
+		}		
+		return kAryTree;
+	}
+	
+    public boolean replaceTreeVertexID(Integer id, ArrayList<VertexSimulation2> vertexArray)
+    {
+    	VertexSimulation2 newVertex;
+    	
+        if(id == null) {
+        	System.out.println("Error in replaceTreeVertexID");
+            return false;
+        }
+        
+        // objects is the objectList for this particular node
+        ObjectSimulation2[] objects = new ObjectSimulation2[objectPerNode];
+        
+        for(int i = 0; i < objectPerNode; i++) {
+        	objects[i] = new ObjectSimulation2(id*objectPerNode+i);
+        }
+        for (ObjectSimulation2 row : objects)
+        	System.out.println(row);
+        
+    	newVertex = new VertexSimulation2(id, objectPerNode, objects);
+    	vertexArray.add(newVertex);
+    	
+        return true;
+    }
+    
+	/*
+	 * Find the first path with specified depth 
+	 */
+	public boolean DFSTree(int depth, VertexSimulation2 v, ArrayList<VertexSimulation2> path) 
+	{
+		if (v == null)
+			return false;
+		if (depth == 0) {
+			System.out.println(path);
+			return true;
+		}
+		
+		Set<VertexSimulation2> children;
+		children = new HashSet<VertexSimulation2>(kAryTree.getChildren(v));
+		if (children.isEmpty()) {
+			return false;
+		} else {
+			for (VertexSimulation2 ver: children) {
+				if (ver.visit == false) {
+					ver.visit = true;
+					path.add(ver);
+					if (DFSTree(depth-1, ver, path))
+						return true;
+					int size = path.size();
+					// remove because it does not meet the pathlength requirement.
+					// But we have to make its 'visit' untrue so that even though it is 
+					// not in the current path, it might be selected in the future.
+					path.get(size-1).visit = false;
+					path.remove(size-1);
+				}
+			}
+			return false;
+		}
+	}
+	
+	public ArrayList<VertexSimulation2> findTreePath(int pathLength)
+	{
+		if (pathLength < 0 || pathLength > height) {
+			System.out.println("wrong choise of pathLength for the tree!");
+			System.exit(-1);
+		}
+		Set<VertexSimulation2> vertexSet = new HashSet<VertexSimulation2>(kAryTree.getVertices());
+		ArrayList<VertexSimulation2> path;
+		for (VertexSimulation2 v : vertexSet) {
+			// need to renew all the nodes in the graph by setting 'visit' to be false
+			Set<VertexSimulation2> vers = new HashSet<VertexSimulation2>(kAryTree.getVertices());
+			for (VertexSimulation2 ver : vers) {
+				ver.visit = false;
+			}
+			path = new ArrayList<VertexSimulation2>();
+			if (DFSTree(pathLength, v, path))
+				//System.out.println("hoho");
+				if (path.size() == pathLength)
+					return path;
+		}
+		return null;
 	}
 	
 	public AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> GraphGen(int avgDegreeOfGraph, int objectNumPerNode, 
@@ -93,7 +253,7 @@ public class SimulationGraph2  implements Serializable {
         vertices1.addAll(randomGraph.vertexSet());
         Integer counter = 0;
         for (VertexSimulation2 ver : vertices1) {
-            replaceVertexID(ver, counter++);
+            replaceGraphVertexID(ver, counter++);
         }       
         
         // Output all the vertexes and the edges
@@ -131,12 +291,16 @@ public class SimulationGraph2  implements Serializable {
 					ver.visit = true;
 					path.add(ver);
 					if (DFS(depth-1, ver, path))
-						break;
+						return true;
 					int size = path.size();
+					// remove because it does not meet the pathlength requirement.
+					// But we have to make its 'visit' untrue so that even though it is 
+					// not in the current path, it might be selected in the future.
+					path.get(size-1).visit = false;
 					path.remove(size-1);
 				}
 			}
-			return true;
+			return false;
 		}
 	}
 	
@@ -145,8 +309,14 @@ public class SimulationGraph2  implements Serializable {
 		Set<VertexSimulation2> vertexSet = randomGraph.vertexSet();
 		ArrayList<VertexSimulation2> path;
 		for (VertexSimulation2 v : vertexSet) {
+			// need to renew all the nodes in the graph by setting 'visit' to be false
+			Set<VertexSimulation2> vers = randomGraph.vertexSet();
+			for (VertexSimulation2 ver : vers) {
+				ver.visit = false;
+			}
 			path = new ArrayList<VertexSimulation2>();
 			if (DFS(pathLength, v, path))
+				//System.out.println("hoho");
 				if (path.size() == pathLength)
 					return path;
 		}
@@ -370,7 +540,7 @@ public class SimulationGraph2  implements Serializable {
 	}
 	
 	
-    public boolean replaceVertexID(VertexSimulation2 oldVertex, Integer id)
+    public boolean replaceGraphVertexID(VertexSimulation2 oldVertex, Integer id)
     {
     	VertexSimulation2 newVertex;
     	
@@ -475,7 +645,7 @@ public class SimulationGraph2  implements Serializable {
 		 * Serialize the graphGen
 		 */
 		SimulationGraph2 graphGen1 = new SimulationGraph2();
-		AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> graph1 = null;
+/*		AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> graph1 = null;
 		ArrayList<DefaultWeightedEdge> diameterPath1 = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<VertexSimulation2> diameterPath1InVertex = new ArrayList<VertexSimulation2>();
 		try {
@@ -487,8 +657,8 @@ public class SimulationGraph2  implements Serializable {
 		}
 		System.out.println(graph1.toString());
 		System.out.println(graph1.edgeSet().size());
-/*		diameterPath1InVertex = graphGen1.findDiameterInVertex();
-		graphGen1.setGroundTruthInVertex(diameterPath1InVertex);*/
+		diameterPath1InVertex = graphGen1.findDiameterInVertex();
+		graphGen1.setGroundTruthInVertex(diameterPath1InVertex);
 		diameterPath1 = graphGen1.findDiameter();
 		graphGen1.setGroundTruth(diameterPath1);
 		graphGen1.classify();
@@ -511,7 +681,17 @@ public class SimulationGraph2  implements Serializable {
 		} catch(IOException i)
 		{
 			i.printStackTrace();
+		}*/
+		
+		// int orderVal, int heightVal, int objectNumPerNode, double recallVal
+		graphGen1.PerfectKAryTreeGen(2, 3, 2, 0.5, 3); 
+		//graphGen1.findTreePath(3);
+		
+		ArrayList<VertexSimulation2> pathInVertex = graphGen1.findTreePath(graphGen1.pathLength);
+		if (!graphGen1.setGroundTruthInVertex(pathInVertex)) 
+		{
+			System.out.println("could not find such path!");
+			System.exit(-1);
 		}
-
 	}
 }

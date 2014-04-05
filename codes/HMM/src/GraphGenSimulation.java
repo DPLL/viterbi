@@ -32,6 +32,8 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 
+import edu.uci.ics.jung.graph.OrderedKAryTree;
+
 
 public class GraphGenSimulation  implements Serializable {
 	
@@ -73,7 +75,7 @@ public class GraphGenSimulation  implements Serializable {
 	GraphGenSimulation() 
 	{
 	}
-	
+
 	public AbstractBaseGraph<VertexSimulation, DefaultWeightedEdge> GraphGen(int avgDegreeOfGraph, int objectNumPerNode, 
 			int n, int nodeNum, double rangeValue, double meanValue, double stdDvValue, int length) throws FileNotFoundException 
 	{

@@ -50,7 +50,7 @@ public class VertexSimulation2 implements Serializable {
 			str.append(obj.objectID + " ");
 		}
 		System.out.println(Arrays.toString(objectMatrix));*/
-		System.out.println("haha");
+		//System.out.println("haha");
 		StringBuilder str = new StringBuilder(Integer.toString(vertexID));
 		return str.toString(); 
 	}
