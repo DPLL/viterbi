@@ -33,7 +33,6 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import edu.uci.ics.jung.graph.DelegateTree;
  
-//hahahahahaha we are in the new workspace!!!!!
 
 public class Simulation2
 {
