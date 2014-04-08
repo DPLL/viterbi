@@ -151,9 +151,9 @@ public class Simulation2
 			 * Generate a kAry perfect tree-------------------------------------------------
 			 */
     		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recallVal] 5.[pathLength]
-			tree = graphGen.PerfectKAryTreeGen(2, 2, 2, 0.9, 2);
+			tree = graphGen.PerfectKAryTreeGen(2, 7, 2, 0.5, 6);
 			System.out.println(graphGen.numVertex);
-			System.out.println(tree.toString());
+			//System.out.println(tree.toString());
 			
 			//Graph Interface 
 			treeParse(tree);
@@ -256,21 +256,21 @@ public class Simulation2
         // for emission_probability
         emission_probability = new Hashtable<String, Hashtable<ObjectSimulation2, Double>>();
         double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
-        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
+        //System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
         // for transition_probability
         transition_probability = 
         		new Hashtable<String, Hashtable<String, Double>>();
         
         for (VertexSimulation2 ver : verSet) {
         	// print the current vertex
-        	System.out.println("The current vertex is: " + ver);
+        	//System.out.println("The current vertex is: " + ver);
         	// objects is the ArrayList form of objectList of this particular vertex. 
         	ArrayList<ObjectSimulation2> objects = new ArrayList<ObjectSimulation2>(Arrays.asList(ver.objectMatrix));
         	//System.out.println(objects);
         	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
         	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
         	outgoingEdges.addAll(kAryTree.getOutEdges(ver));
-        	System.out.println(outgoingEdges);
+        	//System.out.println(outgoingEdges);
         	
         	// array of states
         	stateList.add(Integer.toString(ver.vertexID));
@@ -288,11 +288,11 @@ public class Simulation2
         	emission_probability.put(Integer.toString(ver.vertexID), e);
         	// transition_probability
         	double transition_prob = (double)1/(kAryTree.outDegree(ver));
-        	System.out.println("transition_prob is " + transition_prob);
+        	//System.out.println("transition_prob is " + transition_prob);
         	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
             Hashtable<String, Double> t = new Hashtable<String, Double>();
             for(DefaultWeightedEdge edge : outgoingEdges) {
-            	System.out.println("the current kAryTree.getSource(edge).vertexID is " + kAryTree.getSource(edge).vertexID);
+            	//System.out.println("the current kAryTree.getSource(edge).vertexID is " + kAryTree.getSource(edge).vertexID);
             	t.put(Integer.toString(kAryTree.getDest(edge).vertexID), transition_prob);
             }
             transition_probability.put(Integer.toString(ver.vertexID), t);     
@@ -323,8 +323,8 @@ public class Simulation2
             		System.out.println(Arrays.toString(object) + ":" + emission_probability.get(state).get(object));
             }*/
         // print the transition_probability
-        System.out.println("transition_probability is as follows: ");
-        System.out.println(transition_probability);
+        //System.out.println("transition_probability is as follows: ");
+        //System.out.println(transition_probability);
     	return;
     }
     
@@ -438,7 +438,7 @@ public class Simulation2
     	ObjectSimulation2 X[][] = new ObjectSimulation2[obs_num+1][state_num];
 	
     	//Arrays.sort(states);
-    	System.out.println("states[] is: " + Arrays.toString(states));
+    	//System.out.println("states[] is: " + Arrays.toString(states));
 /*        	int m = 0;
         	for (String state : states)
         	{

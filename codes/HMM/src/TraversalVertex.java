@@ -22,7 +22,6 @@ public class TraversalVertex {
 	{
 		return "vertexID("+ vertexID + ")"; 
 	}*/
-	
 	public String toString()
 	{
 		StringBuilder str = new StringBuilder(vertexID);

@@ -102,7 +102,7 @@ public class SimulationGraph2 implements Serializable  {
 	    pathLength = pathLengthVal; 
 		// numNodes is the total number of nodes that a tree has 
 		numVertex = (int) ((Math.pow(order, (height+1))-1)/(order-1));
-		System.out.println("numNodes is " + numVertex);
+		//System.out.println("numNodes is " + numVertex);
 		
 		// sort and store the verteces in order 
 		ArrayList<VertexSimulation2> vertexArray = new ArrayList<VertexSimulation2>(numVertex);
@@ -113,7 +113,7 @@ public class SimulationGraph2 implements Serializable  {
 				System.exit(-1);
 			}
 		}
-		System.out.println(vertexArray);
+		//System.out.println(vertexArray);
 		
 		// add the root to the tree
     	if(!kAryTree.addVertex(vertexArray.get(0))) {
@@ -131,12 +131,12 @@ public class SimulationGraph2 implements Serializable  {
 
 		}
 		
-		System.out.println(kAryTree.toString());
-		for (VertexSimulation2 ver : vertexArray) {
+		//System.out.println(kAryTree.toString());
+/*		for (VertexSimulation2 ver : vertexArray) {
 			HashSet<VertexSimulation2> children = new HashSet<VertexSimulation2>(kAryTree.getChildren(ver));
 			if (children.size() != 0)
 				System.out.println("Parent " + ver + " is connected with" + children);
-		}		
+		}		*/
 		return kAryTree;
 	}
 	
@@ -155,8 +155,8 @@ public class SimulationGraph2 implements Serializable  {
         for(int i = 0; i < objectPerNode; i++) {
         	objects[i] = new ObjectSimulation2(id*objectPerNode+i);
         }
-        for (ObjectSimulation2 row : objects)
-        	System.out.println(row);
+/*        for (ObjectSimulation2 row : objects)
+        	System.out.println(row);*/
         
     	newVertex = new VertexSimulation2(id, objectPerNode, objects);
     	vertexArray.add(newVertex);
