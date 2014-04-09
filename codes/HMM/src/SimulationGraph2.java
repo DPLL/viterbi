@@ -172,7 +172,7 @@ public class SimulationGraph2 implements Serializable  {
 		if (v == null)
 			return false;
 		if (depth == 0) {
-			System.out.println(path);
+			//System.out.println(path);
 			return true;
 		}
 		
@@ -233,7 +233,7 @@ public class SimulationGraph2 implements Serializable  {
 			System.exit(-1);
 		}
 		numEdge = avgDegree * numVertex;
-		System.out.println("numEdge is: " + numEdge);
+		//System.out.println("numEdge is: " + numEdge);
 		recall = recallValue;
 		pathLength = length;
 		
@@ -257,7 +257,7 @@ public class SimulationGraph2 implements Serializable  {
         }       
         
         // Output all the vertexes and the edges
-        System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
+        //System.out.println("The randomGraph.vertexSet() is: "+ randomGraph.vertexSet().toString());
         Iterator<VertexSimulation2> iter2 = new DepthFirstIterator<VertexSimulation2, DefaultWeightedEdge>(randomGraph);
         VertexSimulation2 ver2;
 /*        while (iter2.hasNext()) {
@@ -276,7 +276,7 @@ public class SimulationGraph2 implements Serializable  {
 		if (v == null)
 			return false;
 		if (depth == 0) {
-			System.out.println(path);
+			//System.out.println(path);
 			return true;
 		}
 		
@@ -393,7 +393,7 @@ public class SimulationGraph2 implements Serializable  {
         	System.exit(-1);
         }        
 
-        System.out.println(dijkstraPath.getPathEdgeList());
+        //System.out.println(dijkstraPath.getPathEdgeList());
         diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
         
         // manipulate the diameterPath and extract the vertex array from it
@@ -480,7 +480,7 @@ public class SimulationGraph2 implements Serializable  {
         	System.exit(-1);
         }        
         
-        System.out.println(dijkstraPath.getPathEdgeList());
+        //System.out.println(dijkstraPath.getPathEdgeList());
         diameterPath = (ArrayList<DefaultWeightedEdge>) dijkstraPath.getPathEdgeList();
         
         return diameterPath;
@@ -508,10 +508,10 @@ public class SimulationGraph2 implements Serializable  {
 			trueStates.add(Integer.toString(randomGraph.getEdgeTarget(e).vertexID));
 			trueObjects.add(randomGraph.getEdgeTarget(e).objectMatrix[0]);
 		}
-		System.out.println("The trueStates is: " + trueStates);
+/*		System.out.println("The trueStates is: " + trueStates);
 		System.out.println("The trueObjects is as the following:");
 		for(ObjectSimulation2 arr : trueObjects)
-			System.out.println(arr);
+			System.out.println(arr);*/
 
 		return true;
 	}
@@ -532,10 +532,10 @@ public class SimulationGraph2 implements Serializable  {
 			trueStates.add(Integer.toString(v.vertexID));
 			trueObjects.add(v.objectMatrix[0]);
 		}
-		System.out.println("The trueStates is: " + trueStates);
+/*		System.out.println("The trueStates is: " + trueStates);
 		System.out.println("The trueObjects is as the following:");
 		for(ObjectSimulation2 arr : trueObjects)
-			System.out.println(arr);
+			System.out.println(arr);*/
 		return true;
 	}
 	
@@ -556,8 +556,8 @@ public class SimulationGraph2 implements Serializable  {
         for(int i = 0; i < objectPerNode; i++) {
         	objects[i] = new ObjectSimulation2(id*objectPerNode+i);
         }
-        for (ObjectSimulation2 row : objects)
-        	System.out.println(row);
+/*        for (ObjectSimulation2 row : objects)
+        	System.out.println(row);*/
         
     	newVertex = new VertexSimulation2(id, objectPerNode, objects);
         
@@ -613,7 +613,7 @@ public class SimulationGraph2 implements Serializable  {
     {
     	// evenly distribute the errorGranularity among all the nodes
     	errorGranularity = (1-recall)/(objectPerNode*numVertex-1);
-		System.out.println("errorGranularity is " + errorGranularity);
+		//System.out.println("errorGranularity is " + errorGranularity);
     	classifiedResults = new ArrayList<ObjectSimulation2>();
         for(ObjectSimulation2 obj: trueObjects) {
     		double error = Math.random();  

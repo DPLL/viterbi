@@ -114,7 +114,7 @@ public class Simulation2
 				e.printStackTrace();
 			}
 			
-			System.out.println(graph.toString());
+			//System.out.println(graph.toString());
 			graphGen.randomGraph = graph;
 			graphGen.avgDegree = 5;
 			graphGen.objectPerNode = 2;
@@ -128,7 +128,7 @@ public class Simulation2
 			classifiedResult = graphGen.trueObjects;
 			objectSeq = new ObjectSimulation2[classifiedResult.size()];
 	        objectSeq = classifiedResult.toArray(objectSeq);
-	        System.out.println(Arrays.toString(objectSeq));
+	        //System.out.println(Arrays.toString(objectSeq));
 
 		} else {
 	    	int runTime = runTimeVal;
@@ -171,14 +171,14 @@ public class Simulation2
 			 */
     		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recall] 5.[pathLength]
 			tree = graphGen.PerfectKAryTreeGen(orderVal, heightVal, objNumPerNodeVal, recallVal, pathLengthVal);
-			System.out.println(graphGen.numVertex);
+			//System.out.println(graphGen.numVertex);
 			//System.out.println(tree.toString());
 			
 			//Graph Interface 
 			treeParse(tree);
     		
 			// instead of choosing the diameter as the path, choose a path specified length 
-			System.out.println(graphGen.pathLength);
+			//System.out.println(graphGen.pathLength);
 			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
 			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
 			{
@@ -197,7 +197,7 @@ public class Simulation2
 				classifiedResult= graphGen.classify();
 				objectSeq = new ObjectSimulation2[classifiedResult.size()];
 		        objectSeq = classifiedResult.toArray(objectSeq);
-		        System.out.println("objectSeq is " + Arrays.toString(objectSeq));
+		        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
 		        
 	    		/*
 	    		 * generate the confusion probability matrix
@@ -221,12 +221,12 @@ public class Simulation2
 	            //System.out.println(str);
 	    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
 	            
-	    		System.out.println("The trueObjects is as follows:" + str);
+	    		//System.out.println("The trueObjects is as follows:" + str);
 	    		/*
 	    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
 	    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
 	    		}*/
-	    		System.out.println("The trueStates is: " + graphGen.trueStates);	
+	    		//System.out.println("The trueStates is: " + graphGen.trueStates);	
 	    		
 	    		totalMyWordPercentage += myWordPercentage;
 	    		totalMyStatePercentage += myStatePercentage;
@@ -265,7 +265,7 @@ public class Simulation2
          */
         start_probability = new Hashtable<String, Double>();
         double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
+        //System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
         
         /*
          * Version II: make the root node as the source
@@ -362,14 +362,14 @@ public class Simulation2
         // for start_probability
         start_probability = new Hashtable<String, Double>();
         double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
+        //System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
         // for trueObjectSet
         ArrayList<ObjectSimulation2> trueObjectSetList = new ArrayList<ObjectSimulation2>();
         // for emission_probability
         emission_probability = 
         		new Hashtable<String, Hashtable<ObjectSimulation2, Double>>();
         double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
-        System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
+        //System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
         // for transition_probability
         transition_probability = 
         		new Hashtable<String, Hashtable<String, Double>>();
@@ -582,7 +582,7 @@ public class Simulation2
         	objects[x] = X[x][path[x]]; 
         }
        	
-        System.out.println("\n*************************************\n");         
+/*        System.out.println("\n*************************************\n");         
         System.out.println(Arrays.toString(actualObs));
         
         for (int x = 0; x < obs_num+1; x++)
@@ -590,12 +590,12 @@ public class Simulation2
         	System.out.println("state: " + path[x] + 
         			", with the object: " + objects[x]);
         }
-        System.out.println("\n*************************************\n");
+        System.out.println("\n*************************************\n");*/
         
         // report the results of fidelity
         reportFidelity(actualObs, path, objects, trueObjects, trueStates);
         
-        System.out.println("Purely for the sake of debugging");
+/*        System.out.println("Purely for the sake of debugging");*/
     }
     
     /*
