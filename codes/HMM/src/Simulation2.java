@@ -58,6 +58,8 @@ public class Simulation2
 	static double myStatePercentage;
     // asrWordPercentage is the percentage of object that ASR is right
 	static double asrWordPercentage;
+    // asrStatePercentage is the percentage of state that ASR is right
+	static double asrStatePercentage;
 
     
     public static final boolean DEBUG_MODE = false;
@@ -68,6 +70,7 @@ public class Simulation2
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
     	double totalMyStatePercentage = (double) 0.0;
+    	double totalASRStatePercentage = (double) 0.0;
     	
     	double totalPathLength = 0.0;
     	
@@ -152,7 +155,7 @@ public class Simulation2
 			 * Generate a kAry perfect tree-------------------------------------------------
 			 */
     		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recallVal] 5.[pathLength]
-			tree = graphGen.PerfectKAryTreeGen(2, 7, 2, 0.5, 6);
+			tree = graphGen.PerfectKAryTreeGen(2, 2, 2, 0.3, 2);
 			System.out.println(graphGen.numVertex);
 			//System.out.println(tree.toString());
 			
@@ -213,6 +216,7 @@ public class Simulation2
 	    		totalMyWordPercentage += myWordPercentage;
 	    		totalMyStatePercentage += myStatePercentage;
 	        	totalASRWordPercentage += asrWordPercentage;
+	        	totalASRStatePercentage += asrStatePercentage;
 	        	totalPathLength += pathLength;
 	      	
 	        	System.out.println("in the " + i + " th interation, haha!!!!");
@@ -221,7 +225,8 @@ public class Simulation2
 	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
 	    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
-	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);    
+	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);  
+	    	System.out.println("asrStatePercentage: " + (double)totalASRStatePercentage/runTime);  
 	    	System.out.println("averagePathLength: " + (double)totalPathLength/runTime);     
 	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	    	System.out.println("");
@@ -624,6 +629,8 @@ public class Simulation2
     	double myObjectScore = 0;
     	// sensorObjectScore is the score of objects of my ASR.
     	double sensorObjectScore = 0;
+    	// sensorStateScore is the score of states of my ASR.
+    	double sensorStateScore = 0;
     	// for the object recovery
     	for (int i = groundObjectScore-1; i >= 0; i--) {
     		//System.out.println("objects[i+1]: " + objects[i+1]);
@@ -650,18 +657,23 @@ public class Simulation2
 			if (path[i+1] == Integer.parseInt(trueStates.get(i))) {
 				myStateScore += 1;
 			}
+			// nodeID = objID / objPerNode by using this formula, we check the se state score
+    		if (actualObs[i].objectID/graphGen.objectPerNode == Integer.parseInt(trueStates.get(i))) {
+    			sensorStateScore += 1;
+    		}
     	}
     	
     	// 
         myWordPercentage =  ((double)myObjectScore/groundObjectScore);
         asrWordPercentage = ((double)sensorObjectScore/groundObjectScore);
         myStatePercentage = ((double)myStateScore/groundStateScore);
+        asrStatePercentage = ((double)sensorStateScore/groundStateScore);
     	
         
     	System.out.println("myObjectScore: " + myWordPercentage);
     	System.out.println("sensorObjectScore: " + asrWordPercentage);
     	System.out.println("myStateScore: " + myStatePercentage);      	
-    	
+    	System.out.println("asrStatePercentage: " + asrStatePercentage);  
     }
     
     public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
