@@ -66,6 +66,21 @@ public class Simulation2
     
     public static void main(String[] args) throws IOException, InterruptedException 
     {
+    	
+		if (args.length != 6) {
+			System.out.println("Correct Usage: ./Simulation2 1.[order] 2.[height] "
+					+ "3.[objectNumPerNode] 4.[recall] 5.[pathLength] 6.[runTime]");
+			System.exit(-1);
+		}
+		
+		int orderVal = Integer.parseInt(args[0]);
+		int heightVal = Integer.parseInt(args[1]);
+		int objNumPerNodeVal = Integer.parseInt(args[2]);
+		double recallVal = Double.parseDouble(args[3]);
+		int pathLengthVal = Integer.parseInt(args[4]);
+		int runTimeVal = Integer.parseInt(args[5]);
+			
+		
     	//
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
@@ -116,7 +131,7 @@ public class Simulation2
 	        System.out.println(Arrays.toString(objectSeq));
 
 		} else {
-	    	int runTime = 1;
+	    	int runTime = runTimeVal;
 	    	
     	 	// Generate a random graph
     		graphGen = new SimulationGraph2();
@@ -154,8 +169,8 @@ public class Simulation2
 			/*
 			 * Generate a kAry perfect tree-------------------------------------------------
 			 */
-    		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recallVal] 5.[pathLength]
-			tree = graphGen.PerfectKAryTreeGen(2, 2, 2, 0.3, 2);
+    		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recall] 5.[pathLength]
+			tree = graphGen.PerfectKAryTreeGen(orderVal, heightVal, objNumPerNodeVal, recallVal, pathLengthVal);
 			System.out.println(graphGen.numVertex);
 			//System.out.println(tree.toString());
 			
