@@ -67,7 +67,7 @@ public class Simulation2
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	
-		if (args.length != 6) {
+		if (args.length < 6) {
 			System.out.println("Correct Usage: ./Simulation2 1.[order] 2.[height] "
 					+ "3.[objectNumPerNode] 4.[recall] 5.[pathLength] 6.[runTime]");
 			System.exit(-1);
@@ -79,8 +79,10 @@ public class Simulation2
 		double recallVal = Double.parseDouble(args[3]);
 		int pathLengthVal = Integer.parseInt(args[4]);
 		int runTimeVal = Integer.parseInt(args[5]);
-			
-		
+		System.out.println("order is " + orderVal + ", height is " + heightVal + ", objPerNode is " 
+				+ objNumPerNodeVal + ", recall is " + recallVal + ", pathLength is " +
+				 pathLengthVal + ", runTime is " + runTimeVal);	
+		 
     	//
     	double totalMyWordPercentage = (double) 0.0;
     	double totalASRWordPercentage = (double) 0.0;
