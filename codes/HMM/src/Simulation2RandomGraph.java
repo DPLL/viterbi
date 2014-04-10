@@ -1,5 +1,5 @@
 /*
- * SimulationGraph2.java & Simulation2RandomGraph.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
+ * SimulationGraph2.java & Simulation2RandomGraph.java & VertexSimulation2.java & ObjectSimulation2.java  & Simulation2.java are in the same set.
  * Simulation2RandomGraph.java is java file that implements our NIUBI algorithm
  * 
  * PAY ATTENTION that Simulation2RandomGraph is similar to Simulation2, the difference lies in the fact that this file generate a random graph 
@@ -115,7 +115,7 @@ public class Simulation2RandomGraph
 		} else {
 			
 	    	// 1.[degree] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength] 6.[graphNum] 7.[runPerGraph]	
-			if (args.length != 7) {
+			if (args.length < 7) {
 				System.out.println("Correct Usage: ./Simulation2RandomGraph 1.[degree] 2.[objectNumPerNode] "
 						+ "3.[nodeNum] 4.[recall] 5.[pathLength] 6.[graphNum] 7.[runPerGraph]");
 				System.exit(-1);
@@ -128,6 +128,10 @@ public class Simulation2RandomGraph
 			int pathLengthVal = Integer.parseInt(args[4]);
 			int graphNumVal = Integer.parseInt(args[5]);
 			int runPerGraphVal = Integer.parseInt(args[6]);
+			
+			System.out.println("degree is " + degreeVal + ", objectNumPerNode is " + objNumPerNodeVal + ", nodeNum is " 
+					+ nodeNumVal + ", recall is " + recallVal + ", pathLength is " +
+					 pathLengthVal + ", graphNum is " + graphNumVal + ", runPerGraph is " + runPerGraphVal);	
 			
         	// runTime is how many runs in total
         	int runTime;
