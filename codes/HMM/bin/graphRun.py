@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# This file runs the codes for generating results for random graphs
+
 import os
 import re
 import array
