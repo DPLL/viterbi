@@ -180,22 +180,23 @@
 
 
 
-x = 1 : 1 : 10;
-myObjScore = [0.95625 0.81625  0.72125 0.73  0.695 0.655 0.65875 0.56125 0.59875 0.5525 ];
-sensorObjScore = [ 0.6 0.6025 0.59 0.6 0.6225  0.61 0.625 0.5875 0.60125 0.58625 ];
-myStateScore = [ 0.9625 0.825 0.73625  0.7375 0.7025 0.665 0.66375 0.575  0.61125 0.5675 ];
-sensorStateScore = [ 0.60625 0.61125 0.60625 0.60875  0.63375 0.62 0.63 0.605 0.615 0.60375 ];
-plot(x, myObjScore, '-b', 'LineWidth', 7);
-hold on;
-plot(x, sensorObjScore, '*r-', 'LineWidth', 7)
-hold on;
-plot(x, myStateScore, 'yo--', 'LineWidth', 7);
-hold on;
-plot(x, sensorStateScore, 'g-', 'LineWidth', 7);
-legend('myObjScore', 'sensorObjScore', 'myStateScore', 'sensorStateScore');
-xlabel('degree', 'FontSize', 18);
-ylabel('fidelity', 'FontSize', 18);
-title('Effect of degree of graph (objPerNode=5, recall = 0.6, pathLength=8)', 'FontSize', 18);
+% x = 1 : 1 : 10;
+% myObjScore = [0.95625 0.81625  0.72125 0.73  0.695 0.655 0.65875 0.56125 0.59875 0.5525 ];
+% sensorObjScore = [ 0.6 0.6025 0.59 0.6 0.6225  0.61 0.625 0.5875 0.60125 0.58625 ];
+% myStateScore = [ 0.9625 0.825 0.73625  0.7375 0.7025 0.665 0.66375 0.575  0.61125 0.5675 ];
+% sensorStateScore = [ 0.60625 0.61125 0.60625 0.60875  0.63375 0.62 0.63 0.605 0.615 0.60375 ];
+% plot(x, myObjScore, '-b', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorObjScore, '*r-', 'LineWidth', 7)
+% hold on;
+% plot(x, myStateScore, 'yo--', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorStateScore, 'g-', 'LineWidth', 7);
+% legend('myObjScore', 'sensorObjScore', 'myStateScore', 'sensorStateScore');
+% xlabel('degree', 'FontSize', 18);
+% ylabel('fidelity', 'FontSize', 18);
+% title('Effect of degree of graph (objPerNode=5, recall = 0.6, pathLength=8)', 'FontSize', 18);
+
 % 
 % 
 % x = 1 : 1 : 6;
@@ -251,4 +252,55 @@ title('Effect of degree of graph (objPerNode=5, recall = 0.6, pathLength=8)', 'F
 % ylabel('fidelity', 'FontSize', 18);
 % title('Effect of Graph pathLength (avgDegree=3, objPerNode=5, nodeNum=30, recall=0.6)', 'FontSize', 18);
 
+% x = 1 : 10;
+% myObjScore = [ 0.9083333333333333 0.97 0.8916666666666664 0.9033333333333328 0.9216666666666664 0.9433333333333335  0.8983333333333331  0.8949999999999992 0.8949999999999996 0.8799999999999999 ];
+% sensorObjScore = [0.6233333333333333 0.5983333333333334 0.6183333333333334 0.6216666666666667 0.5999999999999999 0.5849999999999999 0.6466666666666666 0.625 0.5983333333333334 0.5900000000000001 ];
+% myStateScore = [ 0.9083333333333333  0.9716666666666666 0.8933333333333331 0.9099999999999995  0.9249999999999998 0.9466666666666668 0.9049999999999998 0.8999999999999991 0.8966666666666663 0.8849999999999999 ];
+% sensorStateScore = [0.6233333333333333  0.6 0.62  0.6283333333333334 0.6033333333333332 0.588333333333333 0.6533333333333333 0.6300000000000001 0.6 0.5950000000000001 ];
+% plot(x, myObjScore, '-b', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorObjScore, '*r-', 'LineWidth', 7)
+% hold on;
+% plot(x, myStateScore, 'yo--', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorStateScore, 'g-', 'LineWidth', 7);
+% legend('myObjScore', 'sensorObjScore', 'myStateScore', 'sensorStateScore');
+% xlabel('pathLength', 'FontSize', 18);
+% ylabel('fidelity', 'FontSize', 18);
+% title('Effect of objPerNode of Tree (avgDegree=2, pathLength=6, recall=0.6,height=6)', 'FontSize', 18);
+
+
+% x = 1 : 10;
+% myObjScore = [0.790625 0.754375 0.726875 0.779375 0.79375 0.77875 0.739375 0.68875 0.775625 0.725625 ];
+% sensorObjScore = [ 0.60125 0.614375 0.606875 0.60625 0.62625 0.608125 0.586875 0.595 0.61375 0.609375 ];
+% myStateScore = [0.790625 0.761875 0.73625 0.7925 0.8 0.7925 0.748125 0.699375 0.786875 0.738125];
+% sensorStateScore = [ 0.60125 0.621875  0.6175 0.62125 0.6325 0.62312 0.595625 0.605625 0.62625 0.624375];
+% plot(x, myObjScore, '-b', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorObjScore, '*r-', 'LineWidth', 7)
+% hold on;
+% plot(x, myStateScore, 'yo--', 'LineWidth', 7);
+% hold on;
+% plot(x, sensorStateScore, 'g-', 'LineWidth', 7);
+% legend('myObjScore', 'sensorObjScore', 'myStateScore', 'sensorStateScore');
+% xlabel('pathLength', 'FontSize', 18);
+% ylabel('fidelity', 'FontSize', 18);
+% title('Effect of objPerNode of Graph (avgDegree=3, pathLength=8, nodeNum=30, recall=0.6)', 'FontSize', 18);
+
+x = 15 : 3 : 42;
+myObjScore = [0.74687 0.72 0.713125 0.725 0.749375 0.735 0.809375 0.72625 0.683125 0.75625 ];
+sensorObjScore = [0.6225 0.581875 0.601875 0.600625 0.6025 0.620625 0.60625 .584375 0.573125 0.625625 ];
+myStateScore = [0.761875 0.736875 0.7275 0.74 0.75875 0.74625 0.818125 0.73375 0.69125 0.76 ];
+sensorStateScore = [0.638125 0.6 0.61625 0.6175 0.6125 0.633125 0.615 0.5925 0.5825 0.63];
+plot(x, myObjScore, '-b', 'LineWidth', 7);
+hold on;
+plot(x, sensorObjScore, '*r-', 'LineWidth', 7)
+hold on;
+plot(x, myStateScore, 'yo--', 'LineWidth', 7);
+hold on;
+plot(x, sensorStateScore, 'g-', 'LineWidth', 7);
+legend('myObjScore', 'sensorObjScore', 'myStateScore', 'sensorStateScore');
+xlabel('pathLength', 'FontSize', 18);
+ylabel('fidelity', 'FontSize', 18);
+title('Effect of nodeNum of Graph (avgDegree=3, pathLength=8, objPerNode=5, recall=0.6)', 'FontSize', 18);
 
