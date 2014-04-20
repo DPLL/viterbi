@@ -1,0 +1,1016 @@
+degree is 3, objectNumPerNode is 5, nodeNum is 36, recall is 0.6, pathLength is 8, graphNum is 2, runPerGraph is 100
+36
+([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], [(2,6), (6,0), (6,3), (6,4), (1,7), (7,6), (8,6), (7,10), (7,11), (11,3), (11,5), (11,8), (10,12), (12,11), (9,13), (13,4), (13,6), (14,11), (14,12), (0,15), (5,15), (11,15), (15,1), (15,10), (15,11), (11,16), (5,17), (7,17), (10,17), (17,2), (17,4), (12,18), (15,18), (18,17), (15,19), (19,14), (14,20), (20,12), (2,21), (7,21), (10,21), (21,7), (13,22), (14,22), (22,0), (22,10), (4,23), (6,23), (23,11), (23,15), (24,4), (24,7), (24,10), (24,16), (24,17), (23,25), (25,12), (25,15), (1,26), (26,2), (26,7), (3,27), (5,27), (27,4), (27,5), (27,11), (4,28), (28,5), (28,20), (28,23), (7,29), (10,29), (12,29), (16,29), (28,29), (29,5), (29,6), (29,15), (29,17), (25,30), (16,31), (21,31), (31,8), (31,17), (10,32), (19,32), (32,20), (32,22), (32,30), (17,33), (22,33), (31,33), (32,33), (33,6), (33,7), (33,27), (16,34), (26,34), (34,15), (34,23), (3,35), (19,35), (22,35), (31,35), (34,35), (35,4), (35,10), (35,21)])
+8
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 1 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 2 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 3 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 4 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 5 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 6 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 7 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.625
+myStateScore: 0.75
+asrStatePercentage: 0.625
+in the 8 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.25
+myStateScore: 0.125
+asrStatePercentage: 0.25
+in the 9 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.625
+myStateScore: 0.375
+asrStatePercentage: 0.625
+in the 10 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 11 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.75
+myStateScore: 0.625
+asrStatePercentage: 0.75
+in the 12 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.25
+myStateScore: 0.375
+asrStatePercentage: 0.25
+in the 13 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.625
+myStateScore: 0.5
+asrStatePercentage: 0.625
+in the 14 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 15 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 16 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.375
+myStateScore: 0.125
+asrStatePercentage: 0.375
+in the 17 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 18 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 19 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 20 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.25
+myStateScore: 0.75
+asrStatePercentage: 0.375
+in the 21 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 22 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 23 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 24 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 25 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 26 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 27 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 28 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 29 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 30 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.625
+myStateScore: 0.75
+asrStatePercentage: 0.625
+in the 31 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 32 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 33 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.25
+myStateScore: 0.375
+asrStatePercentage: 0.25
+in the 34 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 35 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 36 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 37 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 38 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 39 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.5
+myStateScore: 0.25
+asrStatePercentage: 0.5
+in the 40 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 41 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.375
+myStateScore: 0.0
+asrStatePercentage: 0.375
+in the 42 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 43 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 44 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.625
+myStateScore: 0.75
+asrStatePercentage: 0.625
+in the 45 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 46 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.375
+myStateScore: 0.0
+asrStatePercentage: 0.375
+in the 47 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 48 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 49 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 50 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.5
+myStateScore: 0.375
+asrStatePercentage: 0.5
+in the 51 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.375
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 52 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 53 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 54 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 55 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.625
+myStateScore: 0.625
+asrStatePercentage: 0.625
+in the 56 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 57 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.75
+myStateScore: 0.625
+asrStatePercentage: 0.75
+in the 58 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 59 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 60 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 61 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 62 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 63 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 64 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.375
+myStateScore: 0.0
+asrStatePercentage: 0.375
+in the 65 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 66 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 67 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 68 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 69 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 70 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.25
+myStateScore: 0.125
+asrStatePercentage: 0.25
+in the 71 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 72 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.875
+in the 73 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.625
+in the 74 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 75 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.25
+myStateScore: 0.125
+asrStatePercentage: 0.25
+in the 76 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.375
+myStateScore: 0.75
+asrStatePercentage: 0.375
+in the 77 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 78 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.375
+myStateScore: 0.125
+asrStatePercentage: 0.5
+in the 79 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 80 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.625
+myStateScore: 0.5
+asrStatePercentage: 0.625
+in the 81 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.375
+myStateScore: 0.375
+asrStatePercentage: 0.375
+in the 82 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.25
+myStateScore: 0.375
+asrStatePercentage: 0.25
+in the 83 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.75
+myStateScore: 0.625
+asrStatePercentage: 0.75
+in the 84 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 85 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.25
+myStateScore: 0.25
+asrStatePercentage: 0.25
+in the 86 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.75
+myStateScore: 0.625
+asrStatePercentage: 0.75
+in the 87 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 88 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 89 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.25
+myStateScore: 0.125
+asrStatePercentage: 0.25
+in the 90 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 91 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 92 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 93 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.25
+myStateScore: 0.25
+asrStatePercentage: 0.25
+in the 94 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 95 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 96 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.625
+myStateScore: 0.625
+asrStatePercentage: 0.625
+in the 97 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 98 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 99 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 100 th interation, haha!!!!
+36
+([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], [(0,1), (2,1), (4,6), (6,0), (4,7), (7,1), (6,8), (8,6), (5,10), (10,7), (12,5), (4,13), (5,13), (7,13), (11,14), (14,1), (14,4), (15,11), (2,16), (9,16), (13,16), (15,16), (17,8), (4,18), (11,18), (12,18), (18,7), (3,19), (13,19), (15,19), (12,20), (16,21), (17,21), (5,22), (16,22), (17,22), (18,22), (17,23), (20,23), (3,24), (19,24), (21,24), (24,9), (24,11), (24,14), (0,25), (23,25), (24,25), (25,4), (25,9), (25,16), (1,26), (5,26), (15,26), (26,1), (26,5), (26,10), (15,27), (17,27), (19,27), (27,22), (1,28), (3,28), (12,28), (17,28), (28,2), (28,18), (28,24), (4,29), (14,29), (21,29), (27,29), (29,1), (29,6), (29,8), (29,12), (29,23), (0,30), (28,30), (30,23), (12,31), (17,31), (25,31), (31,0), (31,5), (31,6), (31,8), (31,22), (23,32), (32,2), (32,23), (4,33), (15,33), (18,33), (33,10), (33,24), (33,28), (1,34), (24,34), (34,4), (34,20), (0,35), (4,35), (9,35), (11,35), (35,0), (35,21), (35,23)])
+8
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 101 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 102 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 103 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 104 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 105 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 106 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 107 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.625
+myStateScore: 0.625
+asrStatePercentage: 0.625
+in the 108 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.25
+myStateScore: 0.625
+asrStatePercentage: 0.375
+in the 109 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 110 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 111 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 112 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 113 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 114 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.125
+myStateScore: 0.0
+asrStatePercentage: 0.125
+in the 115 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 116 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 117 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 118 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.375
+myStateScore: 0.875
+asrStatePercentage: 0.375
+in the 119 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.375
+myStateScore: 0.75
+asrStatePercentage: 0.375
+in the 120 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.25
+myStateScore: 0.0
+asrStatePercentage: 0.25
+in the 121 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.375
+myStateScore: 0.5
+asrStatePercentage: 0.375
+in the 122 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.125
+myStateScore: 0.375
+asrStatePercentage: 0.25
+in the 123 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 124 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 125 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 126 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 127 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 128 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 129 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 130 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 131 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 132 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 133 th interation, haha!!!!
+myObjectScore: 0.0
+sensorObjectScore: 0.25
+myStateScore: 0.0
+asrStatePercentage: 0.25
+in the 134 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.5
+myStateScore: 0.25
+asrStatePercentage: 0.5
+in the 135 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 136 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 137 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 138 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.375
+myStateScore: 1.0
+asrStatePercentage: 0.375
+in the 139 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.625
+myStateScore: 0.625
+asrStatePercentage: 0.625
+in the 140 th interation, haha!!!!
+myObjectScore: 0.5
+sensorObjectScore: 0.5
+myStateScore: 0.5
+asrStatePercentage: 0.5
+in the 141 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 142 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.25
+myStateScore: 0.625
+asrStatePercentage: 0.25
+in the 143 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 144 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.75
+myStateScore: 0.75
+asrStatePercentage: 0.75
+in the 145 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.75
+myStateScore: 0.75
+asrStatePercentage: 0.75
+in the 146 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.375
+myStateScore: 0.625
+asrStatePercentage: 0.375
+in the 147 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 148 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.375
+myStateScore: 0.75
+asrStatePercentage: 0.375
+in the 149 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.25
+myStateScore: 0.25
+asrStatePercentage: 0.25
+in the 150 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 151 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.25
+myStateScore: 0.625
+asrStatePercentage: 0.25
+in the 152 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 153 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.75
+myStateScore: 0.75
+asrStatePercentage: 0.75
+in the 154 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 155 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.25
+myStateScore: 0.375
+asrStatePercentage: 0.25
+in the 156 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 157 th interation, haha!!!!
+myObjectScore: 0.125
+sensorObjectScore: 0.125
+myStateScore: 0.125
+asrStatePercentage: 0.125
+in the 158 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.5
+myStateScore: 0.75
+asrStatePercentage: 0.5
+in the 159 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.5
+myStateScore: 0.625
+asrStatePercentage: 0.5
+in the 160 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 161 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 162 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 163 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.125
+myStateScore: 0.25
+asrStatePercentage: 0.125
+in the 164 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 165 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 166 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 167 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 168 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 169 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.375
+myStateScore: 1.0
+asrStatePercentage: 0.375
+in the 170 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 171 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.875
+myStateScore: 0.875
+asrStatePercentage: 0.875
+in the 172 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 173 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 174 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 175 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.375
+myStateScore: 0.375
+asrStatePercentage: 0.375
+in the 176 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 177 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.75
+myStateScore: 0.875
+asrStatePercentage: 0.75
+in the 178 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 179 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 180 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.625
+myStateScore: 0.625
+asrStatePercentage: 0.625
+in the 181 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.625
+myStateScore: 0.875
+asrStatePercentage: 0.625
+in the 182 th interation, haha!!!!
+myObjectScore: 0.75
+sensorObjectScore: 0.625
+myStateScore: 0.75
+asrStatePercentage: 0.625
+in the 183 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.5
+myStateScore: 1.0
+asrStatePercentage: 0.5
+in the 184 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 185 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 186 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.375
+myStateScore: 1.0
+asrStatePercentage: 0.375
+in the 187 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 188 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 189 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 190 th interation, haha!!!!
+myObjectScore: 0.375
+sensorObjectScore: 0.375
+myStateScore: 0.375
+asrStatePercentage: 0.375
+in the 191 th interation, haha!!!!
+myObjectScore: 0.875
+sensorObjectScore: 0.5
+myStateScore: 0.875
+asrStatePercentage: 0.5
+in the 192 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.625
+myStateScore: 1.0
+asrStatePercentage: 0.625
+in the 193 th interation, haha!!!!
+myObjectScore: 0.625
+sensorObjectScore: 0.375
+myStateScore: 0.625
+asrStatePercentage: 0.375
+in the 194 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.75
+myStateScore: 1.0
+asrStatePercentage: 0.75
+in the 195 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 196 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 197 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 0.875
+myStateScore: 1.0
+asrStatePercentage: 0.875
+in the 198 th interation, haha!!!!
+myObjectScore: 0.25
+sensorObjectScore: 0.375
+myStateScore: 0.25
+asrStatePercentage: 0.375
+in the 199 th interation, haha!!!!
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 200 th interation, haha!!!!
+count is: 200
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+myObjectScore: 0.72625
+sensorObjectScore: 0.584375
+myStateScore: 0.73375
+asrStatePercentage: 0.5925
+averagePathLength: 8.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
