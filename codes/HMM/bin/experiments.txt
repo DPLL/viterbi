@@ -4,7 +4,7 @@ avgDegree = 3, objectPerNode = 5, nodeNum = 30, pathLength = 8, recall = 0.6
 1)recall:      0.1 -- 1.0
 2)pathLength:    1 -- 10
 3)degree:        1 -- 10
-4)nodeNum:       6 -- 24
+4)nodeNum:      15 -- 42 (step = 3)
 5)objPerNode:    1 -- 10
 
 
