@@ -615,9 +615,14 @@ public class SimulationGraph2 implements Serializable  {
     	errorGranularity = (1-recall)/(objectPerNode*numVertex-1);
 		//System.out.println("errorGranularity is " + errorGranularity);
     	classifiedResults = new ArrayList<ObjectSimulation2>();
+
         for(ObjectSimulation2 obj: trueObjects) {
-    		double error = Math.random();  
-    		//System.out.println("error is " + error);
+    		//double error = Math.random();  
+        	Random generator = new Random();
+        	double error = generator.nextDouble();
+/*    		System.out.println("*********************");
+    		System.out.println("error is " + error);
+    		System.out.println("*********************");*/
     		// min and max are the lower and upper bound of obj, respectively.
     		double min = obj.objectID * errorGranularity;
     		double max = obj.objectID * errorGranularity + recall;

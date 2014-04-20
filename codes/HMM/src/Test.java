@@ -1,4 +1,10 @@
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Random;
+
+import cern.jet.random.Uniform;
+import cern.jet.random.engine.DRand;
+import cern.jet.random.engine.RandomEngine;
  
 public class Test
 {
@@ -54,8 +60,52 @@ public class Test
 		System.out.println(((Float) ret[0]).floatValue());		
 		System.out.println((String) ret[1]);
 		System.out.println(((Float) ret[2]).floatValue());
+		classify();
 	}
  
+    public static void classify()
+    {
+    	double recall = 0.7;
+		double min = 0.0;
+		double max = min + recall;
+
+    	int runTime = 10;
+    	int score = 0;
+    	
+        for(int i = 0; i < runTime; i++) {
+/*        	RandomEngine engine = new DRand();
+        	Uniform uni = new Uniform(engine);
+        	double error = uni.nextDouble();*/
+    		double error = Math.random(); 
+/*         	Random generator = new Random();
+        	double error = generator.nextDouble();*/
+    		System.out.println("*********************");
+    		System.out.println("error is " + error);
+    		System.out.println("*********************");
+    		// min and max are the lower and upper bound of obj, respectively.
+
+    		//System.out.println("min is " + min + ", and max is " + max);
+    		int id;
+/*    		if (0 <= error && error < min) {
+    			id = 0;
+    		} else if (1 > error && error >= max) {
+    			id = 0;
+    		} else {
+    			id = 1;
+    		}*/
+    		if (min <= error && error < max) {
+    			id = 1;
+    		} else {
+    			id = 0;
+    		}
+        	score += id;
+        }
+/*        System.out.println("classifiedResults is as follows");
+        for(ObjectSimulation2 arr : classifiedResults)
+        	System.out.println(arr);*/
+		System.out.println("score is: " + ((double)score/runTime));
+    }
+	
 	public static Object[] forward_viterbi(String[] obs, String[] states,
 			Hashtable<String, Float> start_p,
 			Hashtable<String, Hashtable<String, Float>> trans_p,
