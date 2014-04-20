@@ -13,5 +13,5 @@ treeRun:
 avgDegree = 3, objPerNode = 5, height = 5 (nodeNum = 364), pathLength = 6, recall = 0.6
 1)recall:      0.1 -- 1.0
 2)pathLength:    1 -- 6
-2)degree:        1 -- 10? (too many nodes?)
-3)objPerNode:    1 -- 10
+3)degree:        1 -- 10? (too many nodes?)
+4)objPerNode:    1 -- 10
