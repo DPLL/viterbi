@@ -1,3 +1,8 @@
+For laptop, all the codes are in the directory of /home/david/Dropbox/projects/ER/speech/viterbi/codes/HMM/src .  And this directory is under version control of github.  However, when we open up the codes in eclipse, we open it through /home/david/workspace/viterbi/codes.
+
+For the desktop, all the codes are in the directory of /home/workplace/viterbi/codes/HMM/src, and it is also in synch with github.  If we want to open it up in eclipse, it should be in the same place with the github directory.
+
+
 for special2.out
     			graphGen.density = 0.5;
     			graphGen.objectPerNode = 2;
