@@ -176,12 +176,15 @@ public class Simulation2
 			//System.out.println(graphGen.numVertex);
 			//System.out.println(tree.toString());
 			
-			//Graph Interface 
-			treeParse(tree);
+			//Graph Interface
+			// PAY ATTENTION!!! version2 should be coupled with findTreePathFromRoot below, while version1 should be
+			// coupled with findTreePath
+			treeParse(tree, 2);
     		
 			// instead of choosing the diameter as the path, choose a path specified length 
 			//System.out.println(graphGen.pathLength);
-			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
+			//ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
+			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePathFromRoot(graphGen.pathLength);
 			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
 			{
 				System.out.println("could not find such path!");
@@ -221,14 +224,14 @@ public class Simulation2
 	            	str.append(graphGen.trueObjects.get(m) + " ");
 	            }
 	            //System.out.println(str);
-	    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+	    		System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
 	            
 	    		//System.out.println("The trueObjects is as follows:" + str);
 	    		/*
 	    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
 	    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
 	    		}*/
-	    		//System.out.println("The trueStates is: " + graphGen.trueStates);	
+	    		System.out.println("The trueStates is: " + graphGen.trueStates);	
 	    		
 	    		totalMyWordPercentage += myWordPercentage;
 	    		totalMyStatePercentage += myStatePercentage;
@@ -254,7 +257,8 @@ public class Simulation2
     /*
      * read the kAryPerfectTree and create interface for it.
      */
-    public static void treeParse(DelegateTree<VertexSimulation2, DefaultWeightedEdge> kAryTree)
+    // the version determines the version of start_probability
+    public static void treeParse(DelegateTree<VertexSimulation2, DefaultWeightedEdge> kAryTree, int version)
     {
     	// verSet contains all the vertexes of the graph
         Set<VertexSimulation2> verSet = new HashSet<VertexSimulation2>();
@@ -262,18 +266,24 @@ public class Simulation2
         // for states
         ArrayList<String> stateList = new ArrayList<String>();
         // for start_probability
+        start_probability = new Hashtable<String, Double>();
         /*
          * Version I: make every node have equal possibility of getting started
          */
-        start_probability = new Hashtable<String, Double>();
-        double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        //System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
-        
-        /*
-         * Version II: make the root node as the source
-         */
-        //TODO
-        
+        double start_prob = 0;
+        if (version == 1) {
+	        start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
+	        //System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
+        } else if (version == 2){        
+	        /*
+	         * Version II: make the root node as the source
+	         */
+        	start_prob = 1.0;
+	        start_probability.put(Integer.toString(kAryTree.getRoot().vertexID), start_prob);
+        } else {
+        	System.out.println("error in setting version number!");
+        	System.exit(-1);
+        }
         // for trueObjectSet
         ArrayList<ObjectSimulation2> trueObjectSetList = new ArrayList<ObjectSimulation2>();
         // for emission_probability
@@ -297,8 +307,16 @@ public class Simulation2
         	
         	// array of states
         	stateList.add(Integer.toString(ver.vertexID));
-        	// start_probability
-        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
+        	
+        	// start_probability 
+        	if (version == 1) {
+        		// Version I: make every node have equal possibility of getting started
+        		start_probability.put(Integer.toString(ver.vertexID), start_prob);
+        	} else {
+        		// Version II: do nothing here
+        		;;
+        	}
+        	
         	// trueObjectSet and emission_probability
         	Hashtable<ObjectSimulation2, Double> e = new Hashtable<ObjectSimulation2, Double>();
         	for (ObjectSimulation2 object : objects) {
@@ -307,8 +325,10 @@ public class Simulation2
         		// emission_probability
         		e.put(object, emission_prob);
         	}
+        	
         	// emission_probability
         	emission_probability.put(Integer.toString(ver.vertexID), e);
+        	
         	// transition_probability
         	double transition_prob = (double)1/(kAryTree.outDegree(ver));
         	//System.out.println("transition_prob is " + transition_prob);
@@ -327,7 +347,7 @@ public class Simulation2
         states = stateList.toArray(states);
         //System.out.println(Arrays.toString(states));
         // print the start_probability
-        //System.out.println(start_probability);
+        System.out.println(start_probability);
         // print the trueObjectSet
         //System.out.println(trueObjectSetList);
         trueObjectSet = new ObjectSimulation2[trueObjectSetList.size()];
@@ -473,7 +493,11 @@ public class Simulation2
         	}*/
     	for (String state : states)
     	{
-    		V[0][Integer.parseInt(state)] = Math.log(start_p.get(state));
+    		if (start_p.get(state) != null) {
+    			V[0][Integer.parseInt(state)] = Math.log(start_p.get(state));
+    		} else {
+    			V[0][Integer.parseInt(state)] = Math.log(0);
+    		}
     		B[0][Integer.parseInt(state)] = Integer.parseInt(state);
     		X[0][Integer.parseInt(state)] = new ObjectSimulation2();
     	}
@@ -500,7 +524,8 @@ public class Simulation2
                 for (ObjectSimulation2 object : obs)		
                 {
                 	if (t == 1) {
-                		if (emit_p.get(next_state) == null || emit_p.get(next_state).get(object) == null) {
+                		if (emit_p.get(next_state) == null || emit_p.get(next_state).get(object) == null
+                				|| start_p.get(next_state) == null) {
                 			v_prob = Double.NEGATIVE_INFINITY;
                 		}
                 		else {
@@ -584,7 +609,7 @@ public class Simulation2
         	objects[x] = X[x][path[x]]; 
         }
        	
-/*        System.out.println("\n*************************************\n");         
+        System.out.println("\n*************************************\n");         
         System.out.println(Arrays.toString(actualObs));
         
         for (int x = 0; x < obs_num+1; x++)
@@ -592,12 +617,12 @@ public class Simulation2
         	System.out.println("state: " + path[x] + 
         			", with the object: " + objects[x]);
         }
-        System.out.println("\n*************************************\n");*/
+        System.out.println("\n*************************************\n");
         
         // report the results of fidelity
         reportFidelity(actualObs, path, objects, trueObjects, trueStates);
         
-/*        System.out.println("Purely for the sake of debugging");*/
+        System.out.println("Purely for the sake of debugging");
     }
     
     /*
