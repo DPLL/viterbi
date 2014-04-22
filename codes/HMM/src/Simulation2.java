@@ -138,35 +138,6 @@ public class Simulation2
     	 	// Generate a random graph
     		graphGen = new SimulationGraph2();
     		double pathLength;
-    		
-    		/*
-    		 * Generate a random graph-----------------------------------------------------
-    		 */
-    		// 1.[avgDegreeOfGraph] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength]
-/*			graph = graphGen.GraphGen(5, 10, 20, 0.5, 5);
-			System.out.println(graphGen.numVertex);
-			System.out.println(graph.toString());	
-    		
-    		//Graph Interface 
-    		graphParse(graph);
-    		
-    		// pathLength records the length of the path in terms of number of vertex.
-    		// use the diameter as the ground truth
-			diameterPath = graphGen.findDiameter();
-			graphGen.setGroundTruth(diameterPath);
-			pathLength = diameterPath.size() + 1;
-    		
-			// instead of choosing the diameter as the path, choose a path specified length 
-			System.out.println(graphGen.pathLength);
-			ArrayList<VertexSimulation2> pathInVertex = graphGen.findPath(graphGen.pathLength);
-			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
-			{
-				System.out.println("could not find such path!");
-				System.exit(-1);
-			}	
-			pathLength = pathInVertex.size();*/
-						
-			//------------------------------------------------------------------------------
 			
 			/*
 			 * Generate a kAry perfect tree-------------------------------------------------
@@ -224,14 +195,16 @@ public class Simulation2
 	            	str.append(graphGen.trueObjects.get(m) + " ");
 	            }
 	            //System.out.println(str);
-	    		System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+	            // debugging needed
+	    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
 	            
 	    		//System.out.println("The trueObjects is as follows:" + str);
 	    		/*
 	    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
 	    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
 	    		}*/
-	    		System.out.println("The trueStates is: " + graphGen.trueStates);	
+	            // debugging needed
+	    		//System.out.println("The trueStates is: " + graphGen.trueStates);	
 	    		
 	    		totalMyWordPercentage += myWordPercentage;
 	    		totalMyStatePercentage += myStatePercentage;
@@ -347,7 +320,7 @@ public class Simulation2
         states = stateList.toArray(states);
         //System.out.println(Arrays.toString(states));
         // print the start_probability
-        System.out.println(start_probability);
+        //System.out.println(start_probability);
         // print the trueObjectSet
         //System.out.println(trueObjectSetList);
         trueObjectSet = new ObjectSimulation2[trueObjectSetList.size()];
@@ -609,7 +582,8 @@ public class Simulation2
         	objects[x] = X[x][path[x]]; 
         }
        	
-        System.out.println("\n*************************************\n");         
+        // debugging needed
+/*        System.out.println("\n*************************************\n");         
         System.out.println(Arrays.toString(actualObs));
         
         for (int x = 0; x < obs_num+1; x++)
@@ -617,12 +591,13 @@ public class Simulation2
         	System.out.println("state: " + path[x] + 
         			", with the object: " + objects[x]);
         }
-        System.out.println("\n*************************************\n");
+        System.out.println("\n*************************************\n");*/
         
         // report the results of fidelity
         reportFidelity(actualObs, path, objects, trueObjects, trueStates);
         
-        System.out.println("Purely for the sake of debugging");
+        // debugging needed
+        //System.out.println("Purely for the sake of debugging");
     }
     
     /*
