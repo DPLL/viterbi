@@ -101,7 +101,11 @@ public class SimulationGraph2 implements Serializable  {
 		recall = recallVal;
 	    pathLength = pathLengthVal; 
 		// numNodes is the total number of nodes that a tree has 
-		numVertex = (int) ((Math.pow(order, (height+1))-1)/(order-1));
+	    if (order > 1) {
+	    	numVertex = (int) ((Math.pow(order, (height+1))-1)/(order-1));
+	    } else { // when order = 1, it is not a tree, but a straight line.
+	    	numVertex = height + 1;
+	    }
 		//System.out.println("numNodes is " + numVertex);
 		
 		// sort and store the vertices in order 
