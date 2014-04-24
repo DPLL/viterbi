@@ -22,19 +22,21 @@ def runCmd(cmd, outputPath):
 def main():
     degree = '3 '
     objPerNode = '5 '    
-    nodeNum = '30 '
-    recall = '0.6 '
-    #pathLength = ' 8 '
-    graphNum = ' 2 '
+    #nodeNum = '30 '
+    recall = ' 0.6 '
+    pathLength = '8 '
+    graphNum = '2 '
     runPerGraph = '1000'
 
     recallList = [0,1, 0,2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     processList = []
 
 #    for i in recallList:
-    for i in range(1, 11):
-        args = degree + objPerNode + nodeNum + recall + str(i) + graphNum + runPerGraph
-        outputPath = '../results/testGraphPathLength' + str(i)
+#    for i in range(1, 11):
+    for i in range(15, 45, 3):
+        args = degree + objPerNode + str(i) + recall + pathLength + graphNum + runPerGraph
+        #outputPath = '../results/testGraphPathLength' + str(i)
+        outputPath = '../results/testGraphNodeNum' + str(i)
         exeCmd = cmd + args
         p = Process(target=runCmd, args=(exeCmd, outputPath))
         processList.append(p)
