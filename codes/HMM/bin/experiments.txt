@@ -8,7 +8,7 @@ avgDegree = 3, objectPerNode = 5, nodeNum = 30, pathLength = 8, recall = 0.6
 5)objPerNode:    1 -- 10
 
 
-treeRun:
+treeRun (rooted and unrooted):
 
 avgDegree = 3, objPerNode = 5, height = 5 (nodeNum = 364), pathLength = 6, recall = 0.6
 1)recall:      0.1 -- 1.0
