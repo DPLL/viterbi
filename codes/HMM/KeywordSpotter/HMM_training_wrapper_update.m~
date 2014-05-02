@@ -1,0 +1,179 @@
+%% Ignore this part
+% randIdx=randperm(462, 30);
+% filename=cellfun(@(number) sprintf('trainSignals/greasy_%02d.wav', number), num2cell(1:20), 'UniformOutput', 0);
+% 
+% cellfun(@(filename,y) audiowrite(filename, y, 16000), filename, words(7,randIdx(1:20)), 'UniformOutput', 0);
+% 
+% filename=cellfun(@(number) sprintf('testSignals/greasy_%02d.wav', number), num2cell(1:10), 'UniformOutput', 0);
+% cellfun(@(filename,y) audiowrite(filename, y, 16000), filename, words(7,randIdx(21:30)), 'UniformOutput', 0);
+% 
+% filename=cellfun(@(number) sprintf('testSignals/dark_%02d.wav', number), num2cell(1:10), 'UniformOutput', 0);
+% cellfun(@(filename,y) audiowrite(filename, y, 16000), filename, words(4,randIdx(1:10)), 'UniformOutput', 0);
+% 
+
+%% words for HMM models
+%words  = {'beehive', 'bleach', 'bodegones', 'champaign'};
+words = {'scale','scalp','scare','scope','scram','scrap','skate','skill','skunk','slang','slant','slate','slave','slept','slope','slump','bleach','bonnet','bottle','breath','bright','bruise','bubble','bundle','button','candle','cattle','charge','cheese','choice','church','bedtime','beehive','begging','broiler','careful','collect','crinkle','cupcake','delight','explore','gumball','harmful','helpful','herself','sentence','together','children','mountain','chipmunk','crashing','drinking','insisted','insulted','invented','squinted','standing','swishing','talented','whiplash','ingersoll','bodegones','islamabad','catchable','inelegant','nummulite','unitarian','sublimity','decreeing','atrocious','crackling','kilolitre','ondometer','logogriph','champaign'};
+numWords = length(words);
+testNum = 5;
+maxIter = 40;
+for i= 1 : numWords
+    fprintf('%s\n',words{i});
+end
+%% Load signals
+eps = 2.2204e-015;
+addpath('audioread');
+%     trainFilePaths1=dir('trainSignals/beehive_3.wav');
+%     trainFilePaths1.name;
+%     x = 'haha';
+%     test = ['test/',x];
+
+% trainSignalCells stores the cell array of all the training signals for
+% each word
+trainSignalCells = cell(1, numWords);
+% testSignalCells stores the cell array of all the testing signals for
+% each word
+testSignalCells = cell(1, numWords);
+    
+for i = 1 : numWords
+    currentTrainFilePaths = strcat('trainSignals/', words{i}, '*.wav');
+    currentTestFilePaths = strcat('testSignals/', words{i}, '*.wav');
+%     fprintf('currentTrainFilePaths %s\n', currentTrainFilePaths);
+%     fprintf('currentTestFilePaths %s\n', currentTestFilePaths);
+
+    trainFilePaths=dir(currentTrainFilePaths);
+    trainSignals=cellfun(@(trainFilePaths) audioread(['trainSignals/', trainFilePaths])+eps, {trainFilePaths.name}, 'UniformOutput', 0);
+    % add the current training signal to the trainSignalCells array
+    trainSignalCells{i} = trainSignals;
+
+    testFilePaths=dir(currentTestFilePaths);
+    testSignals=cellfun(@(testFilePaths) audioread(['testSignals/', testFilePaths])+eps, {testFilePaths.name}, 'UniformOutput', 0);
+    % add the current testing signal to the testSignalCells array
+    testSignalCells{i} = testSignals;
+end
+
+%% Convert into MFCC
+addpath('rastamat');
+FRAMESIZE=512;
+WINDOW=hann(FRAMESIZE, 'periodic');
+
+trainMFCCCells = cell(1, numWords);
+testMFCCCells = cell(1, numWords);
+
+trainMFCCdeltaCells = cell(1, numWords);
+testMFCCdeltaCells = cell(1, numWords);
+
+trainMFCCdelta2Cells = cell(1, numWords);
+testMFCCdelta2Cells = cell(1, numWords);
+
+finalTrainFeatureCells = cell(1, numWords);
+finalTestFeatureCells = cell(1, numWords);
+
+for i = 1 : numWords
+
+    trainMFCC=cellfun(@(x) melfcc(abs(x), 16000), trainSignalCells{i}, 'UniformOutput', 0);
+    testMFCC=cellfun(@(x) melfcc(abs(x), 16000), testSignalCells{i}, 'UniformOutput', 0);
+    trainMFCCCells{i} = trainMFCC;
+    testMFCCCells{i} = testMFCC;
+
+    trainMFCCdelta=cellfun(@(x) deltas(x), trainMFCC, 'UniformOutput', 0);
+    testMFCCdelta=cellfun(@(x) deltas(x), testMFCC, 'UniformOutput', 0);
+    trainMFCCdeltaCells{i} = trainMFCCdelta;
+    testMFCCdeltaCells{i} = testMFCCdelta;
+
+    trainMFCCdelta2=cellfun(@(x) deltas(x), trainMFCCdelta, 'UniformOutput', 0);
+    testMFCCdelta2=cellfun(@(x) deltas(x), testMFCCdelta, 'UniformOutput', 0);
+    trainMFCCdelta2Cells{i} = trainMFCCdelta2;
+    testMFCCdelta2Cells{i} = testMFCCdelta2;    
+
+    finalTrainFeature=cellfun(@(x,y,z) [x;y;z], trainMFCC, trainMFCCdelta, trainMFCCdelta2, 'UniformOutput', 0);
+    finalTestFeature=cellfun(@(x,y,z) [x;y;z], testMFCC, testMFCCdelta, testMFCCdelta2, 'UniformOutput', 0);
+    finalTrainFeatureCells{i} = finalTrainFeature;
+    finalTestFeatureCells{i} = finalTestFeature;
+    
+end
+finalTrainFeatureCells
+
+% 
+
+% %% HMM Learning 
+addpath(genpath('HMMall'))
+M = 3; % for greasy, the previous value of M is 3
+Q = 5; % for greasy, the previous value of Q is 5
+
+OCells = cell(1, numWords);
+for i = 1 : numWords
+    OCells{i} = size(finalTrainFeatureCells{1}{1},1);
+end
+OCells
+% O = size(finalTrainFeature{1},1);
+cov_type = 'diag';
+
+prior1Cells = cell(1, numWords);
+transmat1Cells = cell(1, numWords);
+mu1Cells = cell(1, numWords);
+Sigma1Cells = cell(1, numWords);
+mixmat1Cells = cell(1, numWords);
+
+for i = 1 : numWords
+    % initial guess of parameters
+    prior0 = normalise(rand(Q,1));
+    transmat0 = mk_stochastic(rand(Q,Q));
+    [mu0, Sigma0] = mixgauss_init(Q*M, cell2mat(finalTrainFeatureCells{i}), cov_type);
+    mu0 = reshape(mu0, [OCells{i} Q M]);
+    Sigma0 = reshape(Sigma0, [OCells{i} OCells{i} Q M]);
+    mixmat0 = mk_stochastic(rand(Q,M));
+    [LL, prior1, transmat1, mu1, Sigma1, mixmat1] = ...
+        mhmm_em(cell2mat(finalTrainFeatureCells{i}), prior0, transmat0, mu0, Sigma0, mixmat0, 'max_iter', maxIter);
+    
+    prior1Cells{i} = prior1;
+    transmat1Cells{i} = transmat1;
+    mu1Cells{i} = mu1;
+    Sigma1Cells{i} = Sigma1;
+    mixmat1Cells{i} = mixmat1;
+    
+end 
+
+%% HMM detection 
+
+for i = 1 : numWords
+    % i is the index for the testing word
+    curMaxLik = [];
+    curIndex = zeros(1, testNum);
+    for m = 1 : testNum
+        curMaxLik(m) = -Inf;
+    end
+    curIndex = 0;
+    for j = 1 : numWords
+        % j is the index for the training word
+        loglik=cellfun(@(x) mhmm_logprob(x, prior1Cells{j}, transmat1Cells{j}, mu1Cells{j}, Sigma1Cells{j}, mixmat1Cells{j}), finalTestFeatureCells{i}, 'UniformOutput', 0);
+        %fprintf('size before cell2mat is %d\n',size(loglik));
+        loglik=cell2mat(loglik); % from cell array results to double array
+        %fprintf('size after cell2mat is %d\n',size(loglik));
+        for n = 1 : testNum
+            if loglik(n) > curMaxLik(n)
+                curMaxLik(n) = loglik(n);
+                curIndex(n) = j;
+            end
+        end
+    end
+    fprintf('For testing word %d, the curIndex is as follows:',i);
+    curIndex
+    curMaxLik
+end
+
+% figure;
+% plot(loglik) % check out that the log-likelihoods of the test items 11~20 (greasy) are bigger than 1~10 (dark)
+% xlabel('number of test data points');
+% ylabel('log likelihood');
+
+% loglik=cellfun(@(x) mhmm_logprob(x, prior1, transmat1, mu1, Sigma1, mixmat1), finalTestFeature, 'UniformOutput', 0);
+% loglik=cell2mat(loglik); % from cell array results to double array
+% lengths=cell2mat(cellfun(@(x) length(x), testSignals, 'UniformOutput', 0)); % calculate the lengths of test signals
+% loglik=bsxfun(@rdivide, loglik, lengths); % normalize result by the lengths
+% loglik
+% figure;
+% plot(loglik) % check out that the log-likelihoods of the test items 11~20 (greasy) are bigger than 1~10 (dark)
+% xlabel('number of test data points');
+% ylabel('log likelihood');
+
