@@ -1,0 +1,100 @@
+state 1:
+	CPR: start CPR
+	oxgen:
+	defibrillator:
+
+state2:
+	VF (ventricular fibrillation):
+	VT (ventricular tachycardia):
+
+state3, 5, 7:
+	defibrillator: charge the defibrillator
+	clear: clear the bed
+	shock: shock the patient
+
+state4:
+	CPR: start CPR for 2 minutes
+	intravenous (IV): 
+	??(IO):
+	
+state6:
+	CPR: start CPR for 2 minutes
+	epinephrine: give epinephrine for 3 minute interval
+	capnography: consider advanced airway and capnography
+
+state8:
+	CPR: start CPR for 2 minutes
+	amiodarone:
+
+state9:
+	asystole: The patient has asystole
+	pulseless: The patient has pulseless electrical activity
+
+state10: (self-loop)
+	resuscitation: start resuscitation for 2 minutes
+	epinephrine: give epinephrine for 3 minute interval
+	
+	
+state 12-15:
+	rhythm: what's the rhythm?
+	pulse: have a pulse check.
+
+
+
+
+
+Start CPR
+
+What's the rhythm?
+
+The patient has asystole.
+
+
+start resuscitation for 2 minutes
+give epinephrine for 3 minute interval
+
+
+
+What's the rhythm?
+The patient has ventricular fibrillation.
+
+
+charge the defibrillator
+clear the bed
+shock the patient
+
+
+start resuscitation for 2 minutes
+give epinephrine for 3 minute interval
+
+
+What's the rhythm?
+The paitent has ventricular fibrillation
+
+
+charge the defibrillator
+clear the bed
+shock the patient
+
+
+start resuscitation for 2 minutes
+give amiodarone for 3 minute interval
+
+
+What's the rhythm?
+Good pulse with compressions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
