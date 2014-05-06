@@ -1,8 +1,6 @@
+package speech.system.test;
+
 /*
- * TestMHMM.java is the right file for testing the speech recognition performance based on the simple
- * synthetic topology of the 5 states.
- * 
- * MHMM is TestMHMM.java, and it is deprecated.
  * 
  * CPRRecognition.java is the right for for testing the speech recognition performance based on the 
  * complete workflow in the ICU. 
@@ -23,7 +21,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
  
-public class TestMHMM
+public class CPRRecognition
 {
 /*	static final String HEALTHY = "Healthy";
 	static final String FEVER = "Fever";
