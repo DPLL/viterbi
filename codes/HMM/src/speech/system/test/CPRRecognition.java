@@ -23,34 +23,33 @@ import java.util.Hashtable;
  
 public class CPRRecognition
 {
-/*	static final String HEALTHY = "Healthy";
-	static final String FEVER = "Fever";
- 
-    static final String CUT = "cut";
-    static final String HAT = "hat";
-    static final String MAD = "mad";
-
-	//added actual observatinons of vocabularySet
-    static final String MAC = "mac";
-    static final String HIT = "hit";
-    static final String CAT = "cat";*/
-	
+	// state variable
 	static final String ZERO  = "0";
 	static final String ONE   = "1";
 	static final String TWO   = "2";
 	static final String THREE = "3";
 	static final String FOUR  = "4";
 	
+	// keyword variable
+	static final String CPR  = "CPR";
+	static final String MONI = "monitor";
+	static final String VF   = "fibrillator";
+	static final String VT   = "tachycardia";
+	static final String CLEA = "clear";
+	static final String RESU = "resuscitation";
+	static final String CAPN = "capnography";
+	static final String PEA  = "PEA";
+	static final String PULS = "pulse"; 
+	static final String COMP = "compression";
     static final String OXYG = "oxygen";
     static final String DEFI = "defibrillator";
-    static final String FLAT = "flat";
     static final String ASYS = "asystole";
     static final String SHOC = "shock";
-    static final String ELEC = "electric";
-    static final String PUSH = "push";
-    static final String INTR = "intravenous";
+    static final String IV   = "intravenous";
+    static final String IO   = "intraosseous";
     static final String EPI  = "epinephrine";
     static final String AMIO = "amiodarone";
+    static final String RHYT = "rhythm";
     
 	//added actual observatinons of vocabularySet
     static final String oxyg = "oxygen";
@@ -76,7 +75,8 @@ public class CPRRecognition
  
         //String[] accurate vocabularySet 
     	//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
-        String[] vocabularySet = new String[] {OXYG, DEFI, FLAT, ASYS, SHOC, ELEC, PUSH, INTR, EPI, AMIO};
+        String[] vocabularySet = new String[] {CPR, MONI, VF, VT, 
+        		CLEA, RESU, CAPN, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};
 
 		//String[] inaccurate vocabularySet 
 		//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
@@ -93,97 +93,53 @@ public class CPRRecognition
         start_probability.put(TWO, 0.2d);
         start_probability.put(THREE, 0.2d);
         start_probability.put(FOUR, 0.2d);
- 
-/*        // transition_probability
-        Hashtable<String, Hashtable<String, Double>> transition_probability = 
-        		new Hashtable<String, Hashtable<String, Double>>();
-        Hashtable<String, Double> t1 = new Hashtable<String, Double>();
-        t1.put(HEALTHY, 0.7d);
-        t1.put(FEVER, 0.3d);
-        Hashtable<String, Double> t2 = new Hashtable<String, Double>();
-        t2.put(HEALTHY, 0.4d);
-        t2.put(FEVER, 0.6d);
-        transition_probability.put(HEALTHY, t1);
-        transition_probability.put(FEVER, t2);
- 
-        // emission_probability
-        Hashtable<String, Hashtable<String, Double>> emission_probability = 
-        		new Hashtable<String, Hashtable<String, Double>>();
-        Hashtable<String, Double> e1 = new Hashtable<String, Double>();
-        e1.put(CUT, 0.1d);            
-        e1.put(HAT, 0.4d); 
-        e1.put(MAD, 0.5d);
-        Hashtable<String, Double> e2 = new Hashtable<String, Double>();
-        e2.put(CUT, 0.6d);            
-        e2.put(HAT, 0.3d); 
-        e2.put(MAD, 0.1d);
-        emission_probability.put(HEALTHY, e1);
-        emission_probability.put(FEVER, e2);*/
 
         // transition_probability
         Hashtable<String, Hashtable<String, Double>> transition_probability = 
         		new Hashtable<String, Hashtable<String, Double>>();
         Hashtable<String, Double> t0 = new Hashtable<String, Double>();
-        t0.put(ZERO, (1.0f/3.0d));
-        t0.put(ONE, (1.0f/3.0d));
-        t0.put(TWO, (1.0f/3.0d));
+        t0.put(ZERO, (1.0/3.0d));
+        t0.put(ONE, (1.0/3.0d));
+        t0.put(TWO, (1.0/3.0d));
         Hashtable<String, Double> t1 = new Hashtable<String, Double>();
         t1.put(ONE, 0.5d);
         t1.put(TWO, 0.5d);
         Hashtable<String, Double> t2 = new Hashtable<String, Double>();
-        t2.put(TWO, (1.0f/3.0d));
-        t2.put(THREE, (1.0f/3.0d));
-        t2.put(FOUR, (1.0f/3.0d));
+        t2.put(TWO, (1.0/3.0d));
+        t2.put(THREE, (1.0/3.0d));
+        t2.put(FOUR, (1.0/3.0d));
+        Hashtable<String, Double> t3 = new Hashtable<String, Double>();
+        t3.put(THREE, (1.0d));
         transition_probability.put(ZERO, t0);
         transition_probability.put(ONE, t1);
         transition_probability.put(TWO, t2);
+        transition_probability.put(THREE, t3);
  
         // emission_probability
         Hashtable<String, Hashtable<String, Double>> emission_probability = 
         		new Hashtable<String, Hashtable<String, Double>>();
         Hashtable<String, Double> e0 = new Hashtable<String, Double>();
-        e0.put(OXYG, 0.5d);            
-        e0.put(DEFI, 0.5d);
+        e0.put(CPR,  (1.0/3.0d));
+        e0.put(OXYG, (1.0/3.0d));            
+        e0.put(MONI, (1.0/3.0d));
         Hashtable<String, Double> e1 = new Hashtable<String, Double>();
-        e1.put(FLAT, 0.5d);            
-        e1.put(ASYS, 0.5d); 
+        e1.put(RHYT, (1.0/2.0d));            
+        e1.put(PULS, (1.0/2.0d)); 
         Hashtable<String, Double> e2 = new Hashtable<String, Double>();
-        e2.put(SHOC, (1.0f/3.0d));            
-        e2.put(ELEC, (1.0f/3.0d)); 
-        e2.put(OXYG, (1.0f/3.0d));
+        e2.put(ASYS, (1.0/2.0d));            
+        e2.put(PEA,  (1.0/2.0d)); 
         Hashtable<String, Double> e3 = new Hashtable<String, Double>();
-        e3.put(INTR, (1.0f/3.0d));            
-        e3.put(PUSH, (1.0f/3.0d)); 
-        e3.put(DEFI, (1.0f/3.0d));
+        e3.put(RESU,  (1.0/3.0d));            
+        e3.put(EPI,  (1.0/3.0d)); 
+        e3.put(CAPN, (1.0/3.0d));
         Hashtable<String, Double> e4 = new Hashtable<String, Double>();
-        e4.put(EPI, 0.5d);            
-        e4.put(AMIO, 0.5d); 
+        e4.put(RHYT, (1.0/2.0d));            
+        e4.put(PULS, (1.0/2.0d)); 
         emission_probability.put(ZERO, e0);
         emission_probability.put(ONE, e1);
         emission_probability.put(TWO, e2);
         emission_probability.put(THREE, e3);
         emission_probability.put(FOUR, e4);
-        
-		//confusion_probability
-        /*
-        // Hardcode confusion_probability
-		Hashtable<String, Hashtable<String, Double>> confusion_probability = 
-			new Hashtable<String, Hashtable<String, Double>>();
-		Hashtable<String, Double> c1 = new Hashtable<String, Double>();
-		c1.put(CUT, 0.0f);
-		c1.put(HAT, (1.0f/3.0d));
-		c1.put(MAD, (2.0f/3.0d));
-		Hashtable<String, Double> c2 = new Hashtable<String, Double>();
-		c2.put(CUT, (1.0f/3.0d));
-		c2.put(HAT, (2.0f/3.0d));
-		c2.put(MAD, 0.0f);
-		Hashtable<String, Double> c3 = new Hashtable<String, Double>();
-		c3.put(CUT, (2.0f/3.0d));
-		c3.put(HAT, (2.0f/3.0d));
-		c3.put(MAD, (1.0f/3.0d));
-		confusion_probability.put(MAC, c1);
-		confusion_probability.put(HIT, c2);
-		confusion_probability.put(CAT, c3);*/
 
         
 /*        Hashtable<String, Hashtable<String, Double>> confusion_probability =
@@ -191,10 +147,7 @@ public class CPRRecognition
 /*
         System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
         
-        ArrayList<String> strArr = new ArrayList<String>(); 
         
-		DatagramSocket serverSocket = new DatagramSocket(port);
-        System.out.println("In the UDPserver");
         
 /*        String str1 = "Oxygen$ Sicily$ electric$ intravenous$\n";
         str1 = str1.replace("\n", " ");
@@ -207,64 +160,44 @@ public class CPRRecognition
         }
         System.out.println("haha");*/
 
-        while(true)
-        {
-	        byte[] receiveData = new byte[256];
-	        //byte[] sendData = new byte[256];
-	    	DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-	    	serverSocket.receive(receivePacket);
-	        //String revStr = new String(receivePacket.getData());
-	    	
-	    	//Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
-	    	String revStr = new String(receiveData, 0, receivePacket.getLength());
-	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
-	        //System.out.println("revStr.length(): " + revStr.length());
-	    	// get rid of the newline char
-	        System.out.println("RECEIVED: " + revStr.replace("\n", " "));
-	        
-	        if(revStr.equals("over"))
-	        		break;
-	
-	        //strArr.add(revStr);
-        	//System.out.println("strArr.size() is " + strArr.size());
-	        //String[] actualVocSet = strArr.toArray(new String[strArr.size()]);
-	        //System.out.println(Arrays.toString(actualVocSet));
-	        /*
-             * modified for one-time MHMM
-             */
-            // manipulate the received string 
-            // Pay attention to the match case of "|" in java!!!
-            String[] wordSeq = revStr.split("\\|");
-	        //String[] wordSeq = revStr.split("\\$ "); 
-            System.out.println("split.size: " + wordSeq.length);
-            System.out.println("The received seq after manipulation is:");
-            for (String str : wordSeq) {
-                System.out.println(str);
-            }
-            System.out.println(Arrays.toString(wordSeq));
-	        
-	        /*Hashtable<String, Hashtable<String, Double>> confusion_probability =
-	        		confustionGen(actualVocSet, vocabularySet);*/
-	        
-	        Hashtable<String, Hashtable<String, Double>> confusion_probability =
-	        		confustionGen(wordSeq, vocabularySet);
-            /*
-	        forward_viterbi(actualVocSet,
-	        		vocabularySet, states,
-	                start_probability,
-	                transition_probability,
-	                emission_probability,
-	                confusion_probability);*/
 
-	        
-	        forward_viterbi(wordSeq,
-	        		vocabularySet, states,
-	                start_probability,
-	                transition_probability,
-	                emission_probability,
-	                confusion_probability);
+	    	
+    	//Notice that receivePacket.getData() is 256(previous value) and receivePacket.getLength() is the actual length
+    	//String revStr = new String(receiveData, 0, receivePacket.getLength());
+    	String revStr = "start CPR$what's the rhythm$the patient has " +
+    			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";
+    	
+        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
+        //System.out.println("revStr.length(): " + revStr.length());
+    	// get rid of the newline char
+        System.out.println("RECEIVED: " + revStr.replace("\n", " "));
+        
+        // manipulate the received string 
+        String[] sentenceSeq = revStr.split("\\$"); 
+        System.out.println("split.size: " + sentenceSeq.length);
+        System.out.println("The received seq after manipulation is:");
+        for (String str : sentenceSeq) {
+            System.out.println(str);
         }
-        serverSocket.close();
+        System.out.println(Arrays.toString(sentenceSeq));
+        
+        // mannipulate the wordSeq to find the nearest match
+        String[] wordSeq =  manipulateSentence(sentenceSeq, vocabularySet);
+        System.out.println(Arrays.toString(wordSeq));
+        
+        wordSeq[2] = "a Cistulli";
+        wordSeq[3] = "reset asian";
+        System.out.println(Arrays.toString(wordSeq));
+        
+        Hashtable<String, Hashtable<String, Double>> confusion_probability =
+        		confustionGen(wordSeq, vocabularySet);
+        
+        forward_viterbi(wordSeq,
+        		vocabularySet, states,
+                start_probability,
+                transition_probability,
+                emission_probability,
+                confusion_probability);
     }
  
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
@@ -415,13 +348,13 @@ public class CPRRecognition
         }
 
 		// convolution_index calculates the overlapping similarity of two strings
-		// Notice that p_src is the string in the vocabulariy set, and p_dest is the
+		// Notice that p_src is the string in the vocabulary set, and p_dest is the
 		// the actual string that is heard.
 		public static double convolution_index(String p_src, String p_dest)
     	{
 		    int len_src = p_src.length();
 		    int len_dest = p_dest.length();
-		    int steps = 2*len_src + len_dest;
+		    int steps = len_src + len_dest - 2;
 		    int i,c;
 		    double retval = 0;
 	   
@@ -606,4 +539,38 @@ public class CPRRecognition
 
             return distance[str1.length()][str2.length()];    
         }
+        
+        //
+        public static String[] manipulateSentence(String[] sentenceSeq, String[] vocabularySet) 
+        {
+        	for (int i = 0; i < sentenceSeq.length; i++) {
+        		String match;
+        		if ((match = findExactMatch(sentenceSeq[i], vocabularySet)) != null) {
+        			sentenceSeq[i] = match;
+        		} else {
+/*        			match = findFuzzyMatch(sentenceSeq[i], vocabularySet);
+        			sentenceSeq[i] = match;*/
+        		}
+        	}
+        	return sentenceSeq;
+        }
+        
+        // findExactMatch sees whether any of the keywords match exactly with substring of 
+        // the received sentence.  It is based on an assumption that the one sentense will 
+        // not have two keywords showing up
+        public static String findExactMatch(String sentence, String[] vocabularySet) {
+        	for (String keyword : vocabularySet) {
+        		if (sentence.toLowerCase().contains(keyword.toLowerCase())) {
+        			return keyword;
+        		}
+        	}      	
+        	return null;
+        }
+        
+        public static String findFuzzyMatch(String sentence, String[] vocabularySet)  {
+        	return null;
+        }
+        
 }
+
+
