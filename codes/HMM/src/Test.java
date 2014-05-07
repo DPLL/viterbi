@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Random;
@@ -63,6 +64,7 @@ public class Test
 		classify();
 	}
  
+	
     public static void classify()
     {
     	double recall = 0.7;

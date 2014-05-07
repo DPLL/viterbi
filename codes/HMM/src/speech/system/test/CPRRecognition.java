@@ -24,11 +24,25 @@ import java.util.Hashtable;
 public class CPRRecognition
 {
 	// state variable
-	static final String ZERO  = "0";
-	static final String ONE   = "1";
-	static final String TWO   = "2";
-	static final String THREE = "3";
-	static final String FOUR  = "4";
+	static final String ZERO      =  "0";
+	static final String ONE       =  "1";
+	static final String TWO       =  "2";
+	static final String THREE     =  "3";
+	static final String FOUR      =  "4";
+	static final String FIVE      =  "5";
+	static final String SIX       =  "6";
+	static final String SEVEN     =  "7";
+	static final String EIGHT     =  "8";
+	static final String NINE      =  "9";
+	static final String TEN       = "10";
+	static final String ELEVEN    = "11";
+	static final String TWELVE    = "12";
+	static final String THIRTEEN  = "13";
+	static final String FOURTEEN  = "14";
+	static final String FIFTEEN   = "15";
+	static final String SIXTEEN   = "16";
+	static final String SEVENTEEN = "17";
+	static final String EIGHTEEN  = "18";
 	
 	// keyword variable
 	static final String CPR  = "CPR";
@@ -51,43 +65,24 @@ public class CPRRecognition
     static final String AMIO = "amiodarone";
     static final String RHYT = "rhythm";
     
-	//added actual observatinons of vocabularySet
-    static final String oxyg = "oxygen";
-    static final String asys = "assistant";
-    static final String elec = "trick";
-    static final String epi = "epinephrine";
-    static final String darrell = "still";
-    //static final String darrell = "zen zen zen zen zen zen zen zen zen zen";
-    static final String later = "maybe later";
-/*    static final String oxyg = "oxygen";
-    static final String asys = "asystole";
-    static final String elec = "electric";
-    static final String epi = "epinephrine";*/
-
-	
+    // vocalPhonemes represent the phonemes of the vocabularySet
+	static String[] vocalPhonemes;
+	// vocalMapping is the mapping relationship between keyword and its phoneme
+	static Hashtable<String, String> vocalMapping;
     
     static final int port = 9998;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
-    	//String[] states = new String[] {HEALTHY, FEVER};
-    	String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR};
- 
-        //String[] accurate vocabularySet 
-    	//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
+    	
         String[] vocabularySet = new String[] {CPR, MONI, VF, VT, 
         		CLEA, RESU, CAPN, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};
-
-		//String[] inaccurate vocabularySet 
-		//String[] actualVocabularySet = new String[] {MAC, HIT, CAT};
-        //String[] actualVocabularySet = new String[] {oxyg, asys, elec, epi};
-        String[] actualVocabularySet = new String[] {darrell, later};
- 
-        Hashtable<String, Double> start_probability = new Hashtable<String, Double>();
-        /*
-        start_probability.put(HEALTHY, 0.6d);
-        start_probability.put(FEVER, 0.4d);*/
         
+/*		// simple workflow	    	
+  		String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR};   
+        vocalMapping = new Hashtable<String, String>(); 
+        Hashtable<String, Double> start_probability = new Hashtable<String, Double>();
+    
         start_probability.put(ZERO, 0.2d);
         start_probability.put(ONE, 0.2d);
         start_probability.put(TWO, 0.2d);
@@ -139,27 +134,223 @@ public class CPRRecognition
         emission_probability.put(ONE, e1);
         emission_probability.put(TWO, e2);
         emission_probability.put(THREE, e3);
+        emission_probability.put(FOUR, e4);*/
+
+    	String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN,
+    			ELEVEN, TWELVE, THIRTEEN, FOURTEEN, FIFTEEN, SIXTEEN, SEVENTEEN, EIGHTEEN};   
+        vocalMapping = new Hashtable<String, String>(); 
+        Hashtable<String, Double> start_probability = new Hashtable<String, Double>();
+    
+        start_probability.put(ZERO, 1/19.0d);
+        start_probability.put(ONE, 1/19.0d);
+        start_probability.put(TWO, 1/19.0d);
+        start_probability.put(THREE, 1/19.0d);
+        start_probability.put(FOUR, 1/19.0d);
+        start_probability.put(FIVE, 1/19.0d);
+        start_probability.put(SIX, 1/19.0d);
+        start_probability.put(SEVEN, 1/19.0d);
+        start_probability.put(EIGHT, 1/19.0d);
+        start_probability.put(NINE, 1/19.0d);
+        start_probability.put(TEN, 1/19.0d);
+        start_probability.put(ELEVEN, 1/19.0d);
+        start_probability.put(TWELVE, 1/19.0d);
+        start_probability.put(THIRTEEN, 1/19.0d);
+        start_probability.put(FOURTEEN, 1/19.0d);
+        start_probability.put(FIFTEEN, 1/19.0d);
+        start_probability.put(SIXTEEN, 1/19.0d);
+        start_probability.put(SEVENTEEN, 1/19.0d);
+        start_probability.put(EIGHTEEN, 1/19.0d);
+        
+
+        // transition_probability
+        Hashtable<String, Hashtable<String, Double>> transition_probability = 
+        		new Hashtable<String, Hashtable<String, Double>>();
+        
+        Hashtable<String, Double> t0 = new Hashtable<String, Double>();
+        t0.put(ONE, (1.0d));
+        
+        Hashtable<String, Double> t1 = new Hashtable<String, Double>();
+        t1.put(TWO, 1/2.0d);
+        t1.put(SEVEN, 1/2.0d);
+        
+        Hashtable<String, Double> t2 = new Hashtable<String, Double>();
+        t2.put(THREE, (1.0d));
+        
+        Hashtable<String, Double> t3 = new Hashtable<String, Double>();
+        t3.put(THREE, (1/2.0d));
+        t3.put(FOUR, (1/2.0d));
+        
+        Hashtable<String, Double> t4 = new Hashtable<String, Double>();
+        t4.put(FIVE, (1/2.0d));
+        t4.put(SEVENTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t5 = new Hashtable<String, Double>();
+        t5.put(SIX, (1.0d));
+        
+        Hashtable<String, Double> t6 = new Hashtable<String, Double>();
+        t6.put(ELEVEN, (1/3.0d));
+        t6.put(FOURTEEN, (1/3.0d));
+        t6.put(SIXTEEN, (1/3.0d));
+        
+        Hashtable<String, Double> t7 = new Hashtable<String, Double>();
+        t7.put(EIGHT, (1.0d));
+
+        Hashtable<String, Double> t8 = new Hashtable<String, Double>();
+        t8.put(EIGHT, (1/2.0d));
+        t8.put(NINE, (1/2.0d));
+        
+        Hashtable<String, Double> t9 = new Hashtable<String, Double>();
+        t9.put(NINE, (1/2.0d));
+        t9.put(TEN, (1/2.0d));
+        
+        Hashtable<String, Double> t10 = new Hashtable<String, Double>();
+        t10.put(ELEVEN, (1/2.0d));
+        t10.put(SIXTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t11 = new Hashtable<String, Double>();
+        t11.put(ELEVEN, (1/2.0d));
+        t11.put(TWELVE, (1/2.0d));
+        
+        Hashtable<String, Double> t12 = new Hashtable<String, Double>();
+        t12.put(TWELVE, (1/2.0d));
+        t12.put(THIRTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t13 = new Hashtable<String, Double>();
+        t13.put(SIXTEEN, (1/2.0d));
+        t13.put(EIGHTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t14 = new Hashtable<String, Double>();
+        t14.put(FOURTEEN, (1/2.0d));
+        t14.put(FIFTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t15 = new Hashtable<String, Double>();
+        t15.put(TEN, (1/2.0d));
+        t15.put(FIFTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t17 = new Hashtable<String, Double>();
+        t17.put(ELEVEN, (1/2.0d));
+        t17.put(FOURTEEN, (1/2.0d));
+        
+        Hashtable<String, Double> t18 = new Hashtable<String, Double>();
+        t18.put(FOURTEEN, (1.0d));
+        
+        
+        transition_probability.put(ZERO, t0);
+        transition_probability.put(ONE, t1);
+        transition_probability.put(TWO, t2);
+        transition_probability.put(THREE, t3);
+        transition_probability.put(FOUR, t4);
+        transition_probability.put(FIVE, t5);
+        transition_probability.put(SIX, t6);
+        transition_probability.put(SEVEN, t7);
+        transition_probability.put(EIGHT, t8);
+        transition_probability.put(NINE, t9);
+        transition_probability.put(TEN, t10);
+        transition_probability.put(ELEVEN, t11);
+        transition_probability.put(TWELVE, t12);
+        transition_probability.put(THIRTEEN, t13);
+        transition_probability.put(FOURTEEN, t14);
+        transition_probability.put(FIFTEEN, t15);
+        transition_probability.put(SEVENTEEN, t17);
+        transition_probability.put(EIGHTEEN, t18);
+ 
+        // emission_probability
+        Hashtable<String, Hashtable<String, Double>> emission_probability = 
+        		new Hashtable<String, Hashtable<String, Double>>();
+        Hashtable<String, Double> e0 = new Hashtable<String, Double>();
+        e0.put(CPR,  (1.0/3.0d));
+        e0.put(OXYG, (1.0/3.0d));            
+        e0.put(MONI, (1.0/3.0d));
+        
+        Hashtable<String, Double> e7 = new Hashtable<String, Double>();
+        e7.put(VF, (1.0/2.0d));            
+        e7.put(VT, (1.0/2.0d)); 
+        Hashtable<String, Double> e17 = new Hashtable<String, Double>();
+        e17.put(VF, (1.0/2.0d));            
+        e17.put(VT, (1.0/2.0d)); 
+        Hashtable<String, Double> e18 = new Hashtable<String, Double>();
+        e18.put(VF, (1.0/2.0d));            
+        e18.put(VT, (1.0/2.0d)); 
+        
+        Hashtable<String, Double> e8 = new Hashtable<String, Double>();
+        e8.put(DEFI,  (1.0/3.0d));            
+        e8.put(CLEA,  (1.0/3.0d)); 
+        e8.put(SHOC, (1.0/3.0d));
+        Hashtable<String, Double> e11 = new Hashtable<String, Double>();
+        e11.put(DEFI,  (1.0/3.0d));            
+        e11.put(CLEA,  (1.0/3.0d)); 
+        e11.put(SHOC, (1.0/3.0d));
+        Hashtable<String, Double> e14 = new Hashtable<String, Double>();
+        e14.put(DEFI,  (1.0/3.0d));            
+        e14.put(CLEA,  (1.0/3.0d)); 
+        e14.put(SHOC, (1.0/3.0d));
+        
+        Hashtable<String, Double> e5 = new Hashtable<String, Double>();
+        e5.put(RESU, (1.0d)); 
+        
+        Hashtable<String, Double> e9 = new Hashtable<String, Double>();
+        e9.put(RESU,  (1.0/3.0d));            
+        e9.put(IV,  (1.0/3.0d)); 
+        e9.put(IO, (1.0/3.0d));
+        
+        Hashtable<String, Double> e3 = new Hashtable<String, Double>();
+        e3.put(RESU,  (1.0/3.0d));            
+        e3.put(EPI,  (1.0/3.0d)); 
+        e3.put(CAPN, (1.0/3.0d));
+        Hashtable<String, Double> e12 = new Hashtable<String, Double>();
+        e12.put(RESU,  (1.0/3.0d));            
+        e12.put(EPI,  (1.0/3.0d)); 
+        e12.put(CAPN, (1.0/3.0d));
+        
+        Hashtable<String, Double> e15 = new Hashtable<String, Double>();
+        e15.put(RESU, (1.0/2.0d));            
+        e15.put(AMIO,  (1.0/2.0d)); 
+        
+        Hashtable<String, Double> e2 = new Hashtable<String, Double>();
+        e2.put(ASYS, (1.0/2.0d));            
+        e2.put(PEA,  (1.0/2.0d)); 
+        
+        Hashtable<String, Double> e1 = new Hashtable<String, Double>();
+        e1.put(RHYT, (1.0/2.0d));            
+        e1.put(PULS, (1.0/2.0d)); 
+        Hashtable<String, Double> e4 = new Hashtable<String, Double>();
+        e4.put(RHYT, (1.0/2.0d));            
+        e4.put(PULS, (1.0/2.0d)); 
+        Hashtable<String, Double> e6 = new Hashtable<String, Double>();
+        e6.put(RHYT, (1.0/2.0d));            
+        e6.put(PULS, (1.0/2.0d)); 
+        Hashtable<String, Double> e10 = new Hashtable<String, Double>();
+        e10.put(RHYT, (1.0/2.0d));            
+        e10.put(PULS, (1.0/2.0d)); 
+        Hashtable<String, Double> e13 = new Hashtable<String, Double>();
+        e13.put(RHYT, (1.0/2.0d));            
+        e13.put(PULS, (1.0/2.0d)); 
+        
+        Hashtable<String, Double> e16 = new Hashtable<String, Double>();
+        e16.put(COMP, (1.0d)); 
+
+
+        emission_probability.put(ZERO, e0);
+        emission_probability.put(ONE, e1);
+        emission_probability.put(TWO, e2);
+        emission_probability.put(THREE, e3);
         emission_probability.put(FOUR, e4);
-
+        emission_probability.put(FIVE, e5);
+        emission_probability.put(SIX, e6);
+        emission_probability.put(SEVEN, e7);
+        emission_probability.put(EIGHT, e8);
+        emission_probability.put(NINE, e9);
+        emission_probability.put(TEN, e10);
+        emission_probability.put(ELEVEN, e11);
+        emission_probability.put(TWELVE, e12);
+        emission_probability.put(THIRTEEN, e13);
+        emission_probability.put(FOURTEEN, e14);
+        emission_probability.put(FIFTEEN, e15);
+        emission_probability.put(SIXTEEN, e16);
+        emission_probability.put(SEVENTEEN, e17);
+        emission_probability.put(EIGHTEEN, e18);
         
-/*        Hashtable<String, Hashtable<String, Double>> confusion_probability =
-        		confustionGen(actualVocabularySet, vocabularySet);*/
-/*
-        System.out.println("LD is " + computeLevenshteinDistance("0ksIdZ@n", "0pS@n"));*/
-        
-        
-        
-/*        String str1 = "Oxygen$ Sicily$ electric$ intravenous$\n";
-        str1 = str1.replace("\n", " ");
-        System.out.println("after replacement, the str is: " + str1);
-        String[] strSeq = str1.split("\\$ "); 
-        System.out.println("split.size: " + strSeq.length);
-        System.out.println("The received seq after manipulation is:");
-        for (String st : strSeq) {
-            System.out.println(st);
-        }
-        System.out.println("haha");*/
-
+    	vocalPhonemes = phonemeConversion(vocabularySet, true);    
 
 	    	
     	//Notice that receivePacket.getData() is 256(previous value) and receivePacket.getLength() is the actual length
@@ -181,12 +372,8 @@ public class CPRRecognition
         }
         System.out.println(Arrays.toString(sentenceSeq));
         
-        // mannipulate the wordSeq to find the nearest match
+        // manipulate the wordSeq to find the nearest match
         String[] wordSeq =  manipulateSentence(sentenceSeq, vocabularySet);
-        System.out.println(Arrays.toString(wordSeq));
-        
-        wordSeq[2] = "a Cistulli";
-        wordSeq[3] = "reset asian";
         System.out.println(Arrays.toString(wordSeq));
         
         Hashtable<String, Hashtable<String, Double>> confusion_probability =
@@ -355,10 +542,9 @@ public class CPRRecognition
 		    int len_src = p_src.length();
 		    int len_dest = p_dest.length();
 		    int steps = len_src + len_dest - 2;
-		    int i,c;
 		    double retval = 0;
 	   
-		    for(i=0; i<steps; ++i) {
+		    for(int i = 0; i < steps; i++) {
 		        int cur_conv_index = 0;
 		        int start_s = Math.max(0, (len_src - 1 - i));
 		        int start_d = Math.max(0, i - len_src + 1);
@@ -379,19 +565,16 @@ public class CPRRecognition
 
 
         public static Hashtable<String, Hashtable<String, Double>> 
-        	confustionGen(String[] obs, String[] vocalbularySet) throws IOException, InterruptedException
+        	confustionGen(String[] obs, String[] vocabularySet) throws IOException, InterruptedException
         {
         	/*
         	 * convert the word sequence into phonetic sequence by calling eSpeak.
         	 */        	
         	//.out.println(Arrays.toString(obs));
-        	//System.out.println(Arrays.toString(vocalbularySet));
+        	//System.out.println(Arrays.toString(vocabularySet));
         	String[] obsPhonemes;
-        	//String[] obsPhonemes = {"anju:@L d'arEl", "m'eIbi: l'eIt3"};
-        	String[] vocalPhonemes;
         	
-        	obsPhonemes = phonemeConversion(obs);       	
-        	vocalPhonemes = phonemeConversion(vocalbularySet);        	
+        	obsPhonemes = phonemeConversion(obs, false);       	       	
         	
 /*        	for (String temp : obsPhonemes)
         		System.out.println(temp);
@@ -399,18 +582,6 @@ public class CPRRecognition
         	for (String temp : vocalPhonemes)
         		System.out.println(temp);
         	*/
-        	  
-        	/*
-        	 * calculate the Levenshtein distance and generate the corresponding confusion matrix.
-        	 */
-        	//System.out.println("computeLevenshteinDistance mac and mad "  + computeLevenshteinDistance(obsPhonemes[0], vocalPhonemes[0]));
-        	
-        	/*
-    		Hashtable<String, Double> c3 = new Hashtable<String, Double>();
-    		c3.put(CUT, (2.0f/3.0f));
-    		c3.put(HAT, (2.0f/3.0f));
-    		c3.put(MAD, (1.0f/3.0f));
-    		confusion_probability.put(MAC, c1);*/
         	
         	int i = 0;
         	int j;
@@ -423,7 +594,7 @@ public class CPRRecognition
 				// phonemes such as # is not so clear.
     			String obsPhoneme = obsPhonemes[i].replaceAll("[',%=_:| ]", "");
         		j = 0;
-        		for (String volWord : vocalbularySet) {
+        		for (String volWord : vocabularySet) {
         			double similarityIndex;
         			// get rid of the utility 'phonemes'
         			String vocalPhoneme = vocalPhonemes[j].replaceAll("[',%=_:| ]", "");
@@ -460,26 +631,56 @@ public class CPRRecognition
 			return confusion_probability;
         }
         
-    	public static String[] phonemeConversion(String[] str) throws IOException, InterruptedException
+        public static String phonemeConversion(String str) throws IOException, InterruptedException
+        {
+        	Process p;
+        	String speakCall = "speak -x ";
+      
+        	String[] subWords = str.split(" ");
+        	StringBuilder builder = new StringBuilder();
+        	int j = 0;
+        	for (String subWord : subWords) {
+        		j++;
+        		String command = speakCall + "\"" + subWord + "\"";
+        		p = Runtime.getRuntime().exec(command);
+            	p.waitFor();
+            	BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            	String line;
+            	if ((line = reader.readLine()) != null) {
+            		//System.out.println(line);
+            		if (j == 1)
+            			builder.append(line.substring(1));
+            		else
+            			builder.append(" ").append(line.substring(1));
+            	}
+        	}
+        	
+			return builder.toString();	
+        }
+        
+    	public static String[] phonemeConversion(String[] str, boolean isKeyword) throws IOException, InterruptedException
     	{
         	Process p;
         	String speakCall = "speak -x ";
         	String line;
         	int i = 0;
         	
-        	String[] phenemeArr = new String[str.length];
-        	String command;
+        	// phonemeArr is the returned string array containing the phoneme representations of the str
+        	String[] phonemeArr = new String[str.length];
     		
+        	// word is each word in the string[] 
         	for (String word : str)
         	{
         		// Probably because of the bug in speak package, it cannot return desired results.
+        		// Since word may consist of several other words, e.g., obs[] may contain several words,
+        		// we have to split it into array of words.
         		String[] subWords = word.split(" ");
         		StringBuilder out = new StringBuilder();
         		int j = 0;
         		for (String subWord : subWords)
         		{
         			j++;
-	        		command = speakCall + subWord;
+	        		String command = speakCall + subWord;
 	        		p = Runtime.getRuntime().exec(command);
 	            	p.waitFor();
 	            	
@@ -496,7 +697,6 @@ public class CPRRecognition
 	            		else
 	            			out.append(" ").append(line.substring(1));
 	            	}
-	            	phenemeArr[i] = out.toString();
         		}
             	/*
             	StringBuilder out = new StringBuilder();
@@ -507,13 +707,21 @@ public class CPRRecognition
                         previous = curr;
                         out.append(curr).append('\n');
                         //System.out.println(curr);
-                        phenemeArr[i] = out;
+                        phonemeArr[i] = out;
                     }
-                }*/           	
+                }*/      
+        		
+        		// updated phonemeArr[]
+            	phonemeArr[i] = out.toString();
+            	
+            	// update the vocalMapping
+            	if (isKeyword) {
+            		vocalMapping.put(phonemeArr[i], word);
+            	}
             	i++;
         	}
         	
-			return phenemeArr;	
+			return phonemeArr;	
     	}
     	
         private static int minimum(int a, int b, int c) {
@@ -541,15 +749,15 @@ public class CPRRecognition
         }
         
         //
-        public static String[] manipulateSentence(String[] sentenceSeq, String[] vocabularySet) 
+        public static String[] manipulateSentence(String[] sentenceSeq, String[] vocabularySet) throws IOException, InterruptedException 
         {
         	for (int i = 0; i < sentenceSeq.length; i++) {
         		String match;
         		if ((match = findExactMatch(sentenceSeq[i], vocabularySet)) != null) {
         			sentenceSeq[i] = match;
         		} else {
-/*        			match = findFuzzyMatch(sentenceSeq[i], vocabularySet);
-        			sentenceSeq[i] = match;*/
+        			match = findFuzzyMatch(sentenceSeq[i]);
+        			sentenceSeq[i] = match;
         		}
         	}
         	return sentenceSeq;
@@ -567,8 +775,63 @@ public class CPRRecognition
         	return null;
         }
         
-        public static String findFuzzyMatch(String sentence, String[] vocabularySet)  {
-        	return null;
+        public static String findFuzzyMatch(String sentence) throws IOException, InterruptedException  {
+        	// convert the sentence into its phoneme representations
+        	String sentencePhoneme = phonemeConversion(sentence);  
+        	if (sentencePhoneme != null) {
+        		// get rid of the special characters
+        		sentencePhoneme = sentencePhoneme.replaceAll("[',%=_:| ]", "");
+        	}
+        	System.out.println("sentencePhoneme after replacenment is: " + sentencePhoneme);
+        	
+        	
+    		// Notice that p_src is the string in the vocabulary set, and p_dest is the
+    		// the actual sentence that is heard.
+		    int len_src;
+		    int len_dest = sentencePhoneme.length();
+		    int steps;
+		    
+		    double maxval = 0;
+		    String retStr = null;
+		    
+		    /*
+		     * for testing purpose
+		     */
+		    String[] testStrs = {"a#s'IstoUl", "rI2s,VsIt'eIS@n"};
+		    for (String keywordPhoneme : testStrs) {
+        	//for (String keywordPhoneme : vocalPhonemes) {
+        		// we have modify the keywordPhoneme in order to get rid of the special characters
+        		String modifiedKeyWordPhoneme = keywordPhoneme.replaceAll("[',%=_:| ]", "");
+			    len_src = modifiedKeyWordPhoneme.length();
+			    len_dest = sentencePhoneme.length();
+			    steps = len_src + len_dest - 2;
+			    // retval is the current largest overlapping value for this particular keyword
+			    double retval = 0;
+		   
+			    for(int i = 0; i < steps; i++) {
+			        int cur_conv_index = 0;
+			        int start_s = Math.max(0, (len_src - 1 - i));
+			        int start_d = Math.max(0, i - len_src + 1);
+			        while(start_s < len_src && start_d < len_dest) {
+			            //System.out.println(p_src.substring(start_s,start_s+1) + " == " + p_dest.substring(start_d,start_d+1));
+			            if(modifiedKeyWordPhoneme.substring(start_s,start_s+1).equals(sentencePhoneme.substring(start_d,start_d+1))) {
+			                ++cur_conv_index;
+			            }
+			            ++start_s;
+			            ++start_d;
+			        }
+			        if(cur_conv_index > retval) {
+			            retval = cur_conv_index;
+			        }
+			    }
+			    
+			    if (retval > maxval) {
+			    	maxval = retval;
+			    	retStr = vocalMapping.get(keywordPhoneme);
+			    }
+			//System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
+        	}     	
+        	return retStr;
         }
         
 }
