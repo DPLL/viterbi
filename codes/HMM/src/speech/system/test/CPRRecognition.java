@@ -47,7 +47,7 @@ public class CPRRecognition
 	// keyword variable
 	static final String CPR  = "CPR";
 	static final String MONI = "monitor";
-	static final String VF   = "fibrillator";
+	static final String VF   = "fibrillation";
 	static final String VT   = "tachycardia";
 	static final String CLEA = "clear";
 	static final String RESU = "resuscitation";
@@ -141,6 +141,7 @@ public class CPRRecognition
         vocalMapping = new Hashtable<String, String>(); 
         Hashtable<String, Double> start_probability = new Hashtable<String, Double>();
     
+        // start_probability
         start_probability.put(ZERO, 1/19.0d);
         start_probability.put(ONE, 1/19.0d);
         start_probability.put(TWO, 1/19.0d);
@@ -329,7 +330,6 @@ public class CPRRecognition
         Hashtable<String, Double> e16 = new Hashtable<String, Double>();
         e16.put(COMP, (1.0d)); 
 
-
         emission_probability.put(ZERO, e0);
         emission_probability.put(ONE, e1);
         emission_probability.put(TWO, e2);
@@ -350,16 +350,20 @@ public class CPRRecognition
         emission_probability.put(SEVENTEEN, e17);
         emission_probability.put(EIGHTEEN, e18);
         
+        System.out.println("emission_probability is: " + emission_probability);
+        System.out.println("transition_probability is: " + transition_probability);
+        
     	vocalPhonemes = phonemeConversion(vocabularySet, true);    
 
 	    	
     	//Notice that receivePacket.getData() is 256(previous value) and receivePacket.getLength() is the actual length
-    	//String revStr = new String(receiveData, 0, receivePacket.getLength());
+
+/*    	String revStr = "start CPR$what's the rhythm$the patient has " +
+    			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";*/
+    	
     	String revStr = "start CPR$what's the rhythm$the patient has " +
     			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";
-    	
-        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
-        //System.out.println("revStr.length(): " + revStr.length());
+
     	// get rid of the newline char
         System.out.println("RECEIVED: " + revStr.replace("\n", " "));
         
@@ -782,8 +786,7 @@ public class CPRRecognition
         		// get rid of the special characters
         		sentencePhoneme = sentencePhoneme.replaceAll("[',%=_:| ]", "");
         	}
-        	System.out.println("sentencePhoneme after replacenment is: " + sentencePhoneme);
-        	
+        	//System.out.println("sentencePhoneme after replacenment is: " + sentencePhoneme);
         	
     		// Notice that p_src is the string in the vocabulary set, and p_dest is the
     		// the actual sentence that is heard.
@@ -797,9 +800,9 @@ public class CPRRecognition
 		    /*
 		     * for testing purpose
 		     */
-		    String[] testStrs = {"a#s'IstoUl", "rI2s,VsIt'eIS@n"};
-		    for (String keywordPhoneme : testStrs) {
-        	//for (String keywordPhoneme : vocalPhonemes) {
+		    //String[] testStrs = {"a#s'IstoUl", "rI2s,VsIt'eIS@n"};
+		    //for (String keywordPhoneme : testStrs) {
+        	for (String keywordPhoneme : vocalPhonemes) {
         		// we have modify the keywordPhoneme in order to get rid of the special characters
         		String modifiedKeyWordPhoneme = keywordPhoneme.replaceAll("[',%=_:| ]", "");
 			    len_src = modifiedKeyWordPhoneme.length();
