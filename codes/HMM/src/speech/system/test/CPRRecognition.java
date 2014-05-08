@@ -47,8 +47,8 @@ public class CPRRecognition
 	// keyword variable
 	static final String CPR  = "CPR";
 	static final String MONI = "monitor";
-	static final String VF   = "fibrillation";
-	static final String VT   = "tachycardia";
+	static final String VF   = "Vfib";
+	static final String VT   = "Vtach";
 	static final String CLEA = "clear";
 	static final String RESU = "resuscitation";
 	static final String CAPN = "capnography";
@@ -57,6 +57,7 @@ public class CPRRecognition
 	static final String COMP = "compression";
     static final String OXYG = "oxygen";
     static final String DEFI = "defibrillator";
+    //static final String DEFI = "charge";
     static final String ASYS = "asystole";
     static final String SHOC = "shock";
     static final String IV   = "intravenous";
@@ -64,6 +65,14 @@ public class CPRRecognition
     static final String EPI  = "epinephrine";
     static final String AMIO = "amiodarone";
     static final String RHYT = "rhythm";
+    
+    // groundTruth states
+    static String[] trueStates = {ZERO, ONE, TWO, THREE, THREE, FOUR, SEVENTEEN, ELEVEN, ELEVEN, 
+    		ELEVEN, TWELVE, TWELVE, THIRTEEN, EIGHTEEN, FOURTEEN, FOURTEEN, FOURTEEN, FIFTEEN, 
+    		FIFTEEN, TEN, SIXTEEN};
+    // groundTruth word sequence
+    static String[] trueWords = {CPR, RHYT, ASYS, RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC,
+    		RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC, RESU, AMIO, RHYT, COMP};
     
     // vocalPhonemes represent the phonemes of the vocabularySet
 	static String[] vocalPhonemes;
@@ -162,6 +171,26 @@ public class CPRRecognition
         start_probability.put(SEVENTEEN, 1/19.0d);
         start_probability.put(EIGHTEEN, 1/19.0d);
         
+        // start_probability
+/*        start_probability.put(ZERO, 1.0d);
+        start_probability.put(ONE, 0d);
+        start_probability.put(TWO, 0d);
+        start_probability.put(THREE, 0d);
+        start_probability.put(FOUR, 0d);
+        start_probability.put(FIVE, 0d);
+        start_probability.put(SIX, 0d);
+        start_probability.put(SEVEN, 0d);
+        start_probability.put(EIGHT, 0d);
+        start_probability.put(NINE, 0d);
+        start_probability.put(TEN, 0d);
+        start_probability.put(ELEVEN, 0d);
+        start_probability.put(TWELVE, 0d);
+        start_probability.put(THIRTEEN, 0d);
+        start_probability.put(FOURTEEN, 0d);
+        start_probability.put(FIFTEEN, 0d);
+        start_probability.put(SIXTEEN, 0d);
+        start_probability.put(SEVENTEEN, 0d);
+        start_probability.put(EIGHTEEN, 0d);*/
 
         // transition_probability
         Hashtable<String, Hashtable<String, Double>> transition_probability = 
@@ -361,24 +390,32 @@ public class CPRRecognition
 /*    	String revStr = "start CPR$what's the rhythm$the patient has " +
     			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";*/
     	
-    	String revStr = "start CPR$what's the rhythm$the patient has " +
-    			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";
+/*    	String revStr = "start CPR$what's the rhythm$the patient has " +
+    			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";*/
+    	
+    	String revStr = "Dr$ what's the rhythm$ the patient has a sister$ start 37 Asian for 2 minutes$ epinephrine for " +
+    			"a 3 minute interval$ what's the riddle$ can a ship has the relation$ charge the difference in later$ clear " +
+    			"the bed$ shock patient$ dodge reset a shin for 2 minutes$ epinephrine .3 minute interval$ what the rhythm$ " +
+    			"the patient has a ventricular fibrillation$ charged in Atlanta$ clear the bed$ shop the patient$ destination " +
+    			"for 2 minutes$ Amy order and Country minute interval$ what's the rhythm$ pulse pressure$";
 
     	// get rid of the newline char
         System.out.println("RECEIVED: " + revStr.replace("\n", " "));
         
         // manipulate the received string 
-        String[] sentenceSeq = revStr.split("\\$"); 
+        String[] sentenceSeq = revStr.split("\\$ "); 
         System.out.println("split.size: " + sentenceSeq.length);
         System.out.println("The received seq after manipulation is:");
-        for (String str : sentenceSeq) {
+/*        for (String str : sentenceSeq) {
             System.out.println(str);
-        }
+        }*/
         System.out.println(Arrays.toString(sentenceSeq));
+        System.out.println("revStr's accuracy is: " + measureWords(sentenceSeq));
         
         // manipulate the wordSeq to find the nearest match
         String[] wordSeq =  manipulateSentence(sentenceSeq, vocabularySet);
         System.out.println(Arrays.toString(wordSeq));
+        System.out.println("revStr's accuracy is: " + measureWords(wordSeq));
         
         Hashtable<String, Hashtable<String, Double>> confusion_probability =
         		confustionGen(wordSeq, vocabularySet);
@@ -526,6 +563,13 @@ public class CPRRecognition
             	words[x] = X[x][path[x]]; 
             }
 
+            String[] subWords = Arrays.copyOfRange(words, 1, obs_num+1);
+            int[] subStates = Arrays.copyOfRange(path, 1, obs_num+1);
+            System.out.println("subWords is: " + Arrays.toString(subWords));
+            System.out.println("subStates is: " + Arrays.toString(subStates));
+            
+            System.out.println("My words measurement is: " + measureWords(subWords));
+            System.out.println("My state measurement is: " + measureStates(subStates));
             	
             System.out.println("\n*************************************\n");         
             System.out.println(Arrays.toString(actualObs));
@@ -835,6 +879,41 @@ public class CPRRecognition
 			//System.out.println("The convolution index value between " + p_src + " and " + p_dest + " is " + retval);
         	}     	
         	return retStr;
+        }
+        
+        public static double measureWords(String[] wordSeq) 
+        {
+        	int numStates = wordSeq.length;
+        	//System.out.println("wordSeq.length is " + wordSeq.length);
+        	//System.out.println("trueWords.length is " + trueWords.length);
+        	int count = 0;
+        	if (numStates > trueWords.length) {
+        		System.out.println("Error! The number of words is larger than possible max value");
+        		System.exit(-1);
+        	}
+        	for (int i = 0; i < numStates; i++) {
+        		if (wordSeq[i].contains(trueWords[i])) {
+        			count++;
+        		}
+        	}
+        	return ((double)count/numStates);
+        }
+        
+        public static double measureStates(int[] stateSeq) 
+        {
+        	int numStates = stateSeq.length;
+        	int count = 0;
+        	if (numStates > trueStates.length) {
+        		System.out.println("Error! The number of states is larger than possible max value");
+        		System.exit(-1);
+        	}
+        	for (int i = 0; i < numStates; i++) {
+        		if (stateSeq[i] == Integer.parseInt(trueStates[i])) {
+        			count++;
+        		}
+        	}
+        	//TODO
+        	return ((double)count/numStates);
         }
         
 }
