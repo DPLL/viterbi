@@ -18,6 +18,7 @@ public class Test
  
 	public static void main(String[] args) 
 	{
+    	
 		String[] states = new String[] {HEALTHY, FEVER};
  
 		//String[] observations = new String[] {DIZZY, COLD, NORMAL};

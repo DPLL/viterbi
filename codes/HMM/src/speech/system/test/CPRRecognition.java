@@ -46,18 +46,24 @@ public class CPRRecognition
 	
 	// keyword variable
 	static final String CPR  = "CPR";
-	static final String MONI = "monitor";
-	static final String VF   = "Vfib";
-	static final String VT   = "Vtach";
+	static final String ATTA = "attach";
+	//version1
+/*	static final String VF   = "fibrillation";
+	static final String VT   = "tachycardia";*/
+	//version2
+	static final String VF   = "VFib";
+	static final String VT   = "VTach";
 	static final String CLEA = "clear";
 	static final String RESU = "resuscitation";
 	static final String CAPN = "capnography";
-	static final String PEA  = "PEA";
-	static final String PULS = "pulse"; 
+	static final String PEA  = "P.E.A";
+	//version1
+	//static final String PULS = "pulse";
+	//version2
+	static final String PRES = "pressure";
 	static final String COMP = "compression";
     static final String OXYG = "oxygen";
     static final String DEFI = "defibrillator";
-    //static final String DEFI = "charge";
     static final String ASYS = "asystole";
     static final String SHOC = "shock";
     static final String IV   = "intravenous";
@@ -66,13 +72,21 @@ public class CPRRecognition
     static final String AMIO = "amiodarone";
     static final String RHYT = "rhythm";
     
+    // stop words are the most common words, and does not contain any information
+    static String[] stopWords = {"doctor", "patient"};
+    
     // groundTruth states
     static String[] trueStates = {ZERO, ONE, TWO, THREE, THREE, FOUR, SEVENTEEN, ELEVEN, ELEVEN, 
     		ELEVEN, TWELVE, TWELVE, THIRTEEN, EIGHTEEN, FOURTEEN, FOURTEEN, FOURTEEN, FIFTEEN, 
     		FIFTEEN, TEN, SIXTEEN};
-    // groundTruth word sequence
+    
+/*    // groundTruth word sequence version 1
     static String[] trueWords = {CPR, RHYT, ASYS, RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC,
-    		RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC, RESU, AMIO, RHYT, COMP};
+    		RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC, RESU, AMIO, RHYT, COMP};*/
+    
+    // groundTruth word sequence version 2
+    static String[] trueWords = {RESU, RHYT, ASYS, CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC,
+    		CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC, CPR, AMIO, RHYT, COMP};
     
     // vocalPhonemes represent the phonemes of the vocabularySet
 	static String[] vocalPhonemes;
@@ -83,9 +97,12 @@ public class CPRRecognition
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
+    	//version1
+/*        String[] vocabularySet = new String[] {CPR, ATTA, VF, VT, 
+        		CLEA, RESU, CAPN, PEA, PULS, COMP, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};*/
     	
-        String[] vocabularySet = new String[] {CPR, MONI, VF, VT, 
-        		CLEA, RESU, CAPN, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};
+        String[] vocabularySet = new String[] {CPR, ATTA, VF, VT, 
+        		CLEA, RESU, CAPN, PEA, PRES, COMP, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};
         
 /*		// simple workflow	    	
   		String[] states = new String[] {ZERO, ONE, TWO, THREE, FOUR};   
@@ -151,7 +168,7 @@ public class CPRRecognition
         Hashtable<String, Double> start_probability = new Hashtable<String, Double>();
     
         // start_probability
-        start_probability.put(ZERO, 1/19.0d);
+/*        start_probability.put(ZERO, 1/19.0d);
         start_probability.put(ONE, 1/19.0d);
         start_probability.put(TWO, 1/19.0d);
         start_probability.put(THREE, 1/19.0d);
@@ -169,10 +186,10 @@ public class CPRRecognition
         start_probability.put(FIFTEEN, 1/19.0d);
         start_probability.put(SIXTEEN, 1/19.0d);
         start_probability.put(SEVENTEEN, 1/19.0d);
-        start_probability.put(EIGHTEEN, 1/19.0d);
+        start_probability.put(EIGHTEEN, 1/19.0d);*/
         
         // start_probability
-/*        start_probability.put(ZERO, 1.0d);
+        start_probability.put(ZERO, 1.0d);
         start_probability.put(ONE, 0d);
         start_probability.put(TWO, 0d);
         start_probability.put(THREE, 0d);
@@ -190,7 +207,7 @@ public class CPRRecognition
         start_probability.put(FIFTEEN, 0d);
         start_probability.put(SIXTEEN, 0d);
         start_probability.put(SEVENTEEN, 0d);
-        start_probability.put(EIGHTEEN, 0d);*/
+        start_probability.put(EIGHTEEN, 0d);
 
         // transition_probability
         Hashtable<String, Hashtable<String, Double>> transition_probability = 
@@ -288,9 +305,12 @@ public class CPRRecognition
         Hashtable<String, Hashtable<String, Double>> emission_probability = 
         		new Hashtable<String, Hashtable<String, Double>>();
         Hashtable<String, Double> e0 = new Hashtable<String, Double>();
-        e0.put(CPR,  (1.0/3.0d));
+        //version1
+        //e0.put(CPR,  (1.0/3.0d));
+        //version2
+        e0.put(RESU,  (1.0/3.0d));
         e0.put(OXYG, (1.0/3.0d));            
-        e0.put(MONI, (1.0/3.0d));
+        e0.put(ATTA, (1.0/3.0d));
         
         Hashtable<String, Double> e7 = new Hashtable<String, Double>();
         e7.put(VF, (1.0/2.0d));            
@@ -316,31 +336,47 @@ public class CPRRecognition
         e14.put(SHOC, (1.0/3.0d));
         
         Hashtable<String, Double> e5 = new Hashtable<String, Double>();
-        e5.put(RESU, (1.0d)); 
+        //version1
+        //e5.put(RESU, (1.0d));
+        //version2
+        e5.put(CPR, (1.0d)); 
         
         Hashtable<String, Double> e9 = new Hashtable<String, Double>();
-        e9.put(RESU,  (1.0/3.0d));            
+        //version1
+        //e9.put(RESU,  (1.0/3.0d));   
+        //version2
+        e9.put(CPR, (1.0/3.0d)); 
         e9.put(IV,  (1.0/3.0d)); 
         e9.put(IO, (1.0/3.0d));
         
         Hashtable<String, Double> e3 = new Hashtable<String, Double>();
-        e3.put(RESU,  (1.0/3.0d));            
+        //version1
+        //e3.put(RESU,  (1.0/3.0d));
+        //version2
+        e3.put(CPR, (1.0/3.0d)); 
         e3.put(EPI,  (1.0/3.0d)); 
         e3.put(CAPN, (1.0/3.0d));
         Hashtable<String, Double> e12 = new Hashtable<String, Double>();
-        e12.put(RESU,  (1.0/3.0d));            
+        //version1
+        //e12.put(RESU,  (1.0/3.0d));
+        //version2
+        e12.put(CPR,  (1.0/3.0d));  
         e12.put(EPI,  (1.0/3.0d)); 
         e12.put(CAPN, (1.0/3.0d));
         
         Hashtable<String, Double> e15 = new Hashtable<String, Double>();
-        e15.put(RESU, (1.0/2.0d));            
+        //version1
+        //e15.put(RESU, (1.0/2.0d));
+        //version2
+        e15.put(CPR, (1.0/2.0d));   
         e15.put(AMIO,  (1.0/2.0d)); 
         
         Hashtable<String, Double> e2 = new Hashtable<String, Double>();
         e2.put(ASYS, (1.0/2.0d));            
         e2.put(PEA,  (1.0/2.0d)); 
         
-        Hashtable<String, Double> e1 = new Hashtable<String, Double>();
+        //version1
+/*        Hashtable<String, Double> e1 = new Hashtable<String, Double>();
         e1.put(RHYT, (1.0/2.0d));            
         e1.put(PULS, (1.0/2.0d)); 
         Hashtable<String, Double> e4 = new Hashtable<String, Double>();
@@ -354,7 +390,24 @@ public class CPRRecognition
         e10.put(PULS, (1.0/2.0d)); 
         Hashtable<String, Double> e13 = new Hashtable<String, Double>();
         e13.put(RHYT, (1.0/2.0d));            
-        e13.put(PULS, (1.0/2.0d)); 
+        e13.put(PULS, (1.0/2.0d)); */
+        
+        //version2
+        Hashtable<String, Double> e1 = new Hashtable<String, Double>();
+        e1.put(RHYT, (1.0/2.0d));            
+        e1.put(PRES, (1.0/2.0d)); 
+        Hashtable<String, Double> e4 = new Hashtable<String, Double>();
+        e4.put(RHYT, (1.0/2.0d));            
+        e4.put(PRES, (1.0/2.0d)); 
+        Hashtable<String, Double> e6 = new Hashtable<String, Double>();
+        e6.put(RHYT, (1.0/2.0d));            
+        e6.put(PRES, (1.0/2.0d)); 
+        Hashtable<String, Double> e10 = new Hashtable<String, Double>();
+        e10.put(RHYT, (1.0/2.0d));            
+        e10.put(PRES, (1.0/2.0d)); 
+        Hashtable<String, Double> e13 = new Hashtable<String, Double>();
+        e13.put(RHYT, (1.0/2.0d));            
+        e13.put(PRES, (1.0/2.0d)); 
         
         Hashtable<String, Double> e16 = new Hashtable<String, Double>();
         e16.put(COMP, (1.0d)); 
@@ -386,36 +439,55 @@ public class CPRRecognition
 
 	    	
     	//Notice that receivePacket.getData() is 256(previous value) and receivePacket.getLength() is the actual length
-
-/*    	String revStr = "start CPR$what's the rhythm$the patient has " +
+    	
+    	
+/*    	// 20min verison
+ * 		String revStr = "start CPR$what's the rhythm$the patient has " +
     			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";*/
     	
-/*    	String revStr = "start CPR$what's the rhythm$the patient has " +
-    			"a Cistulli$start reset asian 42 minutes$give epinephrine for 3 minutes interval$";*/
-    	
-    	String revStr = "Dr$ what's the rhythm$ the patient has a sister$ start 37 Asian for 2 minutes$ epinephrine for " +
+    	// path1version1
+/*    	String revStr = "Dr$ what's the rhythm$ the patient has a sister$ start 37 Asian for 2 minutes$ epinephrine for " +
     			"a 3 minute interval$ what's the riddle$ can a ship has the relation$ charge the difference in later$ clear " +
     			"the bed$ shock patient$ dodge reset a shin for 2 minutes$ epinephrine .3 minute interval$ what the rhythm$ " +
     			"the patient has a ventricular fibrillation$ charged in Atlanta$ clear the bed$ shop the patient$ destination " +
-    			"for 2 minutes$ Amy order and Country minute interval$ what's the rhythm$ pulse pressure$";
+    			"for 2 minutes$ Amy order and Country minute interval$ what's the rhythm$ pulse pressure$";*/
+    	
+    	// path1version2
+/*    	String revStr = "Star Trek$ what's the rhythm$ the patient has a sister$ start CPR for 2 minutes$ give epinephrine 43 " +
+    			"minutes interval$ what's the rhythm$ the patient has to be fed$ Chuck the defibrillator$ clear the bed$ shock " +
+    			"a patient$ start CPR for 2 minutes$ give up enough room for few minutes interval$ what's the rhythm$ the patient " +
+    			"has the Fed$ charge the defibrillator$ clear the bed$ shock the patient$ start CPR for 2 minutes$ give me older in" +
+    			" 43 minutes interval$ what's the rhythm$ good pulse with compression$ ";*/
+    	
+    	String revStr = "Start music Haitian$ what's the rhythm$ the patient has a sister$ start CPR for 2 minutes$ give epinephrine 40 minutes interval$ what's the rhythm$ the patient has to be fed$ charge defibrillator$ clear the bed$ shock a patient$ start CPR for 2 minutes$ give up in Afrin for 3 minutes interval$ what's the rhythm$ the patient has the Fed$ charge the defibrillator$ clear the bed$ shock a patient$ start CPR for 2 minutes$ give me older in 43 minutes interval$ what's the rhythm$ good pulse with compression$";
+    	
+    	//String revStr = "Start me sassy tation$ what's the rhythm$ the patient has a system$ start CPR for 2 minutes$ give epinephrine 43 minutes interval$ what's the rhythm$ the patient has to be fit$ charge the defibrillator$ clear the bed$ shock patient$ start CPR for 2 minutes$ give epinephrine for 3 minutes interval$ what's the rhythm$ the patient has the Fed$ charge the defibrillator$ clear the bed$ shock a patient$ start CPR for 2 minutes$ give me a reason for 3 minutes interval$ what's the rhythm$ good pulse with compression$";
 
     	// get rid of the newline char
         System.out.println("RECEIVED: " + revStr.replace("\n", " "));
+        // get rid of stop words
+/*        String revStr2 = revStr.replaceAll("patient", "");
+        System.out.println("After getting rid of the stop word, RECEIVED: " + revStr2);*/
         
         // manipulate the received string 
         String[] sentenceSeq = revStr.split("\\$ "); 
         System.out.println("split.size: " + sentenceSeq.length);
-        System.out.println("The received seq after manipulation is:");
-/*        for (String str : sentenceSeq) {
+/*        System.out.println("The received seq after splitting is:");
+        for (String str : sentenceSeq) {
             System.out.println(str);
         }*/
-        System.out.println(Arrays.toString(sentenceSeq));
+        //System.out.println(Arrays.toString(sentenceSeq));
         System.out.println("revStr's accuracy is: " + measureWords(sentenceSeq));
         
         // manipulate the wordSeq to find the nearest match
         String[] wordSeq =  manipulateSentence(sentenceSeq, vocabularySet);
-        System.out.println(Arrays.toString(wordSeq));
-        System.out.println("revStr's accuracy is: " + measureWords(wordSeq));
+        //System.out.println(Arrays.toString(wordSeq));
+        System.out.println("The received seq after manipulation is:");
+        for (String str : wordSeq) {
+        	System.out.println(str);
+        }
+        
+        System.out.println("After the manipulation, revStr's accuracy is: " + measureWords(wordSeq));
         
         Hashtable<String, Hashtable<String, Double>> confusion_probability =
         		confustionGen(wordSeq, vocabularySet);
@@ -426,6 +498,7 @@ public class CPRRecognition
                 transition_probability,
                 emission_probability,
                 confusion_probability);
+        
     }
  
         public static void forward_viterbi(String[] actualObs, String[] obs, String[] states,
@@ -482,7 +555,7 @@ public class CPRRecognition
                                 v_prob = Math.log(start_p.get(next_state)) + Math.log(conf_p.get(input).get(word))
                                     + Math.log(emit_p.get(next_state).get(word));
                             }
-                            if (v_prob >= Pmax) {
+                            if (v_prob > Pmax) {
                                 Pmax = v_prob;
                                 //Smax = i;
                                 Smax = Integer.parseInt(next_state);
@@ -508,7 +581,7 @@ public class CPRRecognition
                         		//v_prob = V[t-1][j] * p;
                                 v_prob= V[t-1][Integer.parseInt(source_state)] + p;
     						
-                        		if (v_prob >= Pmax)
+                        		if (v_prob > Pmax)
                         		{
                         			Pmax = v_prob;
                         			//Smax = j;
@@ -565,11 +638,8 @@ public class CPRRecognition
 
             String[] subWords = Arrays.copyOfRange(words, 1, obs_num+1);
             int[] subStates = Arrays.copyOfRange(path, 1, obs_num+1);
-            System.out.println("subWords is: " + Arrays.toString(subWords));
-            System.out.println("subStates is: " + Arrays.toString(subStates));
-            
-            System.out.println("My words measurement is: " + measureWords(subWords));
-            System.out.println("My state measurement is: " + measureStates(subStates));
+            //System.out.println("subWords is: " + Arrays.toString(subWords));
+            //System.out.println("subStates is: " + Arrays.toString(subStates));
             	
             System.out.println("\n*************************************\n");         
             System.out.println(Arrays.toString(actualObs));
@@ -579,6 +649,10 @@ public class CPRRecognition
             	System.out.println("state: " + path[x] + 
             			", with the word: " + words[x]);
             }
+            
+            System.out.println("My words measurement is: " + measureWords(subWords));
+            System.out.println("My state measurement is: " + measureStates(subStates));
+            
             System.out.println("\n*************************************\n");
         }
 
@@ -697,9 +771,9 @@ public class CPRRecognition
             	if ((line = reader.readLine()) != null) {
             		//System.out.println(line);
             		if (j == 1)
-            			builder.append(line.substring(1));
+            			builder.append(line);
             		else
-            			builder.append(" ").append(line.substring(1));
+            			builder.append(" ").append(line);
             	}
         	}
         	
@@ -799,15 +873,18 @@ public class CPRRecognition
         //
         public static String[] manipulateSentence(String[] sentenceSeq, String[] vocabularySet) throws IOException, InterruptedException 
         {
+        	int exactCnt = 0;
         	for (int i = 0; i < sentenceSeq.length; i++) {
-        		String match;
+        		String match = null;
         		if ((match = findExactMatch(sentenceSeq[i], vocabularySet)) != null) {
         			sentenceSeq[i] = match;
+        			exactCnt++;
         		} else {
         			match = findFuzzyMatch(sentenceSeq[i]);
         			sentenceSeq[i] = match;
         		}
         	}
+        	System.out.println("exactCnt is: " + exactCnt);
         	return sentenceSeq;
         }
         
@@ -916,6 +993,17 @@ public class CPRRecognition
         	return ((double)count/numStates);
         }
         
+/*        public static String trimStopWord(String str, int level)
+        {
+        	if (level == -1) {
+        		return str;
+        	} else {
+	        	String retStr = null;
+	        	retStr = str.replaceAll(stopWords[level-1], "");
+	        	System.out.println(retStr);
+	    		return trimStopWord(retStr, level-1);
+        	}
+        }*/
 }
 
 
