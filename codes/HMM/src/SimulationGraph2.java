@@ -203,7 +203,7 @@ public class SimulationGraph2 implements Serializable  {
 		}
 	}
 	
-	// findTreePath finds a random path from any node in the tree, whose number of nodes in the 
+/*	// findTreePath finds a random path from any node in the tree, whose number of nodes in the 
 	// path is equal to pathLength specified.  Notice that the returned path does not contain 'v'
 	public ArrayList<VertexSimulation2> findTreePath(int pathLength)
 	{
@@ -224,6 +224,33 @@ public class SimulationGraph2 implements Serializable  {
 				//System.out.println("hoho");
 				if (path.size() == pathLength)
 					return path;
+		}
+		return null;
+	}*/
+	
+	// findTreePath finds a random path from any node in the tree, whose number of nodes in the 
+	// path is equal to pathLength specified.  Notice that the returned path does not contain 'v'
+	public ArrayList<VertexSimulation2> findTreePath(int pathLength)
+	{
+		if (pathLength < 0 || pathLength > (height+1)) {
+			System.out.println("wrong choise of pathLength for the tree!");
+			System.exit(-1);
+		}
+		Set<VertexSimulation2> vertexSet = new HashSet<VertexSimulation2>(kAryTree.getVertices());
+		ArrayList<VertexSimulation2> path;
+		for (VertexSimulation2 v : vertexSet) {
+			// need to renew all the nodes in the graph by setting 'visit' to be false
+			Set<VertexSimulation2> vers = new HashSet<VertexSimulation2>(kAryTree.getVertices());
+			for (VertexSimulation2 ver : vers) {
+				ver.visit = false;
+			}
+			path = new ArrayList<VertexSimulation2>();
+			if (DFSTree(pathLength-1, v, path))
+				//System.out.println("hoho");
+				if (path.size() == pathLength-1) {
+					path.add(0, v);
+					return path;
+				}
 		}
 		return null;
 	}
