@@ -150,13 +150,13 @@ public class Simulation2
 			//Graph Interface
 			// PAY ATTENTION!!! version2 should be coupled with findTreePathFromRoot below, while version1 should be
 			// coupled with findTreePath
-			//treeParse(tree, 2);
-			treeParse(tree, 1);
+			treeParse(tree, 2);
+			//treeParse(tree, 1);
     		
 			// instead of choosing the diameter as the path, choose a path specified length 
 			//System.out.println(graphGen.pathLength);
-			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
-			//ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePathFromRoot(graphGen.pathLength);
+			//ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
+			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePathFromRoot(graphGen.pathLength);
 			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
 			{
 				System.out.println("could not find such path!");
