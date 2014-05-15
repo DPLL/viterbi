@@ -1,11 +1,6 @@
 order is 4, height is 5, objPerNode is 1, recall is 0.6, pathLength is 6, runTime is 100
 myObjectScore: 1.0
-sensorObjectScore: 0.5
-myStateScore: 1.0
-asrStatePercentage: 0.5
-in the 0 th interation, haha!!!!
-myObjectScore: 1.0
 sensorObjectScore: 0.6666666666666666
 myStateScore: 1.0
 asrStatePercentage: 0.6666666666666666
-in the 1 th interation, haha!!!!
+in the 0 th interation, haha!!!!
