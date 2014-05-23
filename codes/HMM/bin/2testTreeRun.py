@@ -20,20 +20,20 @@ def runCmd(cmd, outputPath):
 def main():
     degree = '3 '
     height = '5 '
-    #objPerNode = '5 '    
-    recall = ' 0.6 '
-    pathLength = '6 '
+    objPerNode = '5 '    
+    #recall = ' 0.6 '
+    pathLength = ' 6 '
     runTime = '100'
 
-    recallList = [0.7, 0.8, 0.9, 1.0]
+    recallList = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     processList = []
 
-#    for i in recallList:
-    for i in range(1, 11):
-        args = degree + height + str(i) + recall + pathLength + runTime
-        #outputPath = '../results/testTreeRootRecall' + str(i)
+    for i in recallList:
+#    for i in range(1, 11):
+        args = degree + height + objPerNode + str(i) + pathLength + runTime
+        outputPath = '../results/testTreeRootRecall' + str(i)
         #outputPath = '../results/testTreeRootPathLength' + str(i)
-        outputPath = '../results/testTreeRootObjPerNode' + str(i)
+        #outputPath = '../results/testTreeRootObjPerNode' + str(i)
         exeCmd = cmd + args
         p = Process(target=runCmd, args=(exeCmd, outputPath))
         processList.append(p)

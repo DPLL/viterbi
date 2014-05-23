@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# this is the parallel version of treeRun.py.  If we want to test (un)rooted tree, we have to modify that in the java code.
+
 import os
 import re
 import array
@@ -19,20 +21,21 @@ def runCmd(cmd, outputPath):
 
 def main():
     degree = '3 '
-    height = '5 '
-    objPerNode = '5 '    
-    recall = '0.6 '
+    height = ' 5 '
+    objPerNode = '5 '    #since objPerNode does not matter, we just make it 1
+    recall = ' 0.6 '
     #pathLength = ' 6 '
     runTime = ' 100'
 
-    recallList = [0.7, 0.8, 0.9, 1.0]
+    recallList = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     processList = []
 
 #    for i in recallList:
     for i in range(6, 7):
         args = degree + height + objPerNode + recall + str(i) + runTime
-        #outputPath = '../results/testTreeRootRecall' + str(i)
+        #outputPath = '../results/testTreeRecall' + str(i)
         outputPath = '../results/testTreeRootPathLength' + str(i)
+        #outputPath = '../results/testTreeObjPerNode' + str(i)
         exeCmd = cmd + args
         p = Process(target=runCmd, args=(exeCmd, outputPath))
         processList.append(p)
