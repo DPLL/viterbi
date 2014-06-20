@@ -69,7 +69,7 @@ public class TestMHMM
 
 	
     
-    static final int port = 9998;
+    static final int port = 9999;
  
     public static void main(String[] args) throws IOException, InterruptedException 
     {
@@ -236,35 +236,35 @@ public class TestMHMM
              */
             // manipulate the received string 
             // Pay attention to the match case of "|" in java!!!
-            String[] wordSeq = revStr.split("\\|");
-	        //String[] wordSeq = revStr.split("\\$ "); 
-            System.out.println("split.size: " + wordSeq.length);
-            System.out.println("The received seq after manipulation is:");
-            for (String str : wordSeq) {
-                System.out.println(str);
-            }
-            System.out.println(Arrays.toString(wordSeq));
-	        
-	        /*Hashtable<String, Hashtable<String, Double>> confusion_probability =
-	        		confustionGen(actualVocSet, vocabularySet);*/
-	        
-	        Hashtable<String, Hashtable<String, Double>> confusion_probability =
-	        		confustionGen(wordSeq, vocabularySet);
-            /*
-	        forward_viterbi(actualVocSet,
-	        		vocabularySet, states,
-	                start_probability,
-	                transition_probability,
-	                emission_probability,
-	                confusion_probability);*/
-
-	        
-	        forward_viterbi(wordSeq,
-	        		vocabularySet, states,
-	                start_probability,
-	                transition_probability,
-	                emission_probability,
-	                confusion_probability);
+            //String[] wordSeq = revStr.split("\\|");
+//	        String[] wordSeq = revStr.split("\\$ "); 
+//            System.out.println("split.size: " + wordSeq.length);
+//            System.out.println("The received seq after manipulation is:");
+//            for (String str : wordSeq) {
+//                System.out.println(str);
+//            }
+//            System.out.println(Arrays.toString(wordSeq));
+//	        
+//	        /*Hashtable<String, Hashtable<String, Double>> confusion_probability =
+//	        		confustionGen(actualVocSet, vocabularySet);*/
+//	        
+//	        Hashtable<String, Hashtable<String, Double>> confusion_probability =
+//	        		confustionGen(wordSeq, vocabularySet);
+//            /*
+//	        forward_viterbi(actualVocSet,
+//	        		vocabularySet, states,
+//	                start_probability,
+//	                transition_probability,
+//	                emission_probability,
+//	                confusion_probability);*/
+//
+//	        
+//	        forward_viterbi(wordSeq,
+//	        		vocabularySet, states,
+//	                start_probability,
+//	                transition_probability,
+//	                emission_probability,
+//	                confusion_probability);
         }
         serverSocket.close();
     }

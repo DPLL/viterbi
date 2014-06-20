@@ -31,10 +31,14 @@ public class CPRRecognitionTest
 	private static int trueWordNum = 21;
 	private static int trueStateNum = 21;
 	private static int vocabularyKeywordNum = 19;
+	// UDP port number
+	static final int port = 9999;
 	
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	CPRRecognitionTest test = new CPRRecognitionTest();
+    	
+    	boolean UDP = true;
 
     	String[] states = new String[stateNum];
     	String[] trueWords = new String[trueWordNum];
@@ -58,6 +62,12 @@ public class CPRRecognitionTest
     	test.path1Version1Setup(states, trueWords, trueStates, vocabularySet, vocalPhonemes, vocalMapping, 
     			start_probability, transition_probability, emission_probability);*/
     	
+    	// strArr is the arraylist of string which stores the received results
+    	ArrayList<String> strArr = new ArrayList<String>();
+    	
+    	String revStr = null;
+    	
+    	if (!UDP) {
     	
 /*    	// 20min verison
  * 		String revStr = "start CPR$what's the rhythm$the patient has " +
@@ -90,13 +100,73 @@ public class CPRRecognitionTest
     	//String revStr = "Touch me Fantasia$ what's the weather$ the patient has of Sicily$ BTR 42 minutes$ FF in 40 minutes interval$ what's the weather$ the patient has visa$ charge the favor later$ clear the back$ shock the patient$ search CR 42 minutes$ F&S in 43 minutes interval$ what's the rhythm$ the patient has defects$ charge does he say breeder$ clear the bed$ shock a patient$ CPR for 2 minutes$ give amiodarone for 3 minutes interval$ what's the weather$ house with compassion$";
     	
     	// path1version3 0.03
-    	String revStr = "Japanese occupation$ what's the weather$ the patient s of Sicily$ CPR for 2 minutes$ give up bass in 3 minutes interval$ what's the weather$ the patient has beat it$ Dutch baby food will a tre$ clear the back$ shock the patient$ CPR for 2 minutes$ Dave Chappelle after 3 minutes interval$ what's the weather$ the patient has v6$ charge to deliver later$ clear the bed$ shock the patient$ star CPR for 2 minutes$ give me older in 43 minutes interval$ what's the weather$ house with compassion$";
+    	revStr = "Japanese occupation$ what's the weather$ the patient s of Sicily$ CPR for 2 minutes$ give up bass in 3 minutes interval$ what's the weather$ the patient has beat it$ Dutch baby food will a tre$ clear the back$ shock the patient$ CPR for 2 minutes$ Dave Chappelle after 3 minutes interval$ what's the weather$ the patient has v6$ charge to deliver later$ clear the bed$ shock the patient$ star CPR for 2 minutes$ give me older in 43 minutes interval$ what's the weather$ house with compassion$";
     	
-    	// get rid of the newline char
-        System.out.println("RECEIVED: " + revStr.replace("\n", " "));
-        // get rid of stop words
-/*        String revStr2 = revStr.replaceAll("patient", "");
-        System.out.println("After getting rid of the stop word, RECEIVED: " + revStr2);*/
+    	} else { // use UDP to receive date from the front end recognizer
+    		
+    		DatagramSocket serverSocket = new DatagramSocket(port);
+            System.out.println("In the UDPserver");
+    		while (true) {
+    	        byte[] receiveData = new byte[256];
+    	    	DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+    	    	serverSocket.receive(receivePacket);
+    	    	//Notice that receivePacket.getData() is 256 and receivePacket.getLength() is the actual length
+    	    	// use receivePacket.getLength()-1 in order to get rid of '$'
+    	    	revStr = new String(receiveData, 0, receivePacket.getLength()-1);
+    	        //System.out.println("receivePacket.getLength(): " + receivePacket.getLength());
+    	        //System.out.println("revStr.length(): " + revStr.length());
+    	    	// get rid of the newline char
+    	        System.out.println("RECEIVED: " + revStr.replace("\n", " "));
+    	        
+    	        // get rid of stop words
+    	    	/*        String revStr2 = revStr.replaceAll("patient", "");
+    	    	        System.out.println("After getting rid of the stop word, RECEIVED: " + revStr2);*/
+    	        
+    	        if(revStr.equals("over"))
+    	        		break;
+    	
+    	        strArr.add(revStr);
+            	System.out.println("strArr.size() is " + strArr.size());
+    	        String[] actualVocSet = strArr.toArray(new String[strArr.size()]);
+    	        System.out.println("So far, the received arraylist of string is " + 
+    	        		Arrays.toString(actualVocSet));
+    	        
+
+    	/*        System.out.println("The received seq after splitting is:");
+    	        for (String str : actualVocSet) {
+    	            System.out.println(str);
+    	        }*/
+    	        //System.out.println(Arrays.toString(actualVocSet));
+    	        System.out.println("revStr's accuracy is: " + test.measureWords(actualVocSet, trueWords));
+    	        
+    	        // manipulate the wordSeq to find the nearest match
+    	        String[] wordSeq =  test.manipulateSentence(actualVocSet, vocabularySet, vocalPhonemes, vocalMapping);
+    	        //System.out.println(Arrays.toString(wordSeq));
+    	        System.out.println("The received seq after manipulation is:");
+    	        for (String str : wordSeq) {
+    	        	System.out.println(str);
+    	        }
+    	        
+    	        System.out.println("After the manipulation, revStr's accuracy is: " 
+    	        		+ test.measureWords(wordSeq, trueWords));
+    	        
+    	        Hashtable<String, Hashtable<String, Double>> confusion_probability =
+    	        		test.confustionGen(wordSeq, vocabularySet, vocalPhonemes, vocalMapping);
+    	        
+    	        test.forward_viterbi(wordSeq,
+    	        		vocabularySet, states,
+    	                start_probability,
+    	                transition_probability,
+    	                emission_probability,
+    	                confusion_probability,
+    	                trueWords,
+    	                trueStates);
+    	        
+    		}
+
+    		serverSocket.close();
+        
+    	}
         
         // manipulate the received string 
         String[] sentenceSeq = revStr.split("\\$ "); 
