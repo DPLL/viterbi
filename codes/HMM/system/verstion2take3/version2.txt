@@ -77,7 +77,7 @@ clear the bed
 shock the patient
 
 
-start resuscitation for 2 minutes
+start CPR for 2 minutes
 give amiodarone for 3 minute interval
 
 

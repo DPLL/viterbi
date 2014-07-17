@@ -1,5 +1,5 @@
 state 1:
-	CPR: start CPR
+	CPR: start resuscitation
 	oxgen:
 	defibrillator:
 
