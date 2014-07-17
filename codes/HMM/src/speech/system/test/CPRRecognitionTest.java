@@ -32,13 +32,17 @@ public class CPRRecognitionTest
 	private static int trueStateNum = 21;
 	private static int vocabularyKeywordNum = 19;
 	// UDP port number
-	static final int port = 9999;
+	static final int port = 9998;
 	
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	CPRRecognitionTest test = new CPRRecognitionTest();
-    	
+    	// this flag is for UDP communication
     	boolean UDP = true;
+    	// this flag is for the missing of the measurements
+    	boolean MISS = false;
+    	// probability of missing measurements
+    	double p = 0.1;
 
     	String[] states = new String[stateNum];
     	String[] trueWords = new String[trueWordNum];
@@ -61,6 +65,13 @@ public class CPRRecognitionTest
 /*    	// set up path1, version1
     	test.path1Version1Setup(states, trueWords, trueStates, vocabularySet, vocalPhonemes, vocalMapping, 
     			start_probability, transition_probability, emission_probability);*/
+    	
+    	// if the missing measurements happen, we need to smooth the transition probability matrix
+    	System.out.println("before smoothing, the transition_probability is:" + transition_probability);
+    	if (MISS) {
+    		test.smooth(transition_probability, p);
+    	}
+    	System.out.println("after smoothing, the transition_probability is:" + transition_probability);
     	
     	// strArr is the arraylist of string which stores the received results
     	ArrayList<String> strArr = new ArrayList<String>();
@@ -710,6 +721,59 @@ public class CPRRecognitionTest
         	}
         }*/
         
+        public void smooth(Hashtable<String, Hashtable<String, Double>> transition_probability, double p)
+        {	
+        	Hashtable<String, Hashtable<String, Double>> updated_transition_probability 
+        		= new Hashtable<String, Hashtable<String, Double>>();
+        	
+        	int i = 0;
+            for (State s1 : State.values()) {
+            	Hashtable<String, Double> t = new Hashtable<String, Double>();
+            	for (State s2 : State.values()) {
+            		double prob = 0;
+/*            		if (transition_probability.get(s1.getName()).get(s2.getName()) != null) {
+            			prob = transition_probability.get(s1.getName()).get(s2.getName()) * (1 - p);
+            		}
+            		else {
+            			
+            		}*/
+        			double prob1 = 0;
+        			double prob2 = 0;
+        			if (transition_probability.get(s1.getName()).get(s2.getName()) != null) {
+            			prob1 = transition_probability.get(s1.getName()).get(s2.getName()) * (1 - p);
+            		} else {
+            			prob1 = 0;
+            		}
+            		for (State s3 : State.values()) {
+            			if (transition_probability.get(s1.getName()).get(s3.getName()) != null 
+            					&& transition_probability.get(s3.getName()).get(s2.getName()) != null) {
+            				prob2 += p*transition_probability.get(s1.getName()).get(s3.getName())
+            						*transition_probability.get(s3.getName()).get(s2.getName());
+            			}
+            		}
+            		prob = prob1 + prob2;
+            		if (prob != 0) {
+            			t.put(s2.getName(), prob);
+            		}
+            	}
+            	updated_transition_probability.put(s1.getName(), t);
+            	
+            	// just to check the order of the enum
+            	if (Integer.valueOf(s1.getName()) != i) {
+            		System.out.println("Error in the order of enum!!!");
+            		System.exit(-1);
+            	}
+            	i++;
+            }
+            
+            //update the new transition_probability
+            for (String s : updated_transition_probability.keySet()) {
+            	transition_probability.put(s, updated_transition_probability.get(s));
+            }
+            //System.out.println("transition_probability is " + transition_probability);
+            //System.out.println("updated_transition_probability is " + updated_transition_probability);
+        }
+        
         public void path1Version2Setup(String[] states, String[] trueWords, String[] trueStates, String[] vocabularySet,
             	String[] vocalPhonemes, Hashtable<String, String> vocalMapping, 
             	Hashtable<String, Double> start_probability, Hashtable<String, Hashtable<String, Double>> transition_probability,
@@ -949,6 +1013,9 @@ public class CPRRecognitionTest
             t15.put(TEN, (1/2.0d));
             t15.put(FIFTEEN, (1/2.0d));
             
+            Hashtable<String, Double> t16 = new Hashtable<String, Double>();
+            t16.put(SIXTEEN, (1.0d));
+            
             Hashtable<String, Double> t17 = new Hashtable<String, Double>();
             t17.put(ELEVEN, (1/2.0d));
             t17.put(FOURTEEN, (1/2.0d));
@@ -973,6 +1040,7 @@ public class CPRRecognitionTest
             transition_probability.put(THIRTEEN, t13);
             transition_probability.put(FOURTEEN, t14);
             transition_probability.put(FIFTEEN, t15);
+            transition_probability.put(SIXTEEN, t16);
             transition_probability.put(SEVENTEEN, t17);
             transition_probability.put(EIGHTEEN, t18);
      
@@ -1321,6 +1389,9 @@ public class CPRRecognitionTest
             t15.put(TEN, (1/2.0d));
             t15.put(FIFTEEN, (1/2.0d));
             
+            Hashtable<String, Double> t16 = new Hashtable<String, Double>();
+            t16.put(SIXTEEN, (1.0d));
+            
             Hashtable<String, Double> t17 = new Hashtable<String, Double>();
             t17.put(ELEVEN, (1/2.0d));
             t17.put(FOURTEEN, (1/2.0d));
@@ -1345,6 +1416,7 @@ public class CPRRecognitionTest
             transition_probability.put(THIRTEEN, t13);
             transition_probability.put(FOURTEEN, t14);
             transition_probability.put(FIFTEEN, t15);
+            transition_probability.put(SIXTEEN, t16);
             transition_probability.put(SEVENTEEN, t17);
             transition_probability.put(EIGHTEEN, t18);
      

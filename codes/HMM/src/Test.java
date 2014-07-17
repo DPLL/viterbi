@@ -40,6 +40,14 @@ public class Test
 		transition_probability.put(HEALTHY, t1);
 		transition_probability.put(FEVER, t2);
  
+		System.out.println("transition_probability is: " + transition_probability);
+		
+		for (String s1 : states) {
+			for (String s2 : states) {
+				System.out.println(s1 + " to " + s2 + " is " + transition_probability.get(s1).get(s2));
+			}
+		}
+		
 		// emission_probability
 		Hashtable<String, Hashtable<String, Float>> emission_probability = 
 			new Hashtable<String, Hashtable<String, Float>>();
