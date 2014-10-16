@@ -2,6 +2,8 @@ For laptop, all the codes are in the directory of /home/david/Dropbox/projects/E
 
 For the desktop, all the codes are in the directory of /home/workplace/viterbi/codes/HMM/src, and it is also in synch with github.  If we want to open it up in eclipse, it should be in the same place with the github directory.
 
+for the codes which implements the web interface, the codes in put in the folder /var/www/, but the codes have a copy under the directory /Dropbox/projects/ER/speech/web_interface
+
 
 for special2.out
     			graphGen.density = 0.5;

@@ -42,7 +42,7 @@ public class CPRRecognitionTest
     	// this flag is for the missing of the measurements
     	boolean MISS = false;
     	// probability of missing measurements
-    	double p = 0.1;
+    	double p = 0.09523809523;
 
     	String[] states = new String[stateNum];
     	String[] trueWords = new String[trueWordNum];
@@ -853,13 +853,13 @@ public class CPRRecognitionTest
 			trueStates[19] = TEN;
 			trueStates[20] = SIXTEEN;
             																								
-        /*    // groundTruth word sequence version 1
-            String[] trueWords = {CPR, RHYT, ASYS, RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC,
-            		RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC, RESU, AMIO, RHYT, COMP};*/
+            // groundTruth word sequence version 1
+            //String[] trueWords = {CPR, RHYT, ASYS, RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC,
+            //		RESU, EPI, RHYT, VF, DEFI, CLEA, SHOC, RESU, AMIO, RHYT, COMP};
             
             // groundTruth word sequence version 2
-/*            trueWords = new String[]{RESU, RHYT, ASYS, CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC,
-            		CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC, CPR, AMIO, RHYT, COMP};*/
+            //trueWords = new String[]{RESU, RHYT, ASYS, CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC,
+            //		CPR, EPI, RHYT, VF, DEFI, CLEA, SHOC, CPR, AMIO, RHYT, COMP};
             trueWords[0] = RESU;
             trueWords[1] = RHYT;
             trueWords[2] = ASYS;
@@ -881,6 +881,52 @@ public class CPRRecognitionTest
 			trueWords[18] = AMIO;
 			trueWords[19] = RHYT;
 			trueWords[20] = COMP;
+            
+            // if missing p = 0.1
+/*            trueStates[0] = ZERO;
+            
+            trueStates[1] = TWO;
+            trueStates[2] = THREE;
+			trueStates[3] = THREE;
+			trueStates[4] = FOUR;
+			trueStates[5] = SEVENTEEN;
+			trueStates[6] = ELEVEN;
+			trueStates[7] = ELEVEN;
+			trueStates[8] = ELEVEN;
+			trueStates[9] = TWELVE;
+			trueStates[10] = TWELVE;
+
+			trueStates[11] = EIGHTEEN;
+			trueStates[12] = FOURTEEN;
+			trueStates[13] = FOURTEEN;
+			trueStates[14] = FOURTEEN;
+			trueStates[15] = FIFTEEN;
+			trueStates[16] = FIFTEEN;
+			trueStates[17] = TEN;
+			trueStates[18] = SIXTEEN;
+            																								
+            trueWords[0] = RESU;
+
+            trueWords[1] = ASYS;
+			trueWords[2] = CPR;
+			trueWords[3] = EPI;
+			trueWords[4] = RHYT;
+			trueWords[5] = VF;
+			trueWords[6] = DEFI;
+			trueWords[7] = CLEA;
+			trueWords[8] = SHOC;
+			trueWords[9] = CPR;
+			trueWords[10] = EPI;
+			
+            trueWords[11] = VF;
+            trueWords[12] = DEFI;
+			trueWords[13] = CLEA;
+			trueWords[14] = SHOC;
+			trueWords[15] = CPR;
+			trueWords[16] = AMIO;
+			trueWords[17] = RHYT;
+			trueWords[18] = COMP;*/
+            
         	
 /*            vocabularySet = new String[] {CPR, ATTA, VF, VT, 
             		CLEA, RESU, CAPN, PEA, PRES, COMP, OXYG, DEFI, ASYS, SHOC, IV, IO, EPI, AMIO, RHYT};*/

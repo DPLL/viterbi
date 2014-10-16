@@ -1,88 +1,90 @@
-state 1:
-	CPR: start resuscitation
+state 0:
+	resuscitation: start resuscitation
 	oxgen:
-	defibrillator:
+	attach: attach the machine
 
-state2:
+state 7, 17, 18:
 	VF (ventricular fibrillation): Vfib
 	VT (ventricular tachycardia): Vtach
 
-state3, 5, 7:
+state 8, 11, 14:
 	defibrillator: charge the defibrillator
 	clear: clear the bed
 	shock: shock the patient
 
-state4:
+state 5:
+	CPR: start CPR for 2 minutes
+
+state 9:
 	CPR: start CPR for 2 minutes
 	intravenous (IV): 
 	??(IO):
 	
-state6:
+state 3, 12:
 	CPR: start CPR for 2 minutes
 	epinephrine: give epinephrine for 3 minute interval
 	capnography: consider advanced airway and capnography
 
-state8:
+state 15:
 	CPR: start CPR for 2 minutes
 	amiodarone:
 
-state9:
+state 2:
 	asystole: The patient has asystole
-	pulseless: The patient has pulseless electrical activity
+	PEA: PEA
 
 state10: (self-loop)
 	resuscitation: start resuscitation for 2 minutes
 	epinephrine: give epinephrine for 3 minute interval
 	
 	
-state 12-15:
+state 1, 4, 6, 10, 13:
 	rhythm: what's the rhythm?
-	pulse: have a pulse check.
+	pressure: what's the blood pressure?
+
+state 16:
+	compression: Good pulse with compression
 
 
 
 
 
-Start resuscitation
+(0) Start resuscitation
 
-What's the rhythm?
+(1)What's the rhythm?
 
-The patient has asystole.
-
-
-start CPR for 2 minutes
-give epinephrine for 3 minute interval
+(2)The patient has asystole.
 
 
+(3)start CPR for 2 minutes
+(3)give epinephrine for 3 minute interval
 
-What's the rhythm?
-The patient has Vfib.
+(4)What's the rhythm?
 
+(17)The patient has Vfib.
 
-charge the defibrillator
-clear the bed
-shock the patient
+(11)charge the defibrillator
+(11)clear the bed
+(11)shock the patient
 
+(12)start CPR for 2 minutes
+(12)give epinephrine for 3 minute interval
 
-start CPR for 2 minutes
-give epinephrine for 3 minute interval
+(13)What's the rhythm?
 
+(18)The paitent has Vfib
 
-What's the rhythm?
-The paitent has Vfib
+(14)charge the defibrillator
+(14)clear the bed
+(14)shock the patient
 
+(15)start CPR for 2 minutes
 
-charge the defibrillator
-clear the bed
-shock the patient
+(15)give amiodarone for 3 minute interval
 
+(10)What's the rhythm?
 
-start resuscitation for 2 minutes
-give amiodarone for 3 minute interval
-
-
-What's the rhythm?
-Good pulse with compression
+(16)Good pulse with compression
 
 
 
