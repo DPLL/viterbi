@@ -64,7 +64,6 @@ public class Simulation2RandomGraph
 	static double asrWordPercentage;
     // asrStatePercentage is the percentage of state that ASR is right
 	static double asrStatePercentage;
-
     
     public static final boolean DEBUG_MODE = false;
     
@@ -81,6 +80,7 @@ public class Simulation2RandomGraph
 			// read from the predefined class
 			graphGen = new SimulationGraph2();
 
+			
 			try {
 				FileInputStream fileIn = new FileInputStream("graph2.out");
 				ObjectInputStream in = new ObjectInputStream(fileIn);   			
@@ -727,22 +727,64 @@ public class Simulation2RandomGraph
     	}
     	
     	//System.out.println("Hi, I am here");
-    	/*
+    	
     	Enumeration<ObjectSimulation2> obsObejct;	
     	obsObejct = confusion_probability.keys();
         while(obsObejct.hasMoreElements()) {
            ObjectSimulation2 key = (ObjectSimulation2) obsObejct.nextElement();
            System.out.println(key + ": " +
         		   confusion_probability.get(key));
-        }*/
-        
-/*            for(ObjectSimulation2 obsObject: confusion_probability.keySet()) {
+        }
+        /*
+           for(ObjectSimulation2 obsObject: confusion_probability.keySet()) {
             	System.out.println("obsObject " + obsObject + ":");
             	for(ObjectSimulation2 trueObject : confusion_probability.get(obsObject).keySet())
             		System.out.println(trueObject + ":" + confusion_probability.get(obsObject).get(trueObject));
             }*/
 		return confusion_probability;
     }
-
+    
+    // new version of confusion_probability
+    // the objects within the same state are going to have very close confusion probability
+    
+    public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
+	newConfusionGen(ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet, int objNumPerNodeVal) throws IOException, InterruptedException
+	{
+		// Due to the assumption that we assume all the objects evenly divide the misclassification probability, the 
+		// misclassification and the inverted misclassification matrix are the same.
+		Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> confusion_probability = 
+				new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
+		for (ObjectSimulation2 obsObject : obs) {
+			Hashtable<ObjectSimulation2, Double> c = new Hashtable<ObjectSimulation2, Double>();
+			for (ObjectSimulation2 trueObject : trueObjectSet) {
+				double similarityIndex;
+				double inStateSimilarity = (1-graphGen.recall)/(objNumPerNodeVal-1);
+				if (obsObject.objectID == trueObject.objectID) {
+					similarityIndex = graphGen.recall;
+				} else if (withinSameState(obsObject.objectID, obsObject.objectID, objNumPerNodeVal)) { // within the same state but different objects
+					similarityIndex = inStateSimilarity;
+				} else { // not within the same states
+					// TODO maybe make it a little higher than 0
+					similarityIndex = 0;
+				}
+				c.put(trueObject, similarityIndex);
+			}
+			confusion_probability.put(obsObject, c);
+		}
+		return confusion_probability;
+	}
+    
+    // detect whether two objects are in the same state
+    public static boolean withinSameState(int ID1, int ID2, int objPerNode) { 
+    	if (ID1 != ID2) {
+    		int node_1_ID = ID1-(ID1%objPerNode)/objPerNode;
+    		int node_2_ID = ID2-(ID2%objPerNode)/objPerNode;
+    		if ( node_1_ID == node_2_ID ) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
 }
 

@@ -503,7 +503,7 @@ public class SimulationGraph2 implements Serializable  {
         //int find = 0;
         int nodeCntr = 0;
         while (nodeIterator1.hasNext()) {
-        	VertexSimulation2 vet1 = nodeIterator1.next();
+        	VertexSimulation2 vet1 = (VertexSimulation2) nodeIterator1.next();
         	//System.out.println("vet1 is: " + vet1);
         	Iterator<VertexSimulation2> nodeIterator2 = randomGraph.vertexSet().iterator();
             while (nodeIterator2.hasNext()) {
@@ -671,6 +671,42 @@ public class SimulationGraph2 implements Serializable  {
     
     public ArrayList<ObjectSimulation2> classify()
     {
+    	// evenly distribute the errorGranularity among all the nodes
+    	errorGranularity = (1-recall)/(objectPerNode*numVertex-1);
+		//System.out.println("errorGranularity is " + errorGranularity);
+    	classifiedResults = new ArrayList<ObjectSimulation2>();
+
+        for(ObjectSimulation2 obj: trueObjects) {
+    		//double error = Math.random();  
+        	Random generator = new Random();
+        	double error = generator.nextDouble();
+/*    		System.out.println("*********************");
+    		System.out.println("error is " + error);
+    		System.out.println("*********************");*/
+    		// min and max are the lower and upper bound of obj, respectively.
+    		double min = obj.objectID * errorGranularity;
+    		double max = obj.objectID * errorGranularity + recall;
+    		//System.out.println("min is " + min + ", and max is " + max);
+    		int id;
+    		if (0 <= error && error < min) {
+    			id = (int) (error/errorGranularity);
+    		} else if (1 > error && error >= max) {
+    			id = (int) (((error - max)/errorGranularity) + obj.objectID + 1);
+    		} else {
+    			id = obj.objectID;
+    		}
+        	classifiedResults.add(new ObjectSimulation2(id));
+        }
+/*        System.out.println("classifiedResults is as follows");
+        for(ObjectSimulation2 arr : classifiedResults)
+        	System.out.println(arr);*/
+		return classifiedResults;
+    }
+    
+    // newClassifiy() will make classification based on updated version of the confusion matrix
+    public ArrayList<ObjectSimulation2> newClassify()
+    {
+    	double inStateSimilarity = (1 - recall)/(objectPerNode-1);
     	// evenly distribute the errorGranularity among all the nodes
     	errorGranularity = (1-recall)/(objectPerNode*numVertex-1);
 		//System.out.println("errorGranularity is " + errorGranularity);
