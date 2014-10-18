@@ -215,7 +215,7 @@ public class Simulation2RandomGraph
 		    		/*
 		    		 * generate the confusion probability matrix
 		    		 */
-		            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+		            confusion_probability =	confusionGen(objectSeq, trueObjectSet);
 		            
 		            correct(objectSeq,
 		            		trueObjectSet, states,
@@ -706,7 +706,7 @@ public class Simulation2RandomGraph
     }
     
     public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
-    	confustionGen(ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet) throws IOException, InterruptedException
+    	confusionGen(ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet) throws IOException, InterruptedException
     {
     	// Due to the assumption that we assume all the objects evenly divide the misclassification probability, the 
     	// misclassification and the inverted misclassification matrix are the same.
