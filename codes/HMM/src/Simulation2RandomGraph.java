@@ -207,7 +207,11 @@ public class Simulation2RandomGraph
 		    	for(int i = 0; i < runPerGraph; i++) {
 		    		count++;	    		
 			        //SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
-					classifiedResult= graphGen.classify();
+		    		//use the evenly distributed confusion matrix to do classification
+					//classifiedResult= graphGen.classify();
+					//use the confusion matrix which favors more on the in-state similarity 
+		    		classifiedResult= graphGen.newClassify();
+		    		
 					objectSeq = new ObjectSimulation2[classifiedResult.size()];
 			        objectSeq = classifiedResult.toArray(objectSeq);
 			        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
@@ -215,7 +219,10 @@ public class Simulation2RandomGraph
 		    		/*
 		    		 * generate the confusion probability matrix
 		    		 */
-		            confusion_probability =	confusionGen(objectSeq, trueObjectSet);
+		            //confusion_probability =	confusionGen(objectSeq, trueObjectSet);
+		            
+		            // generate new confusion matrix by making within-state similarity higher than others
+			        confusion_probability =	newConfusionGen(objectSeq, trueObjectSet, objNumPerNodeVal);
 		            
 		            correct(objectSeq,
 		            		trueObjectSet, states,

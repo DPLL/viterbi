@@ -713,24 +713,23 @@ public class SimulationGraph2 implements Serializable  {
     	classifiedResults = new ArrayList<ObjectSimulation2>();
 
         for(ObjectSimulation2 obj: trueObjects) {
-    		//double error = Math.random();  
+        	int objID = obj.objectID;
+        	int stateID = (objID - objID%objectPerNode)/objectPerNode;
+        	//[min, max] is the range for the objID
+    		double min = (objID%objectPerNode) * inStateSimilarity;
+    		double max = min + recall;
+    		//generate a random number for classifying
         	Random generator = new Random();
         	double error = generator.nextDouble();
-/*    		System.out.println("*********************");
-    		System.out.println("error is " + error);
-    		System.out.println("*********************");*/
-    		// min and max are the lower and upper bound of obj, respectively.
-    		double min = obj.objectID * errorGranularity;
-    		double max = obj.objectID * errorGranularity + recall;
-    		//System.out.println("min is " + min + ", and max is " + max);
-    		int id;
-    		if (0 <= error && error < min) {
-    			id = (int) (error/errorGranularity);
-    		} else if (1 > error && error >= max) {
-    			id = (int) (((error - max)/errorGranularity) + obj.objectID + 1);
-    		} else {
-    			id = obj.objectID;
-    		}
+        	
+        	int id;
+        	if (0 <= error && error < min) {
+        		id = (int) (objID - ((min-error)/inStateSimilarity+1));
+        	} else if (1 > error && error >= max) {
+        		id = (int) (objID + (error-max)/inStateSimilarity + 1);
+        	} else {
+        		id = objID;
+        	}
         	classifiedResults.add(new ObjectSimulation2(id));
         }
 /*        System.out.println("classifiedResults is as follows");
