@@ -223,6 +223,9 @@ public class Simulation2RandomGraph
 		            
 		            // generate new confusion matrix by making within-state similarity higher than others
 			        confusion_probability =	newConfusionGen(objectSeq, trueObjectSet, objNumPerNodeVal);
+			        
+			        //TODO
+			        confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/2));
 		            
 		            correct(objectSeq,
 		            		trueObjectSet, states,
@@ -768,7 +771,7 @@ public class Simulation2RandomGraph
 				double inStateSimilarity = (1-graphGen.recall)/(objNumPerNodeVal-1);
 				if (obsObject.objectID == trueObject.objectID) {
 					similarityIndex = graphGen.recall;
-				} else if (withinSameState(obsObject.objectID, obsObject.objectID, objNumPerNodeVal)) { // within the same state but different objects
+				} else if (withinSameState(obsObject.objectID, trueObject.objectID, objNumPerNodeVal)) { // within the same state but different objects
 					similarityIndex = inStateSimilarity;
 				} else { // not within the same states
 					// TODO maybe make it a little higher than 0
@@ -778,20 +781,125 @@ public class Simulation2RandomGraph
 			}
 			confusion_probability.put(obsObject, c);
 		}
+		
+    	Enumeration<ObjectSimulation2> obsObejct;	
+    	obsObejct = confusion_probability.keys();
+        while(obsObejct.hasMoreElements()) {
+           ObjectSimulation2 key = (ObjectSimulation2) obsObejct.nextElement();
+           System.out.println(key + ": " +
+        		   confusion_probability.get(key));
+        }
+        
 		return confusion_probability;
 	}
     
     // detect whether two objects are in the same state
     public static boolean withinSameState(int ID1, int ID2, int objPerNode) { 
     	if (ID1 != ID2) {
-    		int node_1_ID = ID1-(ID1%objPerNode)/objPerNode;
-    		int node_2_ID = ID2-(ID2%objPerNode)/objPerNode;
+    		int node_1_ID = (ID1-(ID1%objPerNode))/objPerNode;
+    		int node_2_ID = (ID2-(ID2%objPerNode))/objPerNode;
     		if ( node_1_ID == node_2_ID ) {
     			return true;
     		}
     	}
     	return false;
     }
+    
+    /* 
+     * function function: generate the confusion matrix directly, instead of using the rules to do classification and probability lookup
+     * 
+     * inStateProb represents the total probability that the objects are sharing within one state. For instance, if the recall is 0.6, 
+     * the inStateProb is 0.3, then the objects that are not within the same states (intra-state) are sharing 0.1.
+     * 
+     * confusionMatrix[i][j] represents at [i][j], the max total probability so far. e.g. k = 5. For i = 18, which is the 18th row:
+     * 15      16     17     18     19     20     21     22     23     24
+     * 0.075   0.15   0.225  0.825  0.9    0.92   0.94   0.96   0.98   1.0
+     * 
+     * This design provides convenience for classification, though it adds a little inconvenience to the similarity lookup.
+     * 
+     * k other intra-state objects to share (1-recall-inStateProb), where k is 'objPerNode'.
+     */
+    
+    public static double[][] confusionMatrixGen(int nodeNum, int objPerNode, double recall, double inStateProb) {
+    	int objNum = nodeNum * objPerNode;
+    	int k = objPerNode;
+    	// average probability each in-state object is sharing
+    	double avgInStateProb = (double) inStateProb/(k - 1);
+    	// average probability each intra-state object is sharing
+    	double avgOutStateProb = (double) (1- recall - inStateProb)/k;
+    	double[][] confusionMatrix = new double[objNum][objNum];
+    	
+    	for (int i = 0; i < objNum; i++) {
+    		/*
+    		 * the k intra-state objects are the tailing k entries in the confusionMatrix.
+    		 * when it comes to the end of the confusionMatrix, the tailing ones will wrind up and begin from the 0-index element,
+    		 * which saves the codes and also maintains the symmetry of the confusion matrix.
+    		 */
+    		
+    		int offset = i%k;
+    		// startID is the starting index
+    		int startID = i - offset;
+    		// sum is the cumulative probability at the current position
+			double sum = 0;
+    		// first deal with in-state
+			for (int j = 0; j < k; j++) {
+				if (i == (j + startID)) { // the current element is the true object
+					sum += recall;
+				} else {
+					sum += avgInStateProb;
+				}
+				confusionMatrix[i][startID + j] = sum;
+			}
+			// second, deal with the intra-state
+			for (int j = 0; j < k; j++) {
+				sum += avgOutStateProb;
+				confusionMatrix[i][(startID + k + j)%objNum] = sum;
+			}
+    	}
+    	
+    	// print the confusionMatrix for debugging
+    	for (int i = 0; i < objNum; i++) {
+    		System.out.println(Arrays.toString(confusionMatrix[i]));
+    	}
+    	
+		return confusionMatrix;
+    }
+    
+    /*
+     * function overloading: return the confusion probability based on the results of confusionMatrixGen
+     */
+    public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
+	newConfusionGen(double[][] confusionMatrix, ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet, int nodeNum, int objPerNode) throws IOException, InterruptedException
+	{
+		// Due to the way the confusionMatrix is constructed, the 
+		// misclassification and the inverted misclassification matrix are the same.
+    	int objNum = nodeNum * objPerNode;
+		Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> confusion_probability = 
+				new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
+		for (ObjectSimulation2 obsObject : obs) {
+			Hashtable<ObjectSimulation2, Double> c = new Hashtable<ObjectSimulation2, Double>();
+			int objID = obsObject.objectID;
+			for (ObjectSimulation2 trueObject : trueObjectSet) {
+				double similarityIndex;
+				// because confusionMatrix[i][j] is the cumulative probability, so we have to deduce the previous entry to get the similarity probability
+				int currObjID = trueObject.objectID;
+				int prevObjID = trueObject.objectID ==  0? objNum-1: trueObject.objectID-1;
+				similarityIndex = confusionMatrix[objID][currObjID] - confusionMatrix[objID][prevObjID];
+				c.put(trueObject, similarityIndex);
+			}
+			confusion_probability.put(obsObject, c);
+		}
+		
+    	Enumeration<ObjectSimulation2> obsObejct;	
+    	obsObejct = confusion_probability.keys();
+        while(obsObejct.hasMoreElements()) {
+           ObjectSimulation2 key = (ObjectSimulation2) obsObejct.nextElement();
+           System.out.println(key + ": " +
+        		   confusion_probability.get(key));
+        }
+        
+		return confusion_probability;
+	}
     
 }
 
