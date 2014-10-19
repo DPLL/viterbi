@@ -743,6 +743,9 @@ public class SimulationGraph2 implements Serializable  {
     	int objNum = nodeNum * objPerNode;
     	int k = objPerNode;
     	classifiedResults = new ArrayList<ObjectSimulation2>();
+    	
+    	// for debugging purposes
+    	ArrayList<Double> errorList = new ArrayList<Double>();
 
         for(ObjectSimulation2 obj: trueObjects) {
         	int objID = obj.objectID;
@@ -752,6 +755,8 @@ public class SimulationGraph2 implements Serializable  {
     		//generate a random number for classifying
         	Random generator = new Random();
         	double error = generator.nextDouble();
+        	errorList.add(error);
+        	
         	int id = 0;
         	// since we have a k-length tail, we only need to look up in 2k range
         	for (int i = 0; i < 2*k; i++) {
@@ -759,10 +764,26 @@ public class SimulationGraph2 implements Serializable  {
 				int prevObjID = currObjID ==  0? objNum-1: currObjID-1; // considering the wrap-up effect of the confusionMatrix
 				if (error >= confusionMatrix[objID][prevObjID] && error < confusionMatrix[objID][currObjID]) {
 					id = currObjID;
+					break;
 				}
         	}
         	classifiedResults.add(new ObjectSimulation2(id));
         }
+        
+        //for debugging purpose
+        System.out.println("trueObject is as follows");
+        for(ObjectSimulation2 obj: trueObjects) {
+        	System.out.print(obj + " ");
+        }
+        System.out.println("\n");
+        System.out.println("errrList is as follows");
+        for (Double e : errorList) {
+        	System.out.print(e + " ");
+        }
+        System.out.println("\n");
+        System.out.println("classifiedResults is as follows");
+        for(ObjectSimulation2 arr : classifiedResults)
+        	System.out.println(arr);
     	return classifiedResults;
     }
     

@@ -209,12 +209,9 @@ public class Simulation2RandomGraph
 			        //SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
 		    		//use the evenly distributed confusion matrix to do classification
 					//classifiedResult= graphGen.classify();
-					//use the confusion matrix which favors more on the in-state similarity 
-		    		classifiedResult= graphGen.newClassify();
 		    		
-					objectSeq = new ObjectSimulation2[classifiedResult.size()];
-			        objectSeq = classifiedResult.toArray(objectSeq);
-			        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
+					//use the confusion matrix which favors more on the in-state similarity 
+		    		//classifiedResult= graphGen.newClassify();
 			        
 		    		/*
 		    		 * generate the confusion probability matrix (evenly distribution)
@@ -227,10 +224,26 @@ public class Simulation2RandomGraph
 			        
 			        // generate confusionMatrix based on both in-state probability and intra-state probability
 			        // the final argument represents the total probability that the objects are sharing within one state.
-			        double[][] confusionMatrix = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/2));
+			        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/2));
+			        double[][] confusionMatrix = matrixes[0];
+			        double[][] invertedMatrix = matrixes[1];
+			        
+			    	for (int j = 0; j < confusionMatrix.length; j++) {
+			    		System.out.println(Arrays.toString(confusionMatrix[j]));
+			    	}
+			    	for (int j = 0; j < invertedMatrix.length; j++) {
+			    		System.out.println(Arrays.toString(invertedMatrix[j]));
+			    	}
+			        
+		    		// use the confusion matrix which considers both in-state and intra-state similarity
+		    		classifiedResult= graphGen.newClassify(confusionMatrix, nodeNumVal, objNumPerNodeVal);
+		    		
+					objectSeq = new ObjectSimulation2[classifiedResult.size()];
+			        objectSeq = classifiedResult.toArray(objectSeq);
+			        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
 			        
 			        // generate confusion probability based on the previous confusionMatrix.
-			        confusion_probability =	newConfusionGen(confusionMatrix, objectSeq, trueObjectSet, nodeNumVal, objNumPerNodeVal);
+			        confusion_probability =	newConfusionGen(invertedMatrix, objectSeq, trueObjectSet, nodeNumVal, objNumPerNodeVal);
 		            
 		            correct(objectSeq,
 		            		trueObjectSet, states,
@@ -468,7 +481,7 @@ public class Simulation2RandomGraph
     }
 	
     
-	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
+	// actualObs is the initial result from the sensor, i.e., Y; obs is the all the possible objects, i.e., X.
     public static void correct(ObjectSimulation2[] actualObs, ObjectSimulation2[] obs, String[] states,
                     Hashtable<String, Double> start_p,
                     Hashtable<String, Hashtable<String, Double>> trans_p,
@@ -476,6 +489,27 @@ public class Simulation2RandomGraph
 		Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> conf_p,
 		ArrayList<ObjectSimulation2> trueObjects, ArrayList<String> trueStates)
     {
+    	
+    	// for debugging interest:
+    	System.out.println(Arrays.toString(actualObs));
+    	System.out.println(Arrays.toString(obs));
+    	System.out.println(Arrays.toString(states));
+		
+    	System.out.println(start_p);
+    	System.out.println(trans_p);
+    	System.out.println(emit_p);
+        System.out.println(conf_p);
+    	
+    	for (ObjectSimulation2 e : trueObjects) {
+    		System.out.print(e + " ");
+    	}
+    	System.out.println("---");
+    	for (String s : trueStates) {
+    		System.out.print(s + " ");
+    	}
+    	System.out.println("---");
+    	
+    	
     	// state_num is the number of different states
     	int state_num = states.length;
     	// obs_num is the number of objects from ASR
@@ -575,17 +609,14 @@ public class Simulation2RandomGraph
             }
         }
 
-        /*
+        
         for (int n = 0; n < obs_num+1; n++)
-        	for (int z = 0; z < state_num; z++)
-        		System.out.println(V[n][z]);
+        	System.out.println(Arrays.toString(V[n]));
         for (int n = 0; n < obs_num+1; n++)
-        	for (int z = 0; z < state_num; z++)
-        		System.out.println(B[n][z]);
+        	System.out.println(Arrays.toString(B[n]));
         for (int n = 0; n < obs_num+1; n++) 
-        	for (int z = 0; z < state_num; z++)
-        		System.out.println(X[n][z]);
-		*/
+        	System.out.println(Arrays.toString(X[n]));
+		
         // find the current max probability and its corresponding state.
         int Smax = -1;
         //double pMax = 0;
@@ -826,7 +857,7 @@ public class Simulation2RandomGraph
      * k other intra-state objects to share (1-recall-inStateProb), where k is 'objPerNode'.
      */
     
-    public static double[][] confusionMatrixGen(int nodeNum, int objPerNode, double recall, double inStateProb) {
+    public static double[][][] confusionMatrixGen(int nodeNum, int objPerNode, double recall, double inStateProb) {
     	int objNum = nodeNum * objPerNode;
     	int k = objPerNode;
     	// average probability each in-state object is sharing
@@ -834,6 +865,9 @@ public class Simulation2RandomGraph
     	// average probability each intra-state object is sharing
     	double avgOutStateProb = (double) (1- recall - inStateProb)/k;
     	double[][] confusionMatrix = new double[objNum][objNum];
+    	// non-cumulative confusion matrix
+    	double[][] invertedMatrix = new double[objNum][objNum];
+    	double[][][] res = new double[2][][];
     	
     	for (int i = 0; i < objNum; i++) {
     		/*
@@ -851,15 +885,19 @@ public class Simulation2RandomGraph
 			for (int j = 0; j < k; j++) {
 				if (i == (j + startID)) { // the current element is the true object
 					sum += recall;
+					invertedMatrix[i][startID + j] = recall;
 				} else {
 					sum += avgInStateProb;
+					invertedMatrix[i][startID + j] = avgInStateProb;
 				}
 				confusionMatrix[i][startID + j] = sum;
+				
 			}
 			// second, deal with the intra-state
 			for (int j = 0; j < k; j++) {
 				sum += avgOutStateProb;
 				confusionMatrix[i][(startID + k + j)%objNum] = sum;
+				invertedMatrix[i][(startID + k + j)%objNum] = avgOutStateProb;
 			}
     	}
     	
@@ -868,17 +906,27 @@ public class Simulation2RandomGraph
     		System.out.println(Arrays.toString(confusionMatrix[i]));
     	}
     	
-		return confusionMatrix;
+    	for (int i = 0; i < objNum; i++) {
+    		System.out.println(Arrays.toString(invertedMatrix[i]));
+    	}
+    	
+    	res[0] = confusionMatrix;
+    	res[1] = invertedMatrix;
+		return res;
     }
     
     /*
      * function overloading: return the confusion probability based on the results of confusionMatrixGen
      */
     public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
-	newConfusionGen(double[][] confusionMatrix, ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet, int nodeNum, int objPerNode) throws IOException, InterruptedException
+	newConfusionGen(double[][] invertedMatrix, ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet, int nodeNum, int objPerNode) throws IOException, InterruptedException
 	{
-		// Due to the way the confusionMatrix is constructed, the 
-		// misclassification and the inverted misclassification matrix are the same.
+    	/*
+    	 * Due to the way the confusionMatrix is constructed, the misclassification and the inverted misclassification matrix are no longer the same!!!
+    	 * That is why we use invertedMatrix!!!
+    	 * 
+    	 */
+    	
     	int objNum = nodeNum * objPerNode;
 		Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> confusion_probability = 
 				new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
@@ -888,10 +936,12 @@ public class Simulation2RandomGraph
 			for (ObjectSimulation2 trueObject : trueObjectSet) {
 				double similarityIndex;
 				// because confusionMatrix[i][j] is the cumulative probability, so we have to deduce the previous entry to get the similarity probability
-				int currObjID = trueObject.objectID;
+/*				int currObjID = trueObject.objectID;
 				int prevObjID = trueObject.objectID ==  0? objNum-1: trueObject.objectID-1; // considering the wrap-up effect of the confusionMatrix
 				double delta = confusionMatrix[objID][currObjID] - confusionMatrix[objID][prevObjID];
 				similarityIndex = delta > 0? delta : 0; // there is one special case where the entry followed by the '1' minus the '1' entry, leading to -1. It shuold be 0 instead.
+*/				
+				similarityIndex = invertedMatrix[trueObject.objectID][objID];
 				c.put(trueObject, similarityIndex);
 			}
 			confusion_probability.put(obsObject, c);
