@@ -2,8 +2,8 @@
  * SimulationGraph2.java & Simulation2RandomGraph.java & VertexSimulation2.java & ObjectSimulation2.java  & Simulation2.java are in the same set.
  * Simulation2RandomGraph.java is java file that implements our NIUBI algorithm
  * 
- * PAY ATTENTION that Simulation2RandomGraph is similar to Simulation2, the difference lies in the fact that this file generate a random graph 
- * and test it, whereas Simulation2 generates a perfect k-ary tree and test it.
+ * PAY ATTENTION that Simulation2RandomGraph is similar to Simulation2, the difference lies in the fact that this file generates a random graph 
+ * and tests it, whereas Simulation2 generates a perfect k-ary tree and tests it.
  * 
  */
 
@@ -169,7 +169,7 @@ public class Simulation2RandomGraph
 			 */
 	    	for(int i = 0; i < runPerGraph; i++) {
 	    		count++;	    		
-		        //SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
+		        
 	    		//use the evenly distributed confusion matrix to do classification
 				//classifiedResult= graphGen.classify();
 	    		
@@ -194,6 +194,37 @@ public class Simulation2RandomGraph
 		         * So it is an important parameter to tune
 		         */
 		        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/3));
+		        /*
+		         * The confusionMatrix is the cumulative similarity matrix, and the invertedMatrix is just similarity matrix.
+		         * 
+		         * For instance, the similarity matrix is 
+		         *    0    1    2    3    4    5
+		         * 0  0.6  0.3  0.1  0    0    0
+		         * 
+		         * 1  0.3  0.6  0.1  0    0    0
+		         * 
+		         * 2  0    0    0.6  0.3  0.1  0
+		         * 
+		         * 3  0    0    0.3  0.6  0.1  0
+		         * 
+		         * 4  0.1  0    0    0    0.6  0.3
+		         * 
+		         * 5  0.1  0    0    0    0.3  0.6
+		         * 
+		         * And then the confusionMatrix will be:
+				 *    0    1    2    3    4    5
+		         * 0  0.6  0.9  1.0  0    0    0
+		         * 
+		         * 1  0.3  0.9  1.0  0    0    0
+		         * 
+		         * 2  0    0    0.6  0.9  1.0  0
+		         * 
+		         * 3  0    0    0.3  0.9  1.0  0
+		         * 
+		         * 4  1.0  0    0    0    0.6  0.9
+		         * 
+		         * 5  1.0  0    0    0    0.3  0.9
+		         */
 		        double[][] confusionMatrix = matrixes[0];
 		        double[][] invertedMatrix = matrixes[1];
 		        
@@ -211,7 +242,7 @@ public class Simulation2RandomGraph
 		        objectSeq = classifiedResult.toArray(objectSeq);
 		        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
 		        
-		        // generate confusion probability based on the previous confusionMatrix.
+		        // generate confusion probability based on the previous invertedMatrix.
 		        confusion_probability =	newConfusionGen(invertedMatrix, objectSeq, trueObjectSet, nodeNumVal, objNumPerNodeVal);
 	            
 	            correct(objectSeq,
@@ -903,12 +934,7 @@ public class Simulation2RandomGraph
 			int objID = obsObject.objectID;
 			for (ObjectSimulation2 trueObject : trueObjectSet) {
 				double similarityIndex;
-				// because confusionMatrix[i][j] is the cumulative probability, so we have to deduce the previous entry to get the similarity probability
-/*				int currObjID = trueObject.objectID;
-				int prevObjID = trueObject.objectID ==  0? objNum-1: trueObject.objectID-1; // considering the wrap-up effect of the confusionMatrix
-				double delta = confusionMatrix[objID][currObjID] - confusionMatrix[objID][prevObjID];
-				similarityIndex = delta > 0? delta : 0; // there is one special case where the entry followed by the '1' minus the '1' entry, leading to -1. It shuold be 0 instead.
-*/				
+				// pay attention that when we look up in the invertedMatrix, the row is trueObject.objectID and the column is objID.
 				similarityIndex = invertedMatrix[trueObject.objectID][objID];
 				c.put(trueObject, similarityIndex);
 			}

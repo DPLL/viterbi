@@ -1,6 +1,6 @@
 /* @@@
  * SimulationGraph2.java & Simulation2.java & VertexSimulation2.java & ObjectSimulation2.java are in the same set.
- * Simulation2.java is java file that implements our NIUBI algorithm
+ * Simulation2.java is java file that generates a perfect k-ary treen and tests our NIUBI algorithm.
  */
 
 import java.awt.List;
@@ -24,7 +24,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.AbstractBaseGraph;
@@ -61,9 +60,6 @@ public class Simulation2
     // asrStatePercentage is the percentage of state that ASR is right
 	static double asrStatePercentage;
 
-    
-    public static final boolean DEBUG_MODE = false;
-    
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	
@@ -79,6 +75,10 @@ public class Simulation2
 		double recallVal = Double.parseDouble(args[3]);
 		int pathLengthVal = Integer.parseInt(args[4]);
 		int runTimeVal = Integer.parseInt(args[5]);
+		
+		int nodeNumVal = (int) (Math.pow(orderVal, (heightVal+1)) - 1)/(orderVal - 1);
+		//System.out.println("this tree has " + nodeNumVal + " nodes.");
+		
 		System.out.println("order is " + orderVal + ", height is " + heightVal + ", objPerNode is " 
 				+ objNumPerNodeVal + ", recall is " + recallVal + ", pathLength is " +
 				 pathLengthVal + ", runTime is " + runTimeVal);	
@@ -97,135 +97,123 @@ public class Simulation2
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<ObjectSimulation2> classifiedResult = new ArrayList<ObjectSimulation2>();
 		
-		if (DEBUG_MODE) {
-			// read from the predefined class
-			graphGen = new SimulationGraph2();
-
-			try {
-				FileInputStream fileIn = new FileInputStream("graph2.out");
-				ObjectInputStream in = new ObjectInputStream(fileIn);   			
-				graph = (AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge>) in.readObject();
-		        in.close();
-		        fileIn.close();
-			} catch(IOException ex)
-		    {
-		         ex.printStackTrace();
-		         return;
-		    } catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			//System.out.println(graph.toString());
-			graphGen.randomGraph = graph;
-			graphGen.avgDegree = 5;
-			graphGen.objectPerNode = 2;
-			graphGen.numVertex = 3;
-			graphGen.recall = 0.5;
-			
-			graphGen.numEdge = 6;
-
-			diameterPath = graphGen.findDiameter();
-			graphGen.setGroundTruth(diameterPath);
-			classifiedResult = graphGen.trueObjects;
+    	int runTime = runTimeVal;
+    	
+	 	// Generate a random graph
+		graphGen = new SimulationGraph2();
+		double pathLength;
+		
+		/*
+		 * Generate a kAry perfect tree-------------------------------------------------
+		 */
+		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recall] 5.[pathLength]
+		tree = graphGen.PerfectKAryTreeGen(orderVal, heightVal, objNumPerNodeVal, recallVal, pathLengthVal);
+		//System.out.println(graphGen.numVertex);
+		//System.out.println(tree.toString());
+		
+		//Graph Interface
+		// PAY ATTENTION!!! version2 should be coupled with findTreePathFromRoot below, while version1 should be
+		// coupled with findTreePath
+		treeParse(tree, 2);
+		//treeParse(tree, 1);
+		
+		// instead of choosing the diameter as the path, choose a path specified length 
+		//System.out.println(graphGen.pathLength);
+		//ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
+		ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePathFromRoot(graphGen.pathLength);
+		if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
+		{
+			System.out.println("could not find such path!");
+			System.exit(-1);
+		}	
+		pathLength = pathInVertex.size();
+		
+		//------------------------------------------------------------------------------
+		
+		/*
+		 * Sensor simulator -- simulate the classification process of sensors
+		 */
+    	for(int i = 0; i < runTime; i++) {
+    		
+	        /* 
+	         * generate confusionMatrix based on both in-state probability and intra-state probability
+	         * the final argument represents the total probability that the objects are sharing within one state.
+	         * 
+	         * Pay very much attention that the last argument will have an effect on the final results.  Normally, the
+	         * the improvement of sensor accuracy comes from the intra-state objects, which is 1-recall-inStateProb
+	         * So it is an important parameter to tune
+	         */
+	        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/3));
+	        double[][] confusionMatrix = matrixes[0];
+	        double[][] invertedMatrix = matrixes[1];
+	        
+/*			    	for (int j = 0; j < confusionMatrix.length; j++) {
+		    		System.out.println(Arrays.toString(confusionMatrix[j]));
+		    	}
+		    	for (int j = 0; j < invertedMatrix.length; j++) {
+		    		System.out.println(Arrays.toString(invertedMatrix[j]));
+		    	}*/
+	        
+    		// use the confusion matrix which considers both in-state and intra-state similarity
+    		classifiedResult= graphGen.newClassify(confusionMatrix, nodeNumVal, objNumPerNodeVal);
+    		
+			//classifiedResult= graphGen.classify();
 			objectSeq = new ObjectSimulation2[classifiedResult.size()];
 	        objectSeq = classifiedResult.toArray(objectSeq);
-	        //System.out.println(Arrays.toString(objectSeq));
+	        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
+	        
+    		/*
+    		 * generate the confusion probability matrix
+    		 */
+            //confusion_probability =	confustionGen(objectSeq, trueObjectSet);
+            
+	        // generate confusion probability based on the previous invertedMatrix.
+	        confusion_probability =	newConfusionGen(invertedMatrix, objectSeq, trueObjectSet, nodeNumVal, objNumPerNodeVal);
+            
+            correct(objectSeq,
+            		trueObjectSet, states,
+                    start_probability,
+                    transition_probability,
+                    emission_probability,
+                    confusion_probability,
+                    graphGen.trueObjects, 
+                    graphGen.trueStates
+                    );
 
-		} else {
-	    	int runTime = runTimeVal;
-	    	
-    	 	// Generate a random graph
-    		graphGen = new SimulationGraph2();
-    		double pathLength;
-			
-			/*
-			 * Generate a kAry perfect tree-------------------------------------------------
-			 */
-    		// 1.[order] 2.[height] 3.[objectNumPerNode] 4.[recall] 5.[pathLength]
-			tree = graphGen.PerfectKAryTreeGen(orderVal, heightVal, objNumPerNodeVal, recallVal, pathLengthVal);
-			//System.out.println(graphGen.numVertex);
-			//System.out.println(tree.toString());
-			
-			//Graph Interface
-			// PAY ATTENTION!!! version2 should be coupled with findTreePathFromRoot below, while version1 should be
-			// coupled with findTreePath
-			treeParse(tree, 2);
-			//treeParse(tree, 1);
+            StringBuilder str = new StringBuilder();
+            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
+            	str.append(graphGen.trueObjects.get(m) + " ");
+            }
+            //System.out.println(str);
+            // debugging needed
+    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
+            
+    		//System.out.println("The trueObjects is as follows:" + str);
+    		/*
+    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
+    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
+    		}*/
+            // debugging needed
+    		//System.out.println("The trueStates is: " + graphGen.trueStates);	
     		
-			// instead of choosing the diameter as the path, choose a path specified length 
-			//System.out.println(graphGen.pathLength);
-			//ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePath(graphGen.pathLength);
-			ArrayList<VertexSimulation2> pathInVertex = graphGen.findTreePathFromRoot(graphGen.pathLength);
-			if (!graphGen.setGroundTruthInVertex(pathInVertex)) 
-			{
-				System.out.println("could not find such path!");
-				System.exit(-1);
-			}	
-			pathLength = pathInVertex.size();
-			
-			//------------------------------------------------------------------------------
-			
-			/*
-			 * Sensor simulator -- simulate the classification process of sensors
-			 */
-	    	for(int i = 0; i < runTime; i++) {
-		        //SimpleDirectedWeightedGraph<VertexSimulation2, DefaultWeightedEdge> graph;
-				classifiedResult= graphGen.classify();
-				objectSeq = new ObjectSimulation2[classifiedResult.size()];
-		        objectSeq = classifiedResult.toArray(objectSeq);
-		        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
-		        
-	    		/*
-	    		 * generate the confusion probability matrix
-	    		 */
-	            confusion_probability =	confustionGen(objectSeq, trueObjectSet);
-	            
-	            correct(objectSeq,
-	            		trueObjectSet, states,
-	                    start_probability,
-	                    transition_probability,
-	                    emission_probability,
-	                    confusion_probability,
-	                    graphGen.trueObjects, 
-	                    graphGen.trueStates
-	                    );
-
-	            StringBuilder str = new StringBuilder();
-	            for(int m = 0; m < graphGen.trueObjects.size(); m++) {
-	            	str.append(graphGen.trueObjects.get(m) + " ");
-	            }
-	            //System.out.println(str);
-	            // debugging needed
-	    		//System.out.println("The trueObjects is as follows:" + graphGen.trueObjects);
-	            
-	    		//System.out.println("The trueObjects is as follows:" + str);
-	    		/*
-	    		for(int j = 0; j < graphGen.trueObjects.size(); j++) {
-	    			System.out.println(Arrays.toString(graphGen.trueObjects.get(j)));
-	    		}*/
-	            // debugging needed
-	    		//System.out.println("The trueStates is: " + graphGen.trueStates);	
-	    		
-	    		totalMyWordPercentage += myWordPercentage;
-	    		totalMyStatePercentage += myStatePercentage;
-	        	totalASRWordPercentage += asrWordPercentage;
-	        	totalASRStatePercentage += asrStatePercentage;
-	        	totalPathLength += pathLength;
-	      	
-	        	System.out.println("in the " + i + " th interation, haha!!!!");
-	    	}
-	    	
-	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-	    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
-	    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
-	    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);  
-	    	System.out.println("asrStatePercentage: " + (double)totalASRStatePercentage/runTime);  
-	    	System.out.println("averagePathLength: " + (double)totalPathLength/runTime);     
-	    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-	    	System.out.println("");
+    		totalMyWordPercentage += myWordPercentage;
+    		totalMyStatePercentage += myStatePercentage;
+        	totalASRWordPercentage += asrWordPercentage;
+        	totalASRStatePercentage += asrStatePercentage;
+        	totalPathLength += pathLength;
+      	
+        	System.out.println("in the " + i + " th interation, haha!!!!");
     	}
-    }
+    	
+    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);
+    	System.out.println("sensorObjectScore: " + (double)totalASRWordPercentage/runTime);
+    	System.out.println("myStateScore: " + (double)totalMyStatePercentage/runTime);  
+    	System.out.println("asrStatePercentage: " + (double)totalASRStatePercentage/runTime);  
+    	System.out.println("averagePathLength: " + (double)totalPathLength/runTime);     
+    	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    	System.out.println("");
+	}
     
     
     /*
@@ -344,97 +332,7 @@ public class Simulation2
         //System.out.println(transition_probability);
     	return;
     }
-    
-    /*
-     * read the graph and create interface for it. 
-     */
-    public static void graphParse(AbstractBaseGraph<VertexSimulation2, DefaultWeightedEdge> graph)
-    {
-		// verSet contains all the vertexes of the graph
-        Set<VertexSimulation2> verSet = new HashSet<VertexSimulation2>();
-        verSet.addAll(graph.vertexSet());	        
-        // for states
-        ArrayList<String> stateList = new ArrayList<String>();
-        // for start_probability
-        start_probability = new Hashtable<String, Double>();
-        double start_prob = (double)1/(verSet.size()); // start_prob is evenly distributed among all the states
-        //System.out.println("start_prob: " + start_prob + " verSet.size(): " + verSet.size());
-        // for trueObjectSet
-        ArrayList<ObjectSimulation2> trueObjectSetList = new ArrayList<ObjectSimulation2>();
-        // for emission_probability
-        emission_probability = 
-        		new Hashtable<String, Hashtable<ObjectSimulation2, Double>>();
-        double emission_prob = (double)1/(graphGen.objectPerNode);// emission_prob is evenly distributed among all the objects for a node.
-        //System.out.println("emission_prob: " + emission_prob + " graphGen.objectPerNode: " + graphGen.objectPerNode);
-        // for transition_probability
-        transition_probability = 
-        		new Hashtable<String, Hashtable<String, Double>>();
-        
-        for (VertexSimulation2 ver : verSet) {
-        	// print the current vertex
-        	//System.out.println("The current vertex is: " + ver);
-        	// objects is the ArrayList form of objectList of this particular vertex. 
-        	ArrayList<ObjectSimulation2> objects = new ArrayList<ObjectSimulation2>(Arrays.asList(ver.objectMatrix));
-        	//System.out.println(objects);
-        	// outgoingEdges is the ArrayList form of the outgoing edges of this particular vertex.
-        	Set<DefaultWeightedEdge> outgoingEdges = new HashSet<DefaultWeightedEdge>();
-        	outgoingEdges.addAll(graph.outgoingEdgesOf(ver));
-        	//System.out.println(outgoingEdges);
-        	
-        	// array of states
-        	stateList.add(Integer.toString(ver.vertexID));
-        	// start_probability
-        	start_probability.put(Integer.toString(ver.vertexID), start_prob);
-        	// trueObjectSet and emission_probability
-        	Hashtable<ObjectSimulation2, Double> e = new Hashtable<ObjectSimulation2, Double>();
-        	for (ObjectSimulation2 object : objects) {
-            	// trueObjectSet
-        		trueObjectSetList.add(object);
-        		// emission_probability
-        		e.put(object, emission_prob);
-        	}
-        	// emission_probability
-        	emission_probability.put(Integer.toString(ver.vertexID), e);
-        	// transition_probability
-        	double transition_prob = (double)1/(graph.outDegreeOf(ver));
-        	//System.out.println("transition_prob: " + transition_prob + " graph.outDegreeOf(ver): " + graph.outDegreeOf(ver));
-            Hashtable<String, Double> t = new Hashtable<String, Double>();
-            for(DefaultWeightedEdge edge : outgoingEdges) {
-            	t.put(Integer.toString(graph.getEdgeTarget(edge).vertexID), transition_prob);
-            }
-            transition_probability.put(Integer.toString(ver.vertexID), t);     
-        }
-        
-        // print the states
-        //System.out.println(stateList);
-        states = new String[stateList.size()];
-        states = stateList.toArray(states);
-        //System.out.println(Arrays.toString(states));
-        // print the start_probability
-        //System.out.println(start_probability);
-        // print the trueObjectSet
-        //System.out.println(trueObjectSetList);
-        trueObjectSet = new ObjectSimulation2[trueObjectSetList.size()];
-        trueObjectSet = trueObjectSetList.toArray(trueObjectSet);
-        //System.out.println("print out the trueObejctSet as follows:");
-        //for(ObjectSimulation2 object : trueObjectSet)
-        //	System.out.println(Arrays.toString(object));
-        //System.out.println(Arrays.toString(trueObjectSet));
-        //System.out.println(trueObjectSetList.size());
-        // print the emission_probability
-        //System.out.println("emission_probability: " + emission_probability);
-/*			System.out.println("emission_probability: "); 
-            for(String state: emission_probability.keySet()) {
-            	System.out.println("State " + state + ":");
-            	for(ObjectSimulation2 object : emission_probability.get(state).keySet())
-            		System.out.println(Arrays.toString(object) + ":" + emission_probability.get(state).get(object));
-            }*/
-        // print the transition_probability
-        //System.out.println(transition_probability);
-    	return;
-    }
-	
-    
+      
 	// actualObs is the initial result form ASR, i.e., Y; obs is the ground truth objects, i.e., X.
     public static void correct(ObjectSimulation2[] actualObs, ObjectSimulation2[] obs, String[] states,
                     Hashtable<String, Double> start_p,
@@ -733,5 +631,116 @@ public class Simulation2
 		return confusion_probability;
     }
 
+    /* 
+     * function function: generate the confusion matrix directly, instead of using the rules to do classification and probability lookup
+     * 
+     * inStateProb represents the total probability that the objects are sharing within one state. For instance, if the recall is 0.6, 
+     * the inStateProb is 0.3, then the objects that are not within the same states (intra-state) are sharing 0.1.
+     * 
+     * confusionMatrix[i][j] represents at [i][j], the max total probability so far. e.g. k = 5. For i = 18, which is the 18th row:
+     * 15      16     17     18     19     20     21     22     23     24     25
+     * 0.075   0.15   0.225  0.825  0.9    0.92   0.94   0.96   0.98   1.0    0.0
+     * 
+     * This design provides convenience for classification, though it adds a little inconvenience to the similarity lookup, it even creates a
+     * special case for the entry like 25, which is handled by newConfusionGen(...).
+     * 
+     * k other intra-state objects to share (1-recall-inStateProb), where k is 'objPerNode'.
+     */
+    
+    public static double[][][] confusionMatrixGen(int nodeNum, int objPerNode, double recall, double inStateProb) {
+    	int objNum = nodeNum * objPerNode;
+    	int k = objPerNode;
+    	// average probability each in-state object is sharing
+    	double avgInStateProb = (double) inStateProb/(k - 1);
+    	// average probability each intra-state object is sharing
+    	double avgOutStateProb = (double) (1- recall - inStateProb)/k;
+    	double[][] confusionMatrix = new double[objNum][objNum];
+    	// non-cumulative confusion matrix
+    	double[][] invertedMatrix = new double[objNum][objNum];
+    	double[][][] res = new double[2][][];
+    	
+    	for (int i = 0; i < objNum; i++) {
+    		/*
+    		 * the k intra-state objects are the tailing k entries in the confusionMatrix.
+    		 * when it comes to the end of the confusionMatrix, the tailing ones will wrind up and begin from the 0-index element,
+    		 * which saves the codes and also maintains the symmetry of the confusion matrix.
+    		 */
+    		
+    		int offset = i%k;
+    		// startID is the starting index
+    		int startID = i - offset;
+    		// sum is the cumulative probability at the current position
+			double sum = 0;
+    		// first deal with in-state
+			for (int j = 0; j < k; j++) {
+				if (i == (j + startID)) { // the current element is the true object
+					sum += recall;
+					invertedMatrix[i][startID + j] = recall;
+				} else {
+					sum += avgInStateProb;
+					invertedMatrix[i][startID + j] = avgInStateProb;
+				}
+				confusionMatrix[i][startID + j] = sum;
+				
+			}
+			// second, deal with the intra-state
+			for (int j = 0; j < k; j++) {
+				sum += avgOutStateProb;
+				confusionMatrix[i][(startID + k + j)%objNum] = sum;
+				invertedMatrix[i][(startID + k + j)%objNum] = avgOutStateProb;
+			}
+    	}
+    	
+    	// print the confusionMatrix for debugging
+/*    	for (int i = 0; i < objNum; i++) {
+    		System.out.println(Arrays.toString(confusionMatrix[i]));
+    	}
+    	
+    	for (int i = 0; i < objNum; i++) {
+    		System.out.println(Arrays.toString(invertedMatrix[i]));
+    	}*/
+    	
+    	res[0] = confusionMatrix;
+    	res[1] = invertedMatrix;
+		return res;
+    }
+    
+    /*
+     * function overloading: return the confusion probability based on the results of confusionMatrixGen
+     */
+    public static Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> 
+	newConfusionGen(double[][] invertedMatrix, ObjectSimulation2[] obs, ObjectSimulation2[] trueObjectSet, int nodeNum, int objPerNode) throws IOException, InterruptedException
+	{
+    	/*
+    	 * Due to the way the confusionMatrix is constructed, the misclassification and the inverted misclassification matrix are no longer the same!!!
+    	 * That is why we use invertedMatrix!!!
+    	 * 
+    	 */
+    	
+    	int objNum = nodeNum * objPerNode;
+		Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>> confusion_probability = 
+				new Hashtable<ObjectSimulation2, Hashtable<ObjectSimulation2, Double>>();
+		for (ObjectSimulation2 obsObject : obs) {
+			Hashtable<ObjectSimulation2, Double> c = new Hashtable<ObjectSimulation2, Double>();
+			int objID = obsObject.objectID;
+			for (ObjectSimulation2 trueObject : trueObjectSet) {
+				double similarityIndex;
+				// pay attention that when we look up in the invertedMatrix, the row is trueObject.objectID and the column is objID.
+				similarityIndex = invertedMatrix[trueObject.objectID][objID];
+				c.put(trueObject, similarityIndex);
+			}
+			confusion_probability.put(obsObject, c);
+		}
+		
+/*    	Enumeration<ObjectSimulation2> obsObejct;	
+    	obsObejct = confusion_probability.keys();
+        while(obsObejct.hasMoreElements()) {
+           ObjectSimulation2 key = (ObjectSimulation2) obsObejct.nextElement();
+           System.out.println(key + ": " +
+        		   confusion_probability.get(key));
+        }*/
+		return confusion_probability;
+	}
+    
 }
 
