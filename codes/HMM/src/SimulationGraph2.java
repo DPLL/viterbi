@@ -668,7 +668,7 @@ public class SimulationGraph2 implements Serializable  {
     	return true;
     }
     
-    
+    // traditional classify function which uses evenly distributed confusion matrix.
     public ArrayList<ObjectSimulation2> classify()
     {
     	// evenly distribute the errorGranularity among all the nodes
@@ -703,7 +703,7 @@ public class SimulationGraph2 implements Serializable  {
 		return classifiedResults;
     }
     
-    // newClassifiy() will make classification based on updated version of the confusion matrix
+    // newClassifiy() will make classification based on updated version of the confusion matrix which considers only the in-state probability
     public ArrayList<ObjectSimulation2> newClassify()
     {
     	double inStateSimilarity = (1 - recall)/(objectPerNode-1);
@@ -736,6 +736,34 @@ public class SimulationGraph2 implements Serializable  {
         for(ObjectSimulation2 arr : classifiedResults)
         	System.out.println(arr);*/
 		return classifiedResults;
+    }
+    
+    // function overwriting: classification based on double[][] confusionMatrix
+    public ArrayList<ObjectSimulation2> newClassify(double[][] confusionMatrix, int nodeNum, int objPerNode) {
+    	int objNum = nodeNum * objPerNode;
+    	int k = objPerNode;
+    	classifiedResults = new ArrayList<ObjectSimulation2>();
+
+        for(ObjectSimulation2 obj: trueObjects) {
+        	int objID = obj.objectID;
+    		int offset = objID % k;
+    		// startID is the starting index
+    		int startID = objID - offset;
+    		//generate a random number for classifying
+        	Random generator = new Random();
+        	double error = generator.nextDouble();
+        	int id = 0;
+        	// since we have a k-length tail, we only need to look up in 2k range
+        	for (int i = 0; i < 2*k; i++) {
+        		int currObjID = (startID + i) % objNum;
+				int prevObjID = currObjID ==  0? objNum-1: currObjID-1; // considering the wrap-up effect of the confusionMatrix
+				if (error >= confusionMatrix[objID][prevObjID] && error < confusionMatrix[objID][currObjID]) {
+					id = currObjID;
+				}
+        	}
+        	classifiedResults.add(new ObjectSimulation2(id));
+        }
+    	return classifiedResults;
     }
     
 
