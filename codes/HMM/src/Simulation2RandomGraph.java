@@ -217,15 +217,20 @@ public class Simulation2RandomGraph
 			        //System.out.println("objectSeq is " + Arrays.toString(objectSeq));
 			        
 		    		/*
-		    		 * generate the confusion probability matrix
+		    		 * generate the confusion probability matrix (evenly distribution)
 		    		 */
 		            //confusion_probability =	confusionGen(objectSeq, trueObjectSet);
 		            
-		            // generate new confusion matrix by making within-state similarity higher than others
-			        confusion_probability =	newConfusionGen(objectSeq, trueObjectSet, objNumPerNodeVal);
+		            // generate new confusion matrix by making within-state similarity higher than others (only conisders the in-state probability, and the intra-state
+			        // probabiliyt is just 0)
+			        //confusion_probability =	newConfusionGen(objectSeq, trueObjectSet, objNumPerNodeVal);
 			        
-			        //TODO
-			        confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/2));
+			        // generate confusionMatrix based on both in-state probability and intra-state probability
+			        // the final argument represents the total probability that the objects are sharing within one state.
+			        double[][] confusionMatrix = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/2));
+			        
+			        // generate confusion probability based on the previous confusionMatrix.
+			        confusion_probability =	newConfusionGen(confusionMatrix, objectSeq, trueObjectSet, nodeNumVal, objNumPerNodeVal);
 		            
 		            correct(objectSeq,
 		            		trueObjectSet, states,
@@ -812,10 +817,11 @@ public class Simulation2RandomGraph
      * the inStateProb is 0.3, then the objects that are not within the same states (intra-state) are sharing 0.1.
      * 
      * confusionMatrix[i][j] represents at [i][j], the max total probability so far. e.g. k = 5. For i = 18, which is the 18th row:
-     * 15      16     17     18     19     20     21     22     23     24
-     * 0.075   0.15   0.225  0.825  0.9    0.92   0.94   0.96   0.98   1.0
+     * 15      16     17     18     19     20     21     22     23     24     25
+     * 0.075   0.15   0.225  0.825  0.9    0.92   0.94   0.96   0.98   1.0    0.0
      * 
-     * This design provides convenience for classification, though it adds a little inconvenience to the similarity lookup.
+     * This design provides convenience for classification, though it adds a little inconvenience to the similarity lookup, it even creates a
+     * special case for the entry like 25, which is handled by newConfusionGen(...).
      * 
      * k other intra-state objects to share (1-recall-inStateProb), where k is 'objPerNode'.
      */
@@ -883,8 +889,9 @@ public class Simulation2RandomGraph
 				double similarityIndex;
 				// because confusionMatrix[i][j] is the cumulative probability, so we have to deduce the previous entry to get the similarity probability
 				int currObjID = trueObject.objectID;
-				int prevObjID = trueObject.objectID ==  0? objNum-1: trueObject.objectID-1;
-				similarityIndex = confusionMatrix[objID][currObjID] - confusionMatrix[objID][prevObjID];
+				int prevObjID = trueObject.objectID ==  0? objNum-1: trueObject.objectID-1; // considering the wrap-up effect of the confusionMatrix
+				double delta = confusionMatrix[objID][currObjID] - confusionMatrix[objID][prevObjID];
+				similarityIndex = delta > 0? delta : 0; // there is one special case where the entry followed by the '1' minus the '1' entry, leading to -1. It shuold be 0 instead.
 				c.put(trueObject, similarityIndex);
 			}
 			confusion_probability.put(obsObject, c);
