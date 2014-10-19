@@ -16,7 +16,7 @@ def runCmd(cmd, outputPath):
     out.close()
     
 def main():
-    degree = '3 '
+    degree = '6 '
     objPerNode = ' 5 '
     nodeNum = ' 30 '
     recall = ' 0.6 '
