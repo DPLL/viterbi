@@ -771,7 +771,7 @@ public class SimulationGraph2 implements Serializable  {
         }
         
         //for debugging purpose
-        System.out.println("trueObject is as follows");
+/*        System.out.println("trueObject is as follows");
         for(ObjectSimulation2 obj: trueObjects) {
         	System.out.print(obj + " ");
         }
@@ -783,7 +783,7 @@ public class SimulationGraph2 implements Serializable  {
         System.out.println("\n");
         System.out.println("classifiedResults is as follows");
         for(ObjectSimulation2 arr : classifiedResults)
-        	System.out.println(arr);
+        	System.out.println(arr);*/
     	return classifiedResults;
     }
     
