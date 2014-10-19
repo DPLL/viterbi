@@ -20,18 +20,25 @@ def main():
     objPerNode = ' 5 '
     nodeNum = ' 30 '
     recall = ' 0.6 '
-    #pathLength = ' 8 '
+    pathLength = ' 8 '
+    #inStateProb = ' 0.2 ' 
     graphNum = ' 50 '
     runPerGraph = ' 10'
     processList = []
     #recallList = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    inStateProbList = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35]
     # for i in recallList:
-    for i in range(1, 11):
+    #for i in range(1, 11):
+    for i in inStateProbList:
     #for i in range(15, 45, 3):
-        args = degree + objPerNode + nodeNum  + recall + str(i) + graphNum + runPerGraph
+        # only test for evenly distributed cases
+        #args = degree + objPerNode + nodeNum  + recall + str(i) + graphNum + runPerGraph
+        # tests with inStateProb considered
+        args = degree + objPerNode + nodeNum + recall + pathLength + str(i) + graphNum + runPerGraph
         #outputPath = '../results/testGraphNodeNum' + str(i)
-        outputPath = '../results/testGraphPathLength' + str(i)
+        #outputPath = '../results/testGraphPathLength' + str(i)
         #outputPath = '../results/testGraphRecall' + str(i)
+        outputPath = '../results/testGraphInStateProb' + str(i)
         #outputPath = '../results/testGraphDegree' + str(i)
         exeCmd = cmd + args
         p = Process(target=runCmd, args=(exeCmd, outputPath))
