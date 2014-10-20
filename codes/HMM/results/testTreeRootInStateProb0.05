@@ -1,0 +1,73 @@
+order is 3, height is 5, objPerNode is 5, recall is 0.6, inStateProb is 0.05, pathLength is 5, runTime is 10
+TreeGenTime is 16
+treeParseTime is 19
+findTreePathFromRootTime is 1
+forLoopTime is 17
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 0 th interation, haha!!!!
+forLoopTime is 147928
+myObjectScore: 0.8
+sensorObjectScore: 0.8
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 1 th interation, haha!!!!
+forLoopTime is 309816
+myObjectScore: 1.0
+sensorObjectScore: 1.0
+myStateScore: 1.0
+asrStatePercentage: 1.0
+in the 2 th interation, haha!!!!
+forLoopTime is 471515
+myObjectScore: 0.8
+sensorObjectScore: 0.4
+myStateScore: 1.0
+asrStatePercentage: 0.6
+in the 3 th interation, haha!!!!
+forLoopTime is 630140
+myObjectScore: 1.0
+sensorObjectScore: 0.8
+myStateScore: 1.0
+asrStatePercentage: 0.8
+in the 4 th interation, haha!!!!
+forLoopTime is 775822
+myObjectScore: 1.0
+sensorObjectScore: 0.8
+myStateScore: 1.0
+asrStatePercentage: 0.8
+in the 5 th interation, haha!!!!
+forLoopTime is 938432
+myObjectScore: 0.8
+sensorObjectScore: 0.6
+myStateScore: 0.8
+asrStatePercentage: 0.6
+in the 6 th interation, haha!!!!
+forLoopTime is 1093720
+myObjectScore: 0.8
+sensorObjectScore: 0.2
+myStateScore: 1.0
+asrStatePercentage: 0.4
+in the 7 th interation, haha!!!!
+forLoopTime is 1251685
+myObjectScore: 1.0
+sensorObjectScore: 0.6
+myStateScore: 1.0
+asrStatePercentage: 0.6
+in the 8 th interation, haha!!!!
+forLoopTime is 1392124
+myObjectScore: 1.0
+sensorObjectScore: 0.8
+myStateScore: 1.0
+asrStatePercentage: 0.8
+in the 9 th interation, haha!!!!
+forLoopTime is 1522880
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+myObjectScore: 0.9199999999999999
+sensorObjectScore: 0.7
+myStateScore: 0.9800000000000001
+asrStatePercentage: 0.76
+averagePathLength: 5.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
