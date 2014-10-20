@@ -23,17 +23,23 @@ def main():
     height = ' 5 '
     objPerNode = '5 ' #since objPerNode does not matter, we just make it 1
     recall = ' 0.6 '
-    #pathLength = ' 6 '
+    #inStateProb = ' 0.2 '
+    pathLength = ' 5 '
     runTime = ' 10'
     
     recallList = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+    inStateProbList = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35]
     processList = []
     
     # for i in recallList:
-    for i in range(1, 7):
-        args = degree + height + objPerNode + recall + str(i) + runTime
+    #for i in range(1, 7):
+    for i in inStateProbList:
+        #test withouut considering inState
+        #args = degree + height + objPerNode + recall + str(i) + runTime
+        args = degree + height + objPerNode + recall + str(i) + pathLength + runTime
         #outputPath = '../results/testTreeRecall' + str(i)
-        outputPath = '../results/testTreeRootPathLength' + str(i)
+        #outputPath = '../results/testTreeRootPathLength' + str(i)
+        outputPath = '../results/testTreeRootInStateProb' + str(i)
         #outputPath = '../results/testTreeObjPerNode' + str(i)
         exeCmd = cmd + args
         p = Process(target=runCmd, args=(exeCmd, outputPath))
