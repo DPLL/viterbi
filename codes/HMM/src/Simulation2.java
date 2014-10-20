@@ -63,9 +63,9 @@ public class Simulation2
     public static void main(String[] args) throws IOException, InterruptedException 
     {
     	
-		if (args.length < 6) {
+		if (args.length < 7) {
 			System.out.println("Correct Usage: ./Simulation2 1.[order] 2.[height] "
-					+ "3.[objectNumPerNode] 4.[recall] 5.[pathLength] 6.[runTime]");
+					+ "3.[objectNumPerNode] 4.[recall] 5.[inStateProb] 6.[pathLength] 7.[runTime]");
 			System.exit(-1);
 		}
 		
@@ -73,14 +73,21 @@ public class Simulation2
 		int heightVal = Integer.parseInt(args[1]);
 		int objNumPerNodeVal = Integer.parseInt(args[2]);
 		double recallVal = Double.parseDouble(args[3]);
-		int pathLengthVal = Integer.parseInt(args[4]);
-		int runTimeVal = Integer.parseInt(args[5]);
+		double inStateProbVal = Double.parseDouble(args[4]);
+		int pathLengthVal = Integer.parseInt(args[5]);
+		int runTimeVal = Integer.parseInt(args[6]);
 		
 		int nodeNumVal = (int) (Math.pow(orderVal, (heightVal+1)) - 1)/(orderVal - 1);
 		//System.out.println("this tree has " + nodeNumVal + " nodes.");
 		
+		// sanity check
+		if (recallVal + inStateProbVal > 1 || recallVal < 0 || inStateProbVal < 0) {
+			System.err.println("the input probability is not valid!");
+			System.exit(-1);
+		}
+		
 		System.out.println("order is " + orderVal + ", height is " + heightVal + ", objPerNode is " 
-				+ objNumPerNodeVal + ", recall is " + recallVal + ", pathLength is " +
+				+ objNumPerNodeVal + ", recall is " + recallVal + ", inStateProb is " + inStateProbVal + ", pathLength is " +
 				 pathLengthVal + ", runTime is " + runTimeVal);	
 		 
     	//
@@ -103,6 +110,9 @@ public class Simulation2
 		graphGen = new SimulationGraph2();
 		double pathLength;
 		
+		// start to calculate execution time
+		long startTime = System.currentTimeMillis();
+		
 		/*
 		 * Generate a kAry perfect tree-------------------------------------------------
 		 */
@@ -111,11 +121,19 @@ public class Simulation2
 		//System.out.println(graphGen.numVertex);
 		//System.out.println(tree.toString());
 		
+		long PerfectKAryTreeGenTime = System.currentTimeMillis();
+		long elapsedTime = PerfectKAryTreeGenTime - startTime;
+		System.out.println("TreeGenTime is " + elapsedTime);
+		
 		//Graph Interface
 		// PAY ATTENTION!!! version2 should be coupled with findTreePathFromRoot below, while version1 should be
 		// coupled with findTreePath
 		treeParse(tree, 2);
 		//treeParse(tree, 1);
+		
+		long treeParseTime = System.currentTimeMillis();
+		elapsedTime = treeParseTime - PerfectKAryTreeGenTime;
+		System.out.println("treeParseTime is " + elapsedTime);
 		
 		// instead of choosing the diameter as the path, choose a path specified length 
 		//System.out.println(graphGen.pathLength);
@@ -127,6 +145,10 @@ public class Simulation2
 			System.exit(-1);
 		}	
 		pathLength = pathInVertex.size();
+		
+		long findTreePathFromRootTime = System.currentTimeMillis();
+		elapsedTime = findTreePathFromRootTime - treeParseTime;
+		System.out.println("findTreePathFromRootTime is " + elapsedTime);
 		
 		//------------------------------------------------------------------------------
 		
@@ -143,9 +165,13 @@ public class Simulation2
 	         * the improvement of sensor accuracy comes from the intra-state objects, which is 1-recall-inStateProb
 	         * So it is an important parameter to tune
 	         */
-	        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/3));
+	        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, inStateProbVal);
 	        double[][] confusionMatrix = matrixes[0];
 	        double[][] invertedMatrix = matrixes[1];
+	        
+			long forLoopTime = System.currentTimeMillis();
+			elapsedTime = forLoopTime - findTreePathFromRootTime;
+			System.out.println("forLoopTime is " + elapsedTime);
 	        
 /*			    	for (int j = 0; j < confusionMatrix.length; j++) {
 		    		System.out.println(Arrays.toString(confusionMatrix[j]));
@@ -204,6 +230,11 @@ public class Simulation2
       	
         	System.out.println("in the " + i + " th interation, haha!!!!");
     	}
+    	
+		long forLoopTime = System.currentTimeMillis();
+		elapsedTime = forLoopTime - findTreePathFromRootTime;
+		System.out.println("forLoopTime is " + elapsedTime);
+    	
     	
     	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     	System.out.println("myObjectScore: " + (double)totalMyWordPercentage/runTime);

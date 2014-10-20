@@ -77,10 +77,10 @@ public class Simulation2RandomGraph
     	ArrayList<DefaultWeightedEdge> diameterPath = new ArrayList<DefaultWeightedEdge>();
 		ArrayList<ObjectSimulation2> classifiedResult = new ArrayList<ObjectSimulation2>();
 			
-    	// 1.[degree] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength] 6.[graphNum] 7.[runPerGraph]	
-		if (args.length < 7) {
+    	// 1.[degree] 2.[objectNumPerNode] 3.[nodeNum] 4.[recall] 5.[pathLength] 6.[inStateProb] 7.[graphNum] 8.[runPerGraph]	
+		if (args.length < 8) {
 			System.out.println("Correct Usage: ./Simulation2RandomGraph 1.[degree] 2.[objectNumPerNode] "
-					+ "3.[nodeNum] 4.[recall] 5.[pathLength] 6.[graphNum] 7.[runPerGraph]");
+					+ "3.[nodeNum] 4.[recall] 5.[pathLength] 6.[inStateProb] 7.[graphNum] 8.[runPerGraph]");
 			System.exit(-1);
 		}
 		
@@ -89,12 +89,19 @@ public class Simulation2RandomGraph
 		int nodeNumVal = Integer.parseInt(args[2]);
 		double recallVal = Double.parseDouble(args[3]);
 		int pathLengthVal = Integer.parseInt(args[4]);
-		int graphNumVal = Integer.parseInt(args[5]);
-		int runPerGraphVal = Integer.parseInt(args[6]);
+		double inStateProbVal = Double.parseDouble(args[5]);
+		int graphNumVal = Integer.parseInt(args[6]);
+		int runPerGraphVal = Integer.parseInt(args[7]);
+		
+		// sanity check
+		if (recallVal + inStateProbVal > 1 || recallVal < 0 || inStateProbVal < 0) {
+			System.err.println("the input probability is not valid!");
+			System.exit(-1);
+		}
 		
 		System.out.println("degree is " + degreeVal + ", objectNumPerNode is " + objNumPerNodeVal + ", nodeNum is " 
 				+ nodeNumVal + ", recall is " + recallVal + ", pathLength is " +
-				 pathLengthVal + ", graphNum is " + graphNumVal + ", runPerGraph is " + runPerGraphVal);	
+				 pathLengthVal + ", inStateProb is " + inStateProbVal + ", graphNum is " + graphNumVal + ", runPerGraph is " + runPerGraphVal);	
 		
     	// runTime is how many runs in total
     	int runTime;
@@ -193,7 +200,7 @@ public class Simulation2RandomGraph
 		         * the improvement of sensor accuracy comes from the intra-state objects, which is 1-recall-inStateProb
 		         * So it is an important parameter to tune
 		         */
-		        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, (recallVal/3));
+		        double[][][] matrixes = confusionMatrixGen(nodeNumVal, objNumPerNodeVal, recallVal, inStateProbVal);
 		        /*
 		         * The confusionMatrix is the cumulative similarity matrix, and the invertedMatrix is just similarity matrix.
 		         * 
